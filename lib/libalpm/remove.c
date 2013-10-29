@@ -744,18 +744,22 @@ int _alpm_remove_packages(alpm_handle_t *handle, int run_ldconfig)
 		if(_alpm_remove_single_package(handle, pkg, NULL,
 					targ_count, pkg_count) == -1) {
 			handle->pm_errno = ALPM_ERR_TRANS_ABORT;
+#ifndef __MSYS__
 			/* running ldconfig at this point could possibly screw system */
 			run_ldconfig = 0;
+#endif
 			ret = -1;
 		}
 
 		targ_count++;
 	}
 
+#ifndef __MSYS__
 	if(run_ldconfig) {
 		/* run ldconfig if it exists */
 		_alpm_ldconfig(handle);
 	}
+#endif
 
 	return ret;
 }

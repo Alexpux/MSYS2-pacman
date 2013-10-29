@@ -670,7 +670,10 @@ cleanup:
 int _alpm_upgrade_packages(alpm_handle_t *handle)
 {
 	size_t pkg_count, pkg_current;
-	int skip_ldconfig = 0, ret = 0;
+#ifndef __MSYS__
+	int skip_ldconfig = 0;
+#endif
+	int ret = 0;
 	alpm_list_t *targ;
 	alpm_trans_t *trans = handle->trans;
 
@@ -693,18 +696,22 @@ int _alpm_upgrade_packages(alpm_handle_t *handle)
 			/* something screwed up on the commit, abort the trans */
 			trans->state = STATE_INTERRUPTED;
 			handle->pm_errno = ALPM_ERR_TRANS_ABORT;
+#ifndef __MSYS__
 			/* running ldconfig at this point could possibly screw system */
 			skip_ldconfig = 1;
+#endif
 			ret = -1;
 		}
 
 		pkg_current++;
 	}
 
+#ifndef __MSYS__
 	if(!skip_ldconfig) {
 		/* run ldconfig if it exists */
 		_alpm_ldconfig(handle);
 	}
+#endif
 
 	return ret;
 }

@@ -43,7 +43,6 @@ PY_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 PY_LOG_COMPILER = $(top_srcdir)/test/pacman/pactest.py
 AM_PY_LOG_FLAGS = \
 		--scriptlet-shell $(SCRIPTLET_SHELL) \
-		--ldconfig $(LDCONFIG) \
 		-p $(top_builddir)/src/pacman/pacman
 
 # create the pacman DB and cache directories upon install

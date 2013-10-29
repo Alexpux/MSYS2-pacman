@@ -122,12 +122,10 @@ class pmtest(object):
         logdir = os.path.join(self.root, os.path.dirname(util.LOGFILE))
         etcdir = os.path.join(self.root, os.path.dirname(util.PACCONF))
         bindir = os.path.join(self.root, "bin")
-        ldconfig = os.path.basename(pacman["ldconfig"])
-        ldconfigdir = os.path.join(self.root, os.path.dirname(pacman["ldconfig"][1:]))
         shell = pacman["scriptlet-shell"][1:]
         shelldir = os.path.join(self.root, os.path.dirname(shell))
         sys_dirs = [dbdir, cachedir, syncdir, tmpdir, logdir, etcdir, bindir,
-                    ldconfigdir, shelldir]
+                    shelldir]
         for sys_dir in sys_dirs:
             if not os.path.isdir(sys_dir):
                 vprint("\t%s" % sys_dir[len(self.root)+1:])
@@ -136,10 +134,6 @@ class pmtest(object):
         shutil.copy("/bin/sh", bindir)
         if shell != "bin/sh":
             shutil.copy("/bin/sh", os.path.join(self.root, shell))
-        shutil.copy(os.path.join(util.SELFPATH, "ldconfig.stub"),
-            os.path.join(ldconfigdir, ldconfig))
-        ld_so_conf = open(os.path.join(etcdir, "ld.so.conf"), "w")
-        ld_so_conf.close()
 
         # Configuration file
         vprint("    Creating configuration file")
