@@ -193,8 +193,6 @@ disables automatic detection.
 	and are not utilized by pacman during dependency resolution. The format
 	for specifying optdepends is:
 
-	optdepends=('fakeroot: for makepkg usage as normal user')
-
 *conflicts (array)*::
 	An array of packages that will conflict with this package (i.e. they
 	cannot both be installed at the same time). This directive follows the
@@ -302,10 +300,7 @@ files into the packaging directory, with optional `prepare()`, `build()`, and
 *package() Function*::
 	The `package()` function is used to install files into the directory that
 	will become the root directory of the built package and is run after all
-	the optional functions listed below. When specified in combination with
-	the fakeroot BUILDENV option in linkman:makepkg.conf[5], fakeroot usage
-	will be limited to running the packaging stage. All other functions will
-	be run as the user calling makepkg.
+	the optional functions listed below.
 
 *prepare() Function*::
 	An optional `prepare()` function can be specified in which operations to

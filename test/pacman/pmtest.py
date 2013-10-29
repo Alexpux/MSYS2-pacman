@@ -201,19 +201,6 @@ class pmtest(object):
         vprint("\tpacman %s" % self.args)
 
         cmd = []
-        if os.geteuid() != 0:
-            fakeroot = util.which("fakeroot")
-            if not fakeroot:
-                tap.diag("WARNING: fakeroot not found!")
-            else:
-                cmd.append("fakeroot")
-
-            fakechroot = util.which("fakechroot")
-            if not fakechroot:
-                tap.diag("WARNING: fakechroot not found!")
-            else:
-                cmd.append("fakechroot")
-
         if pacman["gdb"]:
             cmd.extend(["libtool", "execute", "gdb", "--args"])
         if pacman["valgrind"]:
