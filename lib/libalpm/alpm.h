@@ -793,6 +793,15 @@ alpm_list_t *alpm_pkg_compute_requiredby(alpm_pkg_t *pkg);
  */
 alpm_list_t *alpm_pkg_compute_optionalfor(alpm_pkg_t *pkg);
 
+/** Test if a package should be ignored.
+ * Checks if the package is ignored via IgnorePkg, or if the package is
+ * in a group ignored via IgnoreGroup.
+ * @param handle the context handle
+ * @param pkg the package to test
+ * @return 1 if the package should be ignored, 0 otherwise
+ */
+int alpm_pkg_should_ignore(alpm_handle_t *handle, alpm_pkg_t *pkg);
+
 /** @name Package Property Accessors
  * Any pointer returned by these functions points to internal structures
  * allocated by libalpm. They should not be freed nor modified in any
@@ -1074,6 +1083,12 @@ int alpm_pkg_check_pgp_signature(alpm_pkg_t *pkg, alpm_siglist_t *siglist);
 int alpm_db_check_pgp_signature(alpm_db_t *db, alpm_siglist_t *siglist);
 
 int alpm_siglist_cleanup(alpm_siglist_t *siglist);
+
+int alpm_decode_signature(const char *base64_data,
+		unsigned char **data, size_t *data_len);
+
+int alpm_extract_keyid(alpm_handle_t *handle, const char *identifier,
+		const unsigned char *sig, const size_t len, alpm_list_t **keys);
 
 /*
  * Groups

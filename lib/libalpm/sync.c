@@ -93,8 +93,8 @@ static int check_literal(alpm_handle_t *handle, alpm_pkg_t *lpkg,
 		_alpm_log(handle, ALPM_LOG_DEBUG, "new version of '%s' found (%s => %s)\n",
 				lpkg->name, lpkg->version, spkg->version);
 		/* check IgnorePkg/IgnoreGroup */
-		if(_alpm_pkg_should_ignore(handle, spkg)
-				|| _alpm_pkg_should_ignore(handle, lpkg)) {
+		if(alpm_pkg_should_ignore(handle, spkg)
+				|| alpm_pkg_should_ignore(handle, lpkg)) {
 			_alpm_log(handle, ALPM_LOG_WARNING, _("%s: ignoring package upgrade (%s => %s)\n"),
 					lpkg->name, lpkg->version, spkg->version);
 		} else {
@@ -105,8 +105,8 @@ static int check_literal(alpm_handle_t *handle, alpm_pkg_t *lpkg,
 	} else if(cmp < 0) {
 		if(enable_downgrade) {
 			/* check IgnorePkg/IgnoreGroup */
-			if(_alpm_pkg_should_ignore(handle, spkg)
-					|| _alpm_pkg_should_ignore(handle, lpkg)) {
+			if(alpm_pkg_should_ignore(handle, spkg)
+					|| alpm_pkg_should_ignore(handle, lpkg)) {
 				_alpm_log(handle, ALPM_LOG_WARNING, _("%s: ignoring package downgrade (%s => %s)\n"),
 						lpkg->name, lpkg->version, spkg->version);
 			} else {
@@ -148,8 +148,8 @@ static alpm_list_t *check_replacers(alpm_handle_t *handle, alpm_pkg_t *lpkg,
 			int doreplace = 0;
 			alpm_pkg_t *tpkg;
 			/* check IgnorePkg/IgnoreGroup */
-			if(_alpm_pkg_should_ignore(handle, spkg)
-					|| _alpm_pkg_should_ignore(handle, lpkg)) {
+			if(alpm_pkg_should_ignore(handle, spkg)
+					|| alpm_pkg_should_ignore(handle, lpkg)) {
 				_alpm_log(handle, ALPM_LOG_WARNING,
 						_("ignoring package replacement (%s-%s => %s-%s)\n"),
 						lpkg->name, lpkg->version, spkg->name, spkg->version);
@@ -270,7 +270,7 @@ alpm_list_t SYMEXPORT *alpm_find_group_pkgs(alpm_list_t *dbs,
 			if(alpm_pkg_find(ignorelist, pkg->name)) {
 				continue;
 			}
-			if(_alpm_pkg_should_ignore(db->handle, pkg)) {
+			if(alpm_pkg_should_ignore(db->handle, pkg)) {
 				ignorelist = alpm_list_add(ignorelist, pkg);
 				int install = 0;
 				QUESTION(db->handle, ALPM_QUESTION_INSTALL_IGNOREPKG, pkg,
@@ -471,10 +471,8 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 		 * holds to package objects. */
 		trans->unresolvable = unresolvable;
 
-		/* re-order w.r.t. dependencies */
 		alpm_list_free(trans->add);
-		trans->add = _alpm_sortbydeps(handle, resolved, 0);
-		alpm_list_free(resolved);
+		trans->add = resolved;
 
 		EVENT(handle, ALPM_EVENT_RESOLVEDEPS_DONE, NULL, NULL);
 	}
@@ -628,6 +626,11 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 			}
 			goto cleanup;
 		}
+
+		/* re-order w.r.t. dependencies */
+		alpm_list_t *add_orig = trans->add;
+		trans->add = _alpm_sortbydeps(handle, add_orig, trans->remove, 0);
+		alpm_list_free(add_orig);
 	}
 	for(i = trans->add; i; i = i->next) {
 		/* update download size field */
@@ -1007,11 +1010,11 @@ static int check_keyring(alpm_handle_t *handle)
 		if((level & ALPM_SIG_PACKAGE) && pkg->base64_sig) {
 			unsigned char *decoded_sigdata = NULL;
 			size_t data_len;
-			int decode_ret = _alpm_decode_signature(pkg->base64_sig,
+			int decode_ret = alpm_decode_signature(pkg->base64_sig,
 					&decoded_sigdata, &data_len);
 			if(decode_ret == 0) {
 				alpm_list_t *keys = NULL;
-				if(_alpm_extract_keyid(handle, pkg->name, decoded_sigdata,
+				if(alpm_extract_keyid(handle, pkg->name, decoded_sigdata,
 							data_len, &keys) == 0) {
 					alpm_list_t *k;
 					for(k = keys; k; k = k->next) {
