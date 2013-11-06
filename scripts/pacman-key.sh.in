@@ -225,7 +225,7 @@ check_keyring() {
 		exit 1
 	fi
 
-	if (( (EXPORT || FINGER || LIST || VERIFY) && EUID != 0 )); then
+	if (( EXPORT || FINGER || LIST || VERIFY )); then
 		if ! grep -q "^[[:space:]]*lock-never[[:space:]]*$" ${PACMAN_KEYRING_DIR}/gpg.conf &>/dev/null; then
 			error "$(gettext "You do not have sufficient permissions to run this command.")"
 			msg "$(gettext "Use '%s' to correct the keyring permissions.")" "pacman-key --init"
@@ -556,11 +556,6 @@ m4_include(library/term_colors.sh)
 
 if ! type -p gpg >/dev/null; then
 	error "$(gettext "Cannot find the %s binary required for all %s operations.")" "gpg" "pacman-key"
-	exit 1
-fi
-
-if (( (ADD || DELETE || EDITKEY || IMPORT || IMPORT_TRUSTDB || INIT || LSIGNKEY || POPULATE || RECEIVE || REFRESH || UPDATEDB) && EUID != 0 )); then
-	error "$(gettext "%s needs to be run as root for this operation.")" "pacman-key"
 	exit 1
 fi
 
