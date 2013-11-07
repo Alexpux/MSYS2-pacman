@@ -81,6 +81,7 @@ PKGVERFUNC=0
 PREPAREFUNC=0
 REPKG=0
 RMDEPS=0
+SETUPFUNC=0
 SKIPCHECKSUMS=0
 SKIPPGPCHECK=0
 SIGNPKG=''
@@ -1469,6 +1470,10 @@ run_build() {
 
 run_check() {
 	run_function_safe "check"
+}
+
+run_setup() {
+	run_function_safe "setup"
 }
 
 run_package() {
@@ -2872,6 +2877,12 @@ if have_function check; then
 		CHECKFUNC=1
 	fi
 fi
+if have_function setup; then
+	# "Hide" setup() function if not going to be run
+	if [[ $RUN_SETUP != "n" ]]; then
+		SETUPFUNC=1
+	fi
+fi
 if have_function package; then
 	PKGFUNC=1
 elif [[ $SPLITPKG -eq 0 ]] && have_function package_${pkgname}; then
@@ -3011,6 +3022,7 @@ else
 		fi
 		(( BUILDFUNC )) && run_build
 		(( CHECKFUNC )) && run_check
+		(( SETUPFUNC )) && run_setup
 	fi
 	chmod 755 "$pkgdirbase"
 	if (( ! SPLITPKG )); then
