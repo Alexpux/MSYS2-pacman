@@ -1643,7 +1643,7 @@ tidy_install() {
 
 	if check_option "staticlibs" "n"; then
 		msg2 "$(gettext "Removing "%s" files...")" "static library"
-		find . ! -type d -name "*.a" -exec rm -f -- '{}' +
+		find . ! -type d \( -name "*.a" ! -name "*.dll.a" \) -exec rm -f -- '{}' +
 	fi
 
 	if check_option "emptydirs" "n"; then
