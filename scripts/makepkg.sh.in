@@ -154,7 +154,7 @@ clean_up() {
 
 		# If it's a clean exit and -c/--clean has been passed...
 		msg "$(gettext "Cleaning up...")"
-		rm -rf "$pkgdirbase" "$srcdir"
+		rm -rf "$pkgdirbase" "$srcdir" "$destdir"
 		if [[ -n $pkgbase ]]; then
 			local fullver=$(get_full_version)
 			# Can't do this unless the BUILDSCRIPT has been sourced.
@@ -1473,6 +1473,7 @@ run_check() {
 }
 
 run_setup() {
+	mkdir -p "$destdir"
 	run_function_safe "setup"
 }
 
@@ -2829,10 +2830,11 @@ epoch=${epoch:-0}
 if [[ $BUILDDIR = "$startdir" ]]; then
 	srcdir="$BUILDDIR/src"
 	pkgdirbase="$BUILDDIR/pkg"
+	destdir="$BUILDDIR/dest"
 else
 	srcdir="$BUILDDIR/$pkgbase/src"
 	pkgdirbase="$BUILDDIR/$pkgbase/pkg"
-
+	destdir="$BUILDDIR/$pkgbase/dest"
 fi
 
 # set pkgdir to something "sensible" for (not recommended) use during build()
