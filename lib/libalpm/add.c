@@ -230,7 +230,7 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 							"filesystem: %o  package: %o\n", filename, lsbuf.st_mode & mask,
 							entrymode & mask);
 				}
-
+#ifndef __MSYS__
 				if((entryuid != lsbuf.st_uid) || (entrygid != lsbuf.st_gid)) {
 					_alpm_log(handle, ALPM_LOG_WARNING, _("directory ownership differs on %s\n"
 							"filesystem: %u:%u  package: %u:%u\n"), filename,
@@ -240,7 +240,7 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 							"filesystem: %u:%u  package: %u:%u\n", filename,
 							lsbuf.st_uid, lsbuf.st_gid, entryuid, entrygid);
 				}
-
+#endif
 				_alpm_log(handle, ALPM_LOG_DEBUG, "extract: skipping dir extraction of %s\n",
 						filename);
 				archive_read_data_skip(archive);
