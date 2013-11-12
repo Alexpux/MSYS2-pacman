@@ -24,7 +24,7 @@ declare -r myname='paccache'
 declare -r myver='@PACKAGE_VERSION@'
 
 declare -a candidates=() cmdopts=() whitelist=() blacklist=()
-declare -i delete=0 dryrun=0 filecount=0 move=0 needsroot=0 totalsaved=0 verbose=0
+declare -i delete=0 dryrun=0 filecount=0 move=0 totalsaved=0 verbose=0
 declare    cachedir=@localstatedir@/cache/pacman/pkg delim=$'\n' keep=3 movedir= scanarch=
 
 USE_COLOR='y'
@@ -104,16 +104,7 @@ pkgfilter() {
 m4_include(../scripts/library/size_to_human.sh)
 
 runcmd() {
-	if (( needsroot && EUID != 0 )); then
-		msg "Privilege escalation required"
-		if sudo -v &>/dev/null && sudo -l &>/dev/null; then
-			sudo "$@"
-		else
-			die 'Unable to escalate privileges using sudo'
-		fi
-	else
-		"$@"
-	fi
+	"$@"
 }
 
 summarize() {
@@ -274,7 +265,6 @@ esac
 if (( move || delete )); then
 	# make it an absolute path since we're about to chdir
 	[[ ${movedir:0:1} != '/' ]] && movedir=$PWD/$movedir
-	[[ ! -w $cachedir || ( $movedir && ! -w $movedir ) ]] && needsroot=1
 fi
 
 # unlikely that this will fail, but better make sure

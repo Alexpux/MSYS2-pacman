@@ -65,17 +65,7 @@ version() {
 }
 
 spacman() {
-	if [ $EUID -eq 0 ]; then
-		pacman "$@"
-	else
-		if ! type -p sudo; then
-			error "Cannot find the sudo binary! Is sudo installed?"
-			error "Otherwise try to run the program as root"
-			exit 1
-		else
-			sudo pacman "$@"
-		fi
-	fi
+	pacman "$@"
 }
 
 print_db() {
