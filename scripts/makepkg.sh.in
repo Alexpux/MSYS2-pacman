@@ -405,7 +405,7 @@ extract_file() {
 			if bsdtar -tf "$file" -q '*' &>/dev/null; then
 				cmd="bsdtar"
 			else
-				return
+				return 0
 			fi ;;
 	esac
 
@@ -1311,8 +1311,8 @@ extract_sources() {
 	for netfile in "${source[@]}"; do
 		local file=$(get_filename "$netfile")
 		if in_array "$file" "${noextract[@]}"; then
-			#skip source files in the noextract=() array
-			#  these are marked explicitly to NOT be extracted
+			# skip source files in the noextract=() array
+			# these are marked explicitly to NOT be extracted
 			continue
 		fi
 		local proto=$(get_protocol "$netfile")
@@ -1334,11 +1334,6 @@ extract_sources() {
 				;;
 		esac
 	done
-
-	if (( PKGVERFUNC )); then
-		update_pkgver
-		check_build_status
-	fi
 }
 
 error_function() {
@@ -1643,8 +1638,13 @@ tidy_install() {
 	fi
 
 	if check_option "staticlibs" "n"; then
-		msg2 "$(gettext "Removing "%s" files...")" "static library"
-		find . ! -type d \( -name "*.a" ! -name "*.dll.a" \) -exec rm -f -- '{}' +
+		msg2 "$(gettext "Removing static library files...")"
+		local l
+		while read -rd '' l; do
+			if [[ -f "${l%.a}.dll.a" ]]; then
+				rm "$l"
+			fi
+		done < <(find . ! -type d \( -name "*.a" ! -name "*.dll.a" \) -print0)
 	fi
 
 	if check_option "emptydirs" "n"; then
@@ -2536,12 +2536,14 @@ m4_include(library/parseopts.sh)
 usage() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
 	echo
+	printf -- "$(gettext "Make packages compatible for use with pacman")\n"
+	echo
 	printf -- "$(gettext "Usage: %s [options]")\n" "$0"
 	echo
 	printf -- "$(gettext "Options:")\n"
 	printf -- "$(gettext "  -A, --ignorearch Ignore incomplete %s field in %s")\n" "arch" "$BUILDSCRIPT"
 	printf -- "$(gettext "  -c, --clean      Clean up work files after build")\n"
-        printf -- "$(gettext "  -C, --cleanbuild Remove %s dir before building the package")\n" "\$srcdir/"
+	printf -- "$(gettext "  -C, --cleanbuild Remove %s dir before building the package")\n" "\$srcdir/"
 	printf -- "$(gettext "  -d, --nodeps     Skip all dependency checks")\n"
 	printf -- "$(gettext "  -e, --noextract  Do not extract source files (use existing %s dir)")\n" "\$srcdir/"
 	printf -- "$(gettext "  -f, --force      Overwrite existing package")\n"
@@ -2999,6 +3001,10 @@ elif (( !REPKG )); then
 	fi
 
 	extract_sources
+	if (( PKGVERFUNC )); then
+		update_pkgver
+		check_build_status
+	fi
 	if (( PREPAREFUNC )); then
 		run_prepare
 	fi

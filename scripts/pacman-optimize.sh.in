@@ -122,7 +122,7 @@ fi
 touch "$lockfile"
 
 workdir=$(mktemp -d "${TMPDIR:-/tmp}/pacman-optimize.XXXXXXXXXX") ||
-	die_r "$(gettext "Can not create temp directory for database building.")\n" >&2
+	die_r "$(gettext "Cannot create temporary directory for database building.")\n" >&2
 
 # step 1: sum the old db
 msg "$(gettext "MD5sum'ing the old database...")"
@@ -142,8 +142,8 @@ msg "$(gettext "Making and MD5sum'ing the new database...")"
 mkdir "$localdb.new"
 bsdtar -xpf "$workdir/pacman-db.tar.gz" -C "$localdb.new"
 if (( $? )); then
-       rm -rf "$workdir"
-       die_r "$(gettext "Untar'ing %s failed.")" "$localdb"
+	rm -rf "$workdir"
+	die_r "$(gettext "Untar'ing %s failed.")" "$localdb"
 fi
 # immediate sync following extraction should get it written continuously on HDD
 msg "$(gettext "Syncing database to disk...")"

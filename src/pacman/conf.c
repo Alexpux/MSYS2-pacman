@@ -405,9 +405,7 @@ static int process_siglevel(alpm_list_t *values, alpm_siglevel_t *storage,
 static void merge_siglevel(alpm_siglevel_t *base, alpm_siglevel_t *over)
 {
 	alpm_siglevel_t level = *over;
-	if(level & ALPM_SIG_USE_DEFAULT) {
-		level = *base;
-	} else {
+	if(!(level & ALPM_SIG_USE_DEFAULT)) {
 		if(!(level & ALPM_SIG_PACKAGE_SET)) {
 			level |= *base & ALPM_SIG_PACKAGE;
 			level |= *base & ALPM_SIG_PACKAGE_OPTIONAL;
@@ -691,7 +689,7 @@ static int setup_libalpm(void)
 		return ret;
 	}
 
-	/* Set GnuPG's home directory.  This is not relative to rootdir, even if
+	/* Set GnuPG's home directory. This is not relative to rootdir, even if
 	 * rootdir is defined. Reasoning: gpgdir contains configuration data. */
 	config->gpgdir = config->gpgdir ? config->gpgdir : strdup(GPGDIR);
 	ret = alpm_option_set_gpgdir(handle, config->gpgdir);

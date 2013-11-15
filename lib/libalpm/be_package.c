@@ -218,6 +218,10 @@ static int parse_descfile(alpm_handle_t *handle, struct archive *a, alpm_pkg_t *
 			} else if(strcmp(key, "optdepend") == 0) {
 				alpm_depend_t *optdep = _alpm_splitdep(ptr);
 				newpkg->optdepends = alpm_list_add(newpkg->optdepends, optdep);
+			} else if(strcmp(key, "makedepend") == 0) {
+				/* not used atm */
+			} else if(strcmp(key, "checkdepend") == 0) {
+				/* not used atm */
 			} else if(strcmp(key, "conflict") == 0) {
 				alpm_depend_t *conflict = _alpm_splitdep(ptr);
 				newpkg->conflicts = alpm_list_add(newpkg->conflicts, conflict);
@@ -419,7 +423,7 @@ alpm_pkg_t *_alpm_pkg_load_internal(alpm_handle_t *handle,
 			}
 			config = 1;
 			continue;
-		} else if(strcmp(entry_name,  ".INSTALL") == 0) {
+		} else if(strcmp(entry_name, ".INSTALL") == 0) {
 			newpkg->scriptlet = 1;
 		} else if(*entry_name == '.') {
 			/* for now, ignore all files starting with '.' that haven't

@@ -52,10 +52,10 @@ do { \
 
 struct __alpm_handle_t {
 	/* internal usage */
-	alpm_db_t *db_local;       /* local db pointer */
+	alpm_db_t *db_local;    /* local db pointer */
 	alpm_list_t *dbs_sync;  /* List of (alpm_db_t *) */
 	FILE *logstream;        /* log file stream pointer */
-	FILE *lckstream;        /* lock file stream pointer if one exists */
+	int lockfd;             /* lock file descriptor */
 	alpm_trans_t *trans;
 
 #ifdef HAVE_LIBCURL
@@ -64,10 +64,10 @@ struct __alpm_handle_t {
 #endif
 
 	/* callback functions */
-	alpm_cb_log logcb;      /* Log callback function */
-	alpm_cb_download dlcb;  /* Download callback function */
+	alpm_cb_log logcb;          /* Log callback function */
+	alpm_cb_download dlcb;      /* Download callback function */
 	alpm_cb_totaldl totaldlcb;  /* Total download callback function */
-	alpm_cb_fetch fetchcb;  /* Download file callback function */
+	alpm_cb_fetch fetchcb;      /* Download file callback function */
 	alpm_cb_event eventcb;
 	alpm_cb_question questioncb;
 	alpm_cb_progress progresscb;

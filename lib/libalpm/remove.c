@@ -672,7 +672,7 @@ int _alpm_remove_single_package(alpm_handle_t *handle,
 		_alpm_log(handle, ALPM_LOG_DEBUG, "removing package %s-%s\n",
 				pkgname, pkgver);
 
-		/* run the pre-remove scriptlet if it exists  */
+		/* run the pre-remove scriptlet if it exists */
 		if(alpm_pkg_has_scriptlet(oldpkg) &&
 				!(handle->trans->flags & ALPM_TRANS_FLAG_NOSCRIPTLET)) {
 			char *scriptlet = _alpm_local_db_pkgpath(handle->db_local,
@@ -687,7 +687,12 @@ int _alpm_remove_single_package(alpm_handle_t *handle,
 		remove_package_files(handle, oldpkg, newpkg, targ_count, pkg_count);
 	}
 
-	/* run the post-remove script if it exists  */
+	if(!newpkg) {
+		alpm_logaction(handle, ALPM_CALLER_PREFIX, "removed %s (%s)\n",
+					oldpkg->name, oldpkg->version);
+	}
+
+	/* run the post-remove script if it exists */
 	if(!newpkg && alpm_pkg_has_scriptlet(oldpkg) &&
 			!(handle->trans->flags & ALPM_TRANS_FLAG_NOSCRIPTLET)) {
 		char *scriptlet = _alpm_local_db_pkgpath(handle->db_local,

@@ -148,8 +148,6 @@ static void fill_progress(const int bar_percent, const int disp_percent,
 	fflush(stdout);
 }
 
-
-
 /* callback to handle messages/notifications from libalpm transactions */
 void cb_event(alpm_event_t event, void *data1, void *data2)
 {
@@ -158,7 +156,7 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 	}
 	switch(event) {
 		case ALPM_EVENT_CHECKDEPS_START:
-		  printf(_("checking dependencies...\n"));
+			printf(_("checking dependencies...\n"));
 			break;
 		case ALPM_EVENT_FILECONFLICTS_START:
 			if(config->noprogressbar) {
@@ -177,10 +175,6 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			}
 			break;
 		case ALPM_EVENT_ADD_DONE:
-			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-					"installed %s (%s)\n",
-					alpm_pkg_get_name(data1),
-					alpm_pkg_get_version(data1));
 			display_optdepends(data1);
 			break;
 		case ALPM_EVENT_REMOVE_START:
@@ -188,23 +182,12 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			printf(_("removing %s...\n"), alpm_pkg_get_name(data1));
 			}
 			break;
-		case ALPM_EVENT_REMOVE_DONE:
-			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-					"removed %s (%s)\n",
-					alpm_pkg_get_name(data1),
-					alpm_pkg_get_version(data1));
-			break;
 		case ALPM_EVENT_UPGRADE_START:
 			if(config->noprogressbar) {
 				printf(_("upgrading %s...\n"), alpm_pkg_get_name(data1));
 			}
 			break;
 		case ALPM_EVENT_UPGRADE_DONE:
-			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-					"upgraded %s (%s -> %s)\n",
-					alpm_pkg_get_name(data1),
-					alpm_pkg_get_version(data2),
-					alpm_pkg_get_version(data1));
 			display_new_optdepends(data2, data1);
 			break;
 		case ALPM_EVENT_DOWNGRADE_START:
@@ -213,23 +196,12 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			}
 			break;
 		case ALPM_EVENT_DOWNGRADE_DONE:
-			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-					"downgraded %s (%s -> %s)\n",
-					alpm_pkg_get_name(data1),
-					alpm_pkg_get_version(data2),
-					alpm_pkg_get_version(data1));
 			display_new_optdepends(data2, data1);
 			break;
 		case ALPM_EVENT_REINSTALL_START:
 			if(config->noprogressbar) {
 				printf(_("reinstalling %s...\n"), alpm_pkg_get_name(data1));
 			}
-			break;
-		case ALPM_EVENT_REINSTALL_DONE:
-			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-					"reinstalled %s (%s)\n",
-					alpm_pkg_get_name(data1),
-					alpm_pkg_get_version(data1));
 			break;
 		case ALPM_EVENT_INTEGRITY_START:
 			if(config->noprogressbar) {
@@ -286,6 +258,8 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			}
 			break;
 		/* all the simple done events, with fallthrough for each */
+		case ALPM_EVENT_REINSTALL_DONE:
+		case ALPM_EVENT_REMOVE_DONE:
 		case ALPM_EVENT_FILECONFLICTS_DONE:
 		case ALPM_EVENT_CHECKDEPS_DONE:
 		case ALPM_EVENT_RESOLVEDEPS_DONE:
@@ -320,7 +294,7 @@ void cb_question(alpm_question_t event, void *data1, void *data2,
 		case ALPM_QUESTION_INSTALL_IGNOREPKG:
 			if(!config->op_s_downloadonly) {
 				*response = yesno(_("%s is in IgnorePkg/IgnoreGroup. Install anyway?"),
-								  alpm_pkg_get_name(data1));
+								alpm_pkg_get_name(data1));
 			} else {
 				*response = 1;
 			}
@@ -724,7 +698,7 @@ void cb_dl_progress(const char *filename, off_t file_xfered, off_t file_total)
 	fname[len] = '\0';
 
 	/* 1 space + filenamelen + 1 space + 6 for size + 1 space + 3 for label +
-	 * + 2 spaces + 4 for rate  + 1 for label + 2 for /s + 1 space +
+	 * + 2 spaces + 4 for rate + 1 for label + 2 for /s + 1 space +
 	 * 8 for eta, gives us the magic 30 */
 	filenamelen = infolen - 30;
 	/* see printf() code, we omit 'HH:' in these conditions */

@@ -611,7 +611,7 @@ static int table_display(const alpm_list_t *header,
 		return -1;
 	}
 
-	if (header) {
+	if(header) {
 		table_print_line(header, padding, totalcols, widths, has_data);
 		printf("\n");
 	}
@@ -1569,7 +1569,7 @@ int pm_asprintf(char **string, const char *format, ...)
 	/* print the message using va_arg list */
 	va_start(args, format);
 	if(vasprintf(string, format, args) == -1) {
-		pm_printf(ALPM_LOG_ERROR,  _("failed to allocate string\n"));
+		pm_printf(ALPM_LOG_ERROR, _("failed to allocate string\n"));
 		ret = -1;
 	}
 	va_end(args);
