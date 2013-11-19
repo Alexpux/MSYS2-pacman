@@ -3030,7 +3030,12 @@ else
 		fi
 		(( BUILDFUNC )) && run_build
 		(( CHECKFUNC )) && run_check
-		(( SETUPFUNC )) && run_setup
+	fi
+	if (( SETUPFUNC )); then
+		rm -rf "$destdir"
+		mkdir -p "$destdir"
+		chmod 755 "$destdir"
+		run_setup
 	fi
 	chmod 755 "$pkgdirbase"
 	if (( ! SPLITPKG )); then
