@@ -2998,6 +2998,7 @@ elif (( !REPKG )); then
 	if (( CLEANBUILD )); then
 		msg "$(gettext "Removing existing %s directory...")" "\$srcdir/"
 		rm -rf "$srcdir"/*
+		rm -rf "$destdir"/*
 	fi
 
 	extract_sources
