@@ -34,7 +34,7 @@ parseopts() {
 				return 255 ;;
 			*)
 				# fail, ambiguous match
-				printf "@SCRIPTNAME@: $(gettext "option '%s' is ambiguous; possibilities:")" "--$1"
+				printf "@SCRIPTNAME@: $(/bin/gettext "option '%s' is ambiguous; possibilities:")" "--$1"
 				printf " '%s'" "${longmatch[@]%:}"
 				printf '\n'
 				return 254 ;;
@@ -53,7 +53,7 @@ parseopts() {
 
 					# option doesn't exist
 					if [[ $shortopts != *$opt* ]]; then
-						printf "@SCRIPTNAME@: $(gettext "invalid option") -- '%s'\n" "$opt" >&2
+						printf "@SCRIPTNAME@: $(/bin/gettext "invalid option") -- '%s'\n" "$opt" >&2
 						OPTRET=(--)
 						return 1
 					fi
@@ -72,7 +72,7 @@ parseopts() {
 							break
 						# parse failure
 						else
-							printf "@SCRIPTNAME@: $(gettext "option requires an argument") -- '%s'\n" "$opt" >&2
+							printf "@SCRIPTNAME@: $(/bin/gettext "option requires an argument") -- '%s'\n" "$opt" >&2
 							OPTRET=(--)
 							return 1
 						fi
@@ -86,7 +86,7 @@ parseopts() {
 					0)
 						# parse failure
 						if [[ $optarg ]]; then
-							printf "@SCRIPTNAME@: $(gettext "option '%s' does not allow an argument")\n" "--$opt" >&2
+							printf "@SCRIPTNAME@: $(/bin/gettext "option '%s' does not allow an argument")\n" "--$opt" >&2
 							OPTRET=(--)
 							return 1
 						# --longopt
@@ -104,7 +104,7 @@ parseopts() {
 							shift
 						# parse failure
 						else
-							printf "@SCRIPTNAME@: $(gettext "option '%s' requires an argument")\n" "--$opt" >&2
+							printf "@SCRIPTNAME@: $(/bin/gettext "option '%s' requires an argument")\n" "--$opt" >&2
 							OPTRET=(--)
 							return 1
 						fi
@@ -116,7 +116,7 @@ parseopts() {
 						;;
 					255)
 						# parse failure
-						printf "@SCRIPTNAME@: $(gettext "invalid option") '--%s'\n" "$opt" >&2
+						printf "@SCRIPTNAME@: $(/bin/gettext "invalid option") '--%s'\n" "$opt" >&2
 						OPTRET=(--)
 						return 1
 						;;

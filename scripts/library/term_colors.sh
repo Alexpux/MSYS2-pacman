@@ -2,13 +2,13 @@
 unset ALL_OFF BOLD BLUE GREEN RED YELLOW
 if [[ -t 2 && ! $USE_COLOR = "n" ]]; then
 	# prefer terminal safe colored and bold text when tput is supported
-	if tput setaf 0 &>/dev/null; then
-		ALL_OFF="$(tput sgr0)"
-		BOLD="$(tput bold)"
-		BLUE="${BOLD}$(tput setaf 4)"
-		GREEN="${BOLD}$(tput setaf 2)"
-		RED="${BOLD}$(tput setaf 1)"
-		YELLOW="${BOLD}$(tput setaf 3)"
+	if /bin/tput setaf 0 &>/dev/null; then
+		ALL_OFF="$(/bin/tput sgr0)"
+		BOLD="$(/bin/tput bold)"
+		BLUE="${BOLD}$(/bin/tput setaf 4)"
+		GREEN="${BOLD}$(/bin/tput setaf 2)"
+		RED="${BOLD}$(/bin/tput setaf 1)"
+		YELLOW="${BOLD}$(/bin/tput setaf 3)"
 	else
 		ALL_OFF="\e[1;0m"
 		BOLD="\e[1;1m"

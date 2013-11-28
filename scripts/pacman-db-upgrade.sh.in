@@ -35,14 +35,14 @@ m4_include(library/output_format.sh)
 usage() {
 	printf "pacman-db-upgrade (pacman) %s\n" "${myver}"
 	echo
-	printf -- "$(gettext "Upgrade the local pacman database to a newer format")\n"
+	printf -- "$(/bin/gettext "Upgrade the local pacman database to a newer format")\n"
 	echo
-	printf -- "$(gettext "Usage: %s [--nocolor] [pacman_db_root]")\n" "$0"
+	printf -- "$(/bin/gettext "Usage: %s [--nocolor] [pacman_db_root]")\n" "$0"
 }
 
 version() {
 	printf "pacman-db-upgrade (pacman) %s\n" "$myver"
-	printf -- "$(gettext "\
+	printf -- "$(/bin/gettext "\
 Copyright (c) 2010-2013 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"
@@ -89,15 +89,15 @@ if [[ -n $1 ]]; then
 fi
 
 if [[ ! -d $dbroot ]]; then
-	die "$(gettext "%s does not exist or is not a directory.")" "$dbroot"
+	die "$(/bin/gettext "%s does not exist or is not a directory.")" "$dbroot"
 fi
 
 if [[ ! -d $dbroot/local ]]; then
-	die "$(gettext "%s is not a pacman database directory.")" "$dbroot"
+	die "$(/bin/gettext "%s is not a pacman database directory.")" "$dbroot"
 fi
 
 if [[ ! -w $dbroot ]]; then
-	die "$(gettext "You must have correct permissions to upgrade the database.")"
+	die "$(/bin/gettext "You must have correct permissions to upgrade the database.")"
 fi
 
 # strip any trailing slash from our dbroot
@@ -107,21 +107,21 @@ lockfile="${dbroot}/db.lck"
 
 # make sure pacman isn't running
 if [[ -f $lockfile ]]; then
-	die "$(gettext "Pacman lock file was found. Cannot run while pacman is running.")"
+	die "$(/bin/gettext "Pacman lock file was found. Cannot run while pacman is running.")"
 fi
 # do not let pacman run while we do this
 touch "$lockfile"
 
 # pacman-3.4 to 3.5 upgrade - merge depends into desc
 if [[ $(find "$dbroot"/local -name depends) ]]; then
-	msg "$(gettext "Pre-3.5 database format detected - upgrading...")"
+	msg "$(/bin/gettext "Pre-3.5 database format detected - upgrading...")"
 	for i in "$dbroot"/local/*; do
 		if [[ -f "$i"/depends ]]; then
 			cat "$i"/depends >> "$i"/desc
 			rm "$i"/depends
 		fi
 	done
-	msg "$(gettext "Done.")"
+	msg "$(/bin/gettext "Done.")"
 fi
 
 # remove the lock file
