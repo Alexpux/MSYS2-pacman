@@ -42,7 +42,7 @@ pac_cache="${CacheDir:-@localstatedir@/cache/pacman/pkg}"
 
 error() {
 	local mesg=$1; shift
-	printf "==> $(gettext "ERROR:") ${mesg}\n" "$@" >&2
+	printf "==> $(/bin/gettext "ERROR:") ${mesg}\n" "$@" >&2
 }
 
 usage() {
@@ -84,7 +84,7 @@ print_db() {
 }
 
 print_pkg() {
-	if ! bsdtar -xqOf "$1" .INSTALL 2>/dev/null; then
+	if ! /bin/bsdtar -xqOf "$1" .INSTALL 2>/dev/null; then
 		error "Package $1 does not include any .INSTALL script"
 		return 1
 	fi
@@ -93,7 +93,7 @@ print_pkg() {
 
 print_scriptlet() {
 	if [ -f "$1" ]; then
-		if bsdtar tf "$1" .PKGINFO &>/dev/null; then
+		if /bin/bsdtar tf "$1" .PKGINFO &>/dev/null; then
 			print_pkg "$1"
 			return
 		fi

@@ -190,7 +190,7 @@ while read i; do
 	esac
 
 	ret=0
-	bsdtar -cnf - -s'/.pacnew$//' "$local_file" 2> /dev/null | bsdtar -xpf - 2> /dev/null
+	/bin/bsdtar -cnf - -s'/.pacnew$//' "$local_file" 2> /dev/null | /bin/bsdtar -xpf - 2> /dev/null
 
 	# Workaround to bsdtar not reporting a missing file as an error
 	if ! [[ -e $package_file || -L $package_file ]]; then
@@ -313,11 +313,11 @@ ret=0
 
 # TODO: Maybe this can be set globally for robustness
 shopt -s -o pipefail
-bsdtar -cf - $comp_files * |
+/bin/bsdtar -cf - $comp_files * |
 case "$PKGEXT" in
-	*tar.gz)  gzip -c -f -n ;;
-	*tar.bz2) bzip2 -c -f ;;
-	*tar.xz)  xz -c -z - ;;
+	*tar.gz)  /bin/gzip -c -f -n ;;
+	*tar.bz2) /bin/bzip2 -c -f ;;
+	*tar.xz)  /bin/xz -c -z - ;;
 	*tar.Z)   compress -c -f ;;
 	*tar)     cat ;;
 	*) warning "'%s' is not a valid archive extension." \

@@ -59,7 +59,7 @@ elif [[ $1 = -@(V|-version) ]]; then
 	exit 0
 fi
 
-printf -v installed '[%s]' "$(gettext installed)"
+printf -v installed '[%s]' "$(/bin/gettext installed)"
 pacman -Sl $1 | awk -v i="$installed" '$NF == i { print $2,$3 }'
 
 # exit with pacman's return value, not awk's
