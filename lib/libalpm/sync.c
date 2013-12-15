@@ -209,6 +209,11 @@ int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
 	for(i = _alpm_db_get_pkgcache(handle->db_local); i; i = i->next) {
 		alpm_pkg_t *lpkg = i->data;
 
+		if(alpm_pkg_find(trans->remove, lpkg->name)) {
+			_alpm_log(handle, ALPM_LOG_DEBUG, "%s is marked for removal -- skipping\n", lpkg->name);
+			continue;
+		}
+
 		if(alpm_pkg_find(trans->add, lpkg->name)) {
 			_alpm_log(handle, ALPM_LOG_DEBUG, "%s is already in the target list -- skipping\n", lpkg->name);
 			continue;
@@ -536,7 +541,6 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 			trans->add = alpm_list_remove(trans->add, rsync, _alpm_pkg_cmp, NULL);
 			/* rsync is not a transaction target anymore */
 			trans->unresolvable = alpm_list_add(trans->unresolvable, rsync);
-			continue;
 		}
 
 		alpm_list_free_inner(deps, (alpm_list_fn_free)_alpm_conflict_free);
