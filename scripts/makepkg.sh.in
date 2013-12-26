@@ -1749,7 +1749,7 @@ find_libdepends() {
 
 	sodepends=0;
 	for d in "${depends[@]}"; do
-		if [[ $d = *.so ]]; then
+		if [[ $d = *.dll ]]; then
 			sodepends=1;
 			break;
 		fi
@@ -1760,28 +1760,33 @@ find_libdepends() {
 		return;
 	fi
 
-	local libdeps filename soarch sofile soname soversion;
+	local libdeps filename soarch sofile soname;
 	declare -A libdeps;
 
 	while read -r filename; do
-		# get architecture of the file; if soarch is empty it's not an ELF binary
-		soarch=$(LC_ALL=C readelf -h "$filename" 2>/dev/null | sed -n 's/.*Class.*ELF\(32\|64\)/\1/p')
+		# get architecture of the file; if soarch is empty it's not an binary
+		soarch=$(LC_ALL=C objdump -a "$filename" | sed -n 's/.*file format.*pei-\(i386\|x86-64\)/\1/p')
 		[[ -n "$soarch" ]] || continue
+		case "$soarch" in
+			i386)
+				soarch=i686
+			;;
+			x86-64)
+				soarch=x86_64
+			;;
+		esac
 
 		# process all libraries needed by the binary
-		for sofile in $(LC_ALL=C readelf -d "$filename" 2>/dev/null | sed -nr 's/.*Shared library: \[(.*)\].*/\1/p')
+		for sofile in $(LC_ALL=C objdump -x "$filename" 2>/dev/null | sed -nr 's/.*DLL Name: (.*).*/\1/p')
 		do
-			# extract the library name: libfoo.so
-			soname="${sofile%.so?(+(.+([0-9])))}".so
-			# extract the major version: 1
-			soversion="${sofile##*\.so\.}"
+			soname=${sofile}
 
 			if [[ ${libdeps[$soname]} ]]; then
-				if [[ ${libdeps[$soname]} != *${soversion}-${soarch}* ]]; then
-					libdeps[$soname]+=" ${soversion}-${soarch}"
+				if [[ ${libdeps[$soname]} != *${soarch}* ]]; then
+					libdeps[$soname]+=" ${soarch}"
 				fi
 			else
-				libdeps[$soname]="${soversion}-${soarch}"
+				libdeps[$soname]="${soarch}"
 			fi
 		done
 	done < <(find "$pkgdir" -type f -perm -u+x)
@@ -1789,7 +1794,7 @@ find_libdepends() {
 	local libdepends v
 	for d in "${depends[@]}"; do
 		case "$d" in
-			*.so)
+			*.dll)
 				if [[ ${libdeps[$d]} ]]; then
 					for v in ${libdeps[$d]}; do
 						libdepends+=("$d=$v")
@@ -1814,32 +1819,23 @@ find_libprovides() {
 	for p in "${provides[@]}"; do
 		missing=0
 		case "$p" in
-			*.so)
-				mapfile -t filename < <(find "$pkgdir" -type f -name $p\*)
+			*.dll)
+				mapfile -t filename < <(find "$pkgdir" -type f -name $p)
 				if [[ $filename ]]; then
 					# packages may provide multiple versions of the same library
 					for fn in "${filename[@]}"; do
-						# check if we really have a shared object
-						if LC_ALL=C readelf -h "$fn" 2>/dev/null | grep -q '.*Type:.*DYN (Shared object file).*'; then
-							# get the string binaries link to (e.g. libfoo.so.1.2 -> libfoo.so.1)
-							local sofile=$(LC_ALL=C readelf -d "$fn" 2>/dev/null | sed -n 's/.*Library soname: \[\(.*\)\].*/\1/p')
-							if [[ -z "$sofile" ]]; then
-								warning "$(/bin/gettext "Library listed in %s is not versioned: %s")" "'provides'" "$p"
-								libprovides+=("$p")
-								continue
-							fi
+						# get the library architecture (32 or 64 bit)
+						local soarch=$(LC_ALL=C objdump -a "$fn" | sed -n 's/.*file format.*pei-\(i386\|x86-64\)/\1/p')
+						case "$soarch" in
+							i386)
+								soarch=i686
+							;;
+							x86-64)
+								soarch=x86_64
+							;;
+						esac
 
-							# get the library architecture (32 or 64 bit)
-							local soarch=$(LC_ALL=C readelf -h "$fn" | sed -n 's/.*Class.*ELF\(32\|64\)/\1/p')
-
-							# extract the library major version
-							local soversion="${sofile##*\.so\.}"
-
-							libprovides+=("${p}=${soversion}-${soarch}")
-						else
-							warning "$(/bin/gettext "Library listed in %s is not a shared object: %s")" "'provides'" "$p"
-							libprovides+=("$p")
-						fi
+						libprovides+=("${p}=${soarch}")
 					done
 				else
 					libprovides+=("$p")
