@@ -2465,6 +2465,7 @@ usage() {
 
 version() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
+	printf -- "$(/bin/gettext "\
 Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 Copyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\n\n\
 This is free software; see the source for copying conditions.\n\
