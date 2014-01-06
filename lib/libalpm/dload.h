@@ -1,7 +1,7 @@
 /*
  *  dload.h
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,8 @@ struct dload_payload {
 	char *destfile_name;
 	char *content_disp_name;
 	char *fileurl;
+	alpm_list_t *servers;
+	long respcode;
 	off_t initial_size;
 	off_t max_size;
 	off_t prevprogress;
@@ -39,11 +41,9 @@ struct dload_payload {
 	int errors_ok;
 	int unlink_on_fail;
 	int trust_remote_name;
-	alpm_list_t *servers;
 #ifdef HAVE_LIBCURL
 	CURLcode curlerr;       /* last error produced by curl */
 #endif
-	long respcode;
 };
 
 void _alpm_dload_payload_reset(struct dload_payload *payload);

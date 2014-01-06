@@ -1,7 +1,7 @@
 /*
  *  util.h
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *  Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
  *  Copyright (c) 2005 by Christian Hamar <krics@linuxforum.hu>
@@ -47,7 +47,7 @@
 /* define _() as shortcut for gettext() */
 #define _(str) dgettext ("libalpm", str)
 #else
-#define _(s) s
+#define _(s) (char *)s
 #endif
 
 void _alpm_alloc_fail(size_t size);

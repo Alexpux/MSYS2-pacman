@@ -1,7 +1,7 @@
 /*
  *  util.h
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,8 +34,8 @@
 #define _(str) gettext(str)
 #define _n(str1, str2, ct) ngettext(str1, str2, ct)
 #else
-#define _(str) str
-#define _n(str1, str2, ct) (ct == 1 ? str1 : str2)
+#define _(str) (char *)str
+#define _n(str1, str2, ct) (char *)(ct == 1 ? str1 : str2)
 #endif
 
 typedef struct _pm_target_t {

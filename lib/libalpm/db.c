@@ -1,7 +1,7 @@
 /*
  *  db.c
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *  Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
  *  Copyright (c) 2005 by Christian Hamar <krics@linuxforum.hu>
@@ -457,7 +457,8 @@ alpm_list_t *_alpm_db_search(alpm_db_t *db, const alpm_list_t *needles)
 
 			if(matched != NULL) {
 				_alpm_log(db->handle, ALPM_LOG_DEBUG,
-						"search target '%s' matched '%s'\n", targ, matched);
+						"search target '%s' matched '%s' on package '%s'\n",
+						targ, matched, name);
 				ret = alpm_list_add(ret, pkg);
 			}
 		}

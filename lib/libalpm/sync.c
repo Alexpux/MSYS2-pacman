@@ -1,7 +1,7 @@
 /*
  *  sync.c
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *  Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
  *  Copyright (c) 2005 by Christian Hamar <krics@linuxforum.hu>
@@ -630,11 +630,6 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 			}
 			goto cleanup;
 		}
-
-		/* re-order w.r.t. dependencies */
-		alpm_list_t *add_orig = trans->add;
-		trans->add = _alpm_sortbydeps(handle, add_orig, trans->remove, 0);
-		alpm_list_free(add_orig);
 	}
 	for(i = trans->add; i; i = i->next) {
 		/* update download size field */
@@ -1031,6 +1026,7 @@ static int check_keyring(alpm_handle_t *handle)
 					}
 					FREELIST(keys);
 				}
+				free(decoded_sigdata);
 			}
 		}
 	}

@@ -1,7 +1,7 @@
 /*
  *  graph.h - helpful graph structure and setup/teardown methods
  *
- *  Copyright (c) 2007-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2007-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@
 #include "alpm_list.h"
 
 typedef struct __alpm_graph_t {
-	char state; /* 0: untouched, -1: entered, other: leaving time */
-	off_t weight; /* weight of the node */
 	void *data;
 	struct __alpm_graph_t *parent; /* where did we come from? */
 	alpm_list_t *children;
 	alpm_list_t *childptr; /* points to a child in children list */
+	off_t weight; /* weight of the node */
+	char state; /* 0: untouched, -1: entered, other: leaving time */
 } alpm_graph_t;
 
 alpm_graph_t *_alpm_graph_new(void);

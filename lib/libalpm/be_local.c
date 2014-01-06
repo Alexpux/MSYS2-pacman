@@ -1,7 +1,7 @@
 /*
  *  be_local.c : backend for the local database
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -990,8 +990,8 @@ int _alpm_local_db_write(alpm_db_t *db, alpm_pkg_t *info, alpm_dbinfrq_t inforeq
 		fp = NULL;
 	}
 
-	/* INSTALL */
-	/* nothing needed here (script is automatically extracted) */
+	/* INSTALL and MTREE */
+	/* nothing needed here (automatically extracted) */
 
 cleanup:
 	umask(oldmask);

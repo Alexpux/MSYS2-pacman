@@ -3,7 +3,7 @@
 #   makepkg - make packages compatible for use with pacman
 #   @configure_input@
 #
-#   Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+#   Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
 #   Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
 #   Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
 #   Copyright (c) 2006 by Miklos Vajna <vmiklos@frugalware.org>
@@ -2271,7 +2271,7 @@ check_software() {
 	fi
 
 	# distcc - compilation with distcc
-	if check_buildenv "distcc" "y" && ! check_option "distcc" "n" ]]; then
+	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
 		if ! type -p distcc >/dev/null; then
 			error "$(/bin/gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
 			ret=1
@@ -2465,8 +2465,7 @@ usage() {
 
 version() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
-	printf -- "$(/bin/gettext "\
-Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>.\n\
+Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 Copyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\n\n\
 This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"

@@ -1,7 +1,7 @@
 /*
  *  conf.c
  *
- *  Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>
  *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -716,7 +716,7 @@ static int setup_libalpm(void)
 	if(config->xfercommand) {
 		alpm_option_set_fetchcb(handle, download_with_xfercommand);
 	} else if(!(alpm_capabilities() & ALPM_CAPABILITY_DOWNLOADER)) {
-		pm_printf(ALPM_LOG_WARNING, _("no '%s' configured"), "XferCommand");
+		pm_printf(ALPM_LOG_WARNING, _("no '%s' configured\n"), "XferCommand");
 	}
 
 	if(config->totaldownload) {
@@ -746,8 +746,8 @@ struct section_t {
 	int is_options;
 	int parse_options;
 	/* db section option gathering */
-	alpm_siglevel_t siglevel;
 	alpm_list_t *servers;
+	alpm_siglevel_t siglevel;
 	alpm_db_usage_t usage;
 };
 
