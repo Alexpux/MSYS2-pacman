@@ -131,7 +131,7 @@ struct __alpm_pkg_t {
 	alpm_pkgvalidation_t validation;
 	alpm_pkgfrom_t origin;
 	alpm_pkgreason_t reason;
-	unsigned int scriptlet;
+	int scriptlet;
 };
 
 alpm_file_t *_alpm_file_copy(alpm_file_t *dest, const alpm_file_t *src);
@@ -152,4 +152,4 @@ int _alpm_pkg_compare_versions(alpm_pkg_t *local_pkg, alpm_pkg_t *pkg);
 
 #endif /* _ALPM_PACKAGE_H */
 
-/* vim: set ts=2 sw=2 noet: */
+/* vim: set noet: */

@@ -371,7 +371,7 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 	alpm_list_t *i, *j;
 	alpm_list_t *deps = NULL;
 	alpm_list_t *unresolvable = NULL;
-	size_t from_sync = 0;
+	int from_sync = 0;
 	int ret = 0;
 	alpm_trans_t *trans = handle->trans;
 
@@ -381,7 +381,10 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 
 	for(i = trans->add; i; i = i->next) {
 		alpm_pkg_t *spkg = i->data;
-		from_sync += (spkg->origin == ALPM_PKG_FROM_SYNCDB);
+		if (spkg->origin == ALPM_PKG_FROM_SYNCDB){
+			from_sync = 1;
+			break;
+		}
 	}
 
 	/* ensure all sync database are valid if we will be using them */
@@ -1221,7 +1224,7 @@ int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
 		return -1;
 	}
 
-#if HAVE_LIBGPGME
+#ifdef HAVE_LIBGPGME
 	/* make sure all required signatures are in keyring */
 	if(check_keyring(handle)) {
 		return -1;
@@ -1313,4 +1316,4 @@ int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
 	return 0;
 }
 
-/* vim: set ts=2 sw=2 noet: */
+/* vim: set noet: */

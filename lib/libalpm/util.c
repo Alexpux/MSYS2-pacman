@@ -1294,4 +1294,4 @@ void _alpm_alloc_fail(size_t size)
 	fprintf(stderr, "alloc failure: could not allocate %zd bytes\n", size);
 }
 
-/* vim: set ts=2 sw=2 noet: */
+/* vim: set noet: */

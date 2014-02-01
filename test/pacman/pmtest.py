@@ -201,6 +201,9 @@ class pmtest(object):
             cmd.extend(["libtool", "execute", "valgrind", "-q",
                 "--tool=memcheck", "--leak-check=full",
                 "--show-reachable=yes",
+                "--gen-suppressions=all",
+                "--child-silent-after-fork=yes",
+                "--log-file=%s" % os.path.join(self.root, "var/log/valgrind"),
                 "--suppressions=%s" % suppfile])
         cmd.extend([pacman["bin"],
             "--config", os.path.join(self.root, util.PACCONF),
@@ -212,7 +215,7 @@ class pmtest(object):
         if pacman["debug"]:
             cmd.append("--debug=%s" % pacman["debug"])
         cmd.extend(shlex.split(self.args))
-        if not (pacman["gdb"] or pacman["valgrind"] or pacman["nolog"]):
+        if not (pacman["gdb"] or pacman["nolog"]):
             output = open(os.path.join(self.root, util.LOGFILE), 'w')
         else:
             output = None

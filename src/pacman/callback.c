@@ -247,7 +247,7 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 				printf(_("checking available disk space...\n"));
 			}
 			break;
-		case ALPM_EVENT_OPTDEP_REQUIRED:
+		case ALPM_EVENT_OPTDEP_REMOVAL:
 			colon_printf(_("%s optionally requires %s\n"), alpm_pkg_get_name(data1),
 				alpm_dep_compute_string(data2));
 			break;
@@ -528,10 +528,11 @@ void cb_progress(alpm_progress_t event, const char *pkgname, int percent,
 	if(percent == 100) {
 		alpm_list_t *i = NULL;
 		on_progress = 0;
-		for(i = output; i; i = i->next) {
-			fputs((const char *)i->data, stdout);
-		}
 		fflush(stdout);
+		for(i = output; i; i = i->next) {
+			fputs((const char *)i->data, stderr);
+		}
+		fflush(stderr);
 		FREELIST(output);
 	} else {
 		on_progress = 1;
@@ -783,4 +784,4 @@ void cb_log(alpm_loglevel_t level, const char *fmt, va_list args)
 	}
 }
 
-/* vim: set ts=2 sw=2 noet: */
+/* vim: set noet: */

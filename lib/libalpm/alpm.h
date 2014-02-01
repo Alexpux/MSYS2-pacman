@@ -377,7 +377,7 @@ typedef enum _alpm_event_t {
 	ALPM_EVENT_DISKSPACE_DONE,
 	/** An optdepend for another package is being removed
 	 * The requiring package and its dependency are passed to the callback */
-	ALPM_EVENT_OPTDEP_REQUIRED,
+	ALPM_EVENT_OPTDEP_REMOVAL,
 	/** A configured repository database is missing */
 	ALPM_EVENT_DATABASE_MISSING,
 	/** Checking keys used to create signatures are in keyring. */
@@ -1359,4 +1359,4 @@ enum alpm_caps alpm_capabilities(void);
 #endif
 #endif /* _ALPM_H */
 
-/* vim: set ts=2 sw=2 noet: */
+/* vim: set noet: */
