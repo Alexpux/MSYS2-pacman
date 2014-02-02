@@ -261,18 +261,18 @@ static void setuseragent(void)
  */
 static void cleanup(int ret)
 {
-	/* free alpm library resources */
-	if(config->handle && alpm_release(config->handle) == -1) {
-		pm_printf(ALPM_LOG_ERROR, "error releasing alpm library\n");
-	}
-
-	/* free memory */
-	FREELIST(pm_targets);
 	if(config) {
+		/* free alpm library resources */
+		if(config->handle && alpm_release(config->handle) == -1) {
+			pm_printf(ALPM_LOG_ERROR, "error releasing alpm library\n");
+		}
+
 		config_free(config);
 		config = NULL;
 	}
 
+	/* free memory */
+	FREELIST(pm_targets);
 	exit(ret);
 }
 
@@ -414,9 +414,7 @@ static int parsearg_global(int opt)
 			enable_colors(config->color);
 			break;
 		case OP_CONFIG:
-			if(config->configfile) {
-				free(config->configfile);
-			}
+			free(config->configfile);
 			config->configfile = strndup(optarg, PATH_MAX);
 			break;
 		case OP_DEBUG:
@@ -889,11 +887,11 @@ static int parseargs(int argc, char *argv[])
 	}
 	if(config->help) {
 		usage(config->op, mbasename(argv[0]));
-		return 2;
+		cleanup(0);
 	}
 	if(config->version) {
 		version();
-		return 2;
+		cleanup(0);
 	}
 
 	/* parse all other options */
