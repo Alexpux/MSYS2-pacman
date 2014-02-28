@@ -179,7 +179,11 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 		return 0;
 	} else {
 		/* build the new entryname relative to handle->root */
-		snprintf(filename, PATH_MAX, "%s%s", handle->root, entryname);
+		if (strncmp(entryname, "usr/", 4) == 0) {
+			snprintf(filename, PATH_MAX, "%s%s", handle->root, entryname+4);
+		} else {
+			snprintf(filename, PATH_MAX, "%s%s", handle->root, entryname);
+		}
 	}
 
 	/* if a file is in NoExtract then we never extract it */
