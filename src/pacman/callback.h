@@ -25,7 +25,7 @@
 #include <alpm.h>
 
 /* callback to handle messages/notifications from libalpm */
-void cb_event(alpm_event_t event, void *data1, void *data2);
+void cb_event(alpm_event_t *event);
 
 /* callback to handle questions from libalpm (yes/no) */
 void cb_question(alpm_question_t event, void *data1, void *data2,
@@ -39,10 +39,6 @@ void cb_progress(alpm_progress_t event, const char *pkgname, int percent,
 void cb_dl_total(off_t total);
 /* callback to handle display of download progress */
 void cb_dl_progress(const char *filename, off_t file_xfered, off_t file_total);
-
-/* callback to handle messages/notifications from pacman library */
-__attribute__((format(printf, 2, 0)))
-void cb_log(alpm_loglevel_t level, const char *fmt, va_list args);
 
 #endif /* _PM_CALLBACK_H */
 

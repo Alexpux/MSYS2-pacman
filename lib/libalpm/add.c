@@ -57,6 +57,8 @@ int SYMEXPORT alpm_add_pkg(alpm_handle_t *handle, alpm_pkg_t *pkg)
 	/* Sanity checks */
 	CHECK_HANDLE(handle, return -1);
 	ASSERT(pkg != NULL, RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
+	ASSERT(pkg->origin != ALPM_PKG_FROM_LOCALDB,
+			RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
 	ASSERT(handle == pkg->handle, RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
 	trans = handle->trans;
 	ASSERT(trans != NULL, RET_ERR(handle, ALPM_ERR_TRANS_NULL, -1));
@@ -178,6 +180,11 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 		archive_read_data_skip(archive);
 		return 0;
 	} else {
+		if (!alpm_filelist_contains(&newpkg->files, entryname)) {
+			_alpm_log(handle, ALPM_LOG_WARNING, _("file not found in file list for package %s. skipping extraction of %s\n"),
+					newpkg->name, entryname);
+			return 0;
+		}
 		/* build the new entryname relative to handle->root */
 		if (strncmp(entryname, "usr/", 4) == 0) {
 			snprintf(filename, PATH_MAX, "%s%s", handle->root, entryname+4);
@@ -367,8 +374,14 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 				if(try_rename(handle, checkfile, newpath)) {
 					errors++;
 				} else {
-					_alpm_log(handle, ALPM_LOG_WARNING, _("%s installed as %s\n"),
-							filename, newpath);
+					alpm_event_pacnew_created_t event = {
+						.type = ALPM_EVENT_PACNEW_CREATED,
+						.from_noupgrade = 0,
+						.oldpkg = oldpkg,
+						.newpkg = newpkg,
+						.file = filename
+					};
+					EVENT(handle, &event);
 					alpm_logaction(handle, ALPM_CALLER_PREFIX,
 							"warning: %s installed as %s\n", filename, newpath);
 				}
@@ -395,8 +408,12 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 					if(try_rename(handle, checkfile, filename)) {
 						errors++;
 					} else {
-						_alpm_log(handle, ALPM_LOG_WARNING,
-								_("%s saved as %s\n"), filename, newpath);
+						alpm_event_pacorig_created_t event = {
+							.type = ALPM_EVENT_PACORIG_CREATED,
+							.newpkg = newpkg,
+							.file = filename
+						};
+						EVENT(handle, &event);
 						alpm_logaction(handle, ALPM_CALLER_PREFIX,
 								"warning: %s saved as %s\n", filename, newpath);
 					}
@@ -411,14 +428,14 @@ needbackup_cleanup:
 		free(hash_local);
 		free(hash_pkg);
 	} else {
+		size_t len;
 		/* we didn't need a backup */
 		if(notouch) {
 			/* change the path to a .pacnew extension */
 			_alpm_log(handle, ALPM_LOG_DEBUG, "%s is in NoUpgrade -- skipping\n", filename);
-			_alpm_log(handle, ALPM_LOG_WARNING, _("extracting %s as %s.pacnew\n"), filename, filename);
-			alpm_logaction(handle, ALPM_CALLER_PREFIX,
-					"warning: extracting %s as %s.pacnew\n", filename, filename);
-			strncat(filename, ".pacnew", PATH_MAX - strlen(filename));
+			/* remember len so we can get the old filename back for the event */
+			len = strlen(filename);
+			strncat(filename, ".pacnew", PATH_MAX - len);
 		} else {
 			_alpm_log(handle, ALPM_LOG_DEBUG, "extracting %s\n", filename);
 		}
@@ -435,6 +452,23 @@ needbackup_cleanup:
 			free(entryname_orig);
 			errors++;
 			return errors;
+		}
+
+		if(notouch) {
+			alpm_event_pacnew_created_t event = {
+				.type = ALPM_EVENT_PACNEW_CREATED,
+				.from_noupgrade = 1,
+				.oldpkg = oldpkg,
+				.newpkg = newpkg,
+				.file = filename
+			};
+			/* "remove" the .pacnew suffix */
+			filename[len] = '\0';
+			EVENT(handle, &event);
+			alpm_logaction(handle, ALPM_CALLER_PREFIX,
+					"warning: %s installed as %s.pacnew\n", filename, filename);
+			/* restore */
+			filename[len] = '.';
 		}
 
 		/* calculate an hash if this is in newpkg's backup */
@@ -464,7 +498,7 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 	alpm_db_t *db = handle->db_local;
 	alpm_trans_t *trans = handle->trans;
 	alpm_progress_t progress = ALPM_PROGRESS_ADD_START;
-	alpm_event_t done = ALPM_EVENT_ADD_DONE, start = ALPM_EVENT_ADD_START;
+	alpm_event_package_operation_t event;
 	const char *log_msg = "adding";
 	const char *pkgfile;
 
@@ -477,18 +511,15 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 		if(cmp < 0) {
 			log_msg = "downgrading";
 			progress = ALPM_PROGRESS_DOWNGRADE_START;
-			start = ALPM_EVENT_DOWNGRADE_START;
-			done = ALPM_EVENT_DOWNGRADE_DONE;
+			event.operation = ALPM_PACKAGE_DOWNGRADE;
 		} else if(cmp == 0) {
 			log_msg = "reinstalling";
 			progress = ALPM_PROGRESS_REINSTALL_START;
-			start = ALPM_EVENT_REINSTALL_START;
-			done = ALPM_EVENT_REINSTALL_DONE;
+			event.operation = ALPM_PACKAGE_REINSTALL;
 		} else {
 			log_msg = "upgrading";
 			progress = ALPM_PROGRESS_UPGRADE_START;
-			start = ALPM_EVENT_UPGRADE_START;
-			done = ALPM_EVENT_UPGRADE_DONE;
+			event.operation = ALPM_PACKAGE_UPGRADE;
 		}
 		is_upgrade = 1;
 
@@ -500,9 +531,14 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 
 		/* copy over the install reason */
 		newpkg->reason = alpm_pkg_get_reason(local);
+	} else {
+		event.operation = ALPM_PACKAGE_INSTALL;
 	}
 
-	EVENT(handle, start, newpkg, local);
+	event.type = ALPM_EVENT_PACKAGE_OPERATION_START;
+	event.oldpkg = oldpkg;
+	event.newpkg = newpkg;
+	EVENT(handle, &event);
 
 	pkgfile = newpkg->origin_data.file;
 
@@ -653,20 +689,20 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 
 	PROGRESS(handle, progress, newpkg->name, 100, pkg_count, pkg_current);
 
-	switch(done) {
-		case ALPM_EVENT_ADD_DONE:
+	switch(event.operation) {
+		case ALPM_PACKAGE_INSTALL:
 			alpm_logaction(handle, ALPM_CALLER_PREFIX, "installed %s (%s)\n",
 					newpkg->name, newpkg->version);
 			break;
-		case ALPM_EVENT_DOWNGRADE_DONE:
+		case ALPM_PACKAGE_DOWNGRADE:
 			alpm_logaction(handle, ALPM_CALLER_PREFIX, "downgraded %s (%s -> %s)\n",
 					newpkg->name, oldpkg->version, newpkg->version);
 			break;
-		case ALPM_EVENT_REINSTALL_DONE:
+		case ALPM_PACKAGE_REINSTALL:
 			alpm_logaction(handle, ALPM_CALLER_PREFIX, "reinstalled %s (%s)\n",
 					newpkg->name, newpkg->version);
 			break;
-		case ALPM_EVENT_UPGRADE_DONE:
+		case ALPM_PACKAGE_UPGRADE:
 			alpm_logaction(handle, ALPM_CALLER_PREFIX, "upgraded %s (%s -> %s)\n",
 					newpkg->name, oldpkg->version, newpkg->version);
 			break;
@@ -686,7 +722,8 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 		free(scriptlet);
 	}
 
-	EVENT(handle, done, newpkg, oldpkg);
+	event.type = ALPM_EVENT_PACKAGE_OPERATION_DONE;
+	EVENT(handle, &event);
 
 cleanup:
 	_alpm_pkg_free(oldpkg);

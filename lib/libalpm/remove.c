@@ -63,6 +63,8 @@ int SYMEXPORT alpm_remove_pkg(alpm_handle_t *handle, alpm_pkg_t *pkg)
 	/* Sanity checks */
 	CHECK_HANDLE(handle, return -1);
 	ASSERT(pkg != NULL, RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
+	ASSERT(pkg->origin == ALPM_PKG_FROM_LOCALDB,
+			RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
 	ASSERT(handle == pkg->handle, RET_ERR(handle, ALPM_ERR_WRONG_ARGS, -1));
 	trans = handle->trans;
 	ASSERT(trans != NULL, RET_ERR(handle, ALPM_ERR_TRANS_NULL, -1));
@@ -179,7 +181,12 @@ static void remove_notify_needed_optdepends(alpm_handle_t *handle, alpm_list_t *
 			for(j = optdeps; j; j = alpm_list_next(j)) {
 				alpm_depend_t *optdep = j->data;
 				if(alpm_pkg_find(lp, optdep->name)) {
-					EVENT(handle, ALPM_EVENT_OPTDEP_REMOVAL, pkg, optdep);
+					alpm_event_optdep_removal_t event = {
+						.type = ALPM_EVENT_OPTDEP_REMOVAL,
+						.pkg = pkg,
+						.optdep = optdep
+					};
+					EVENT(handle, &event);
 				}
 			}
 		}
@@ -203,6 +210,7 @@ int _alpm_remove_prepare(alpm_handle_t *handle, alpm_list_t **data)
 	alpm_list_t *lp;
 	alpm_trans_t *trans = handle->trans;
 	alpm_db_t *db = handle->db_local;
+	alpm_event_t event;
 
 	if((trans->flags & ALPM_TRANS_FLAG_RECURSE)
 			&& !(trans->flags & ALPM_TRANS_FLAG_CASCADE)) {
@@ -214,7 +222,8 @@ int _alpm_remove_prepare(alpm_handle_t *handle, alpm_list_t **data)
 	}
 
 	if(!(trans->flags & ALPM_TRANS_FLAG_NODEPS)) {
-		EVENT(handle, ALPM_EVENT_CHECKDEPS_START, NULL, NULL);
+		event.type = ALPM_EVENT_CHECKDEPS_START;
+		EVENT(handle, &event);
 
 		_alpm_log(handle, ALPM_LOG_DEBUG, "looking for unsatisfied dependencies\n");
 		lp = alpm_checkdeps(handle, _alpm_db_get_pkgcache(db), trans->remove, NULL, 1);
@@ -255,7 +264,8 @@ int _alpm_remove_prepare(alpm_handle_t *handle, alpm_list_t **data)
 	remove_notify_needed_optdepends(handle, trans->remove);
 
 	if(!(trans->flags & ALPM_TRANS_FLAG_NODEPS)) {
-		EVENT(handle, ALPM_EVENT_CHECKDEPS_DONE, NULL, NULL);
+		event.type = ALPM_EVENT_CHECKDEPS_DONE;
+		EVENT(handle, &event);
 	}
 
 	return 0;
@@ -512,6 +522,11 @@ static int unlink_file(alpm_handle_t *handle, alpm_pkg_t *oldpkg,
 				int cmp = filehash ? strcmp(filehash, backup->hash) : 0;
 				FREE(filehash);
 				if(cmp != 0) {
+					alpm_event_pacsave_created_t event = {
+						.type = ALPM_EVENT_PACSAVE_CREATED,
+						.oldpkg = oldpkg,
+						.file = file
+					};
 					char *newpath;
 					size_t len = strlen(file) + 8 + 1;
 					MALLOC(newpath, len, RET_ERR(handle, ALPM_ERR_MEMORY, -1));
@@ -526,7 +541,7 @@ static int unlink_file(alpm_handle_t *handle, alpm_pkg_t *oldpkg,
 						free(newpath);
 						return -1;
 					}
-					_alpm_log(handle, ALPM_LOG_WARNING, _("%s saved as %s\n"), file, newpath);
+					EVENT(handle, &event);
 					alpm_logaction(handle, ALPM_CALLER_PREFIX,
 							"warning: %s saved as %s\n", file, newpath);
 					free(newpath);
@@ -657,12 +672,18 @@ int _alpm_remove_single_package(alpm_handle_t *handle,
 {
 	const char *pkgname = oldpkg->name;
 	const char *pkgver = oldpkg->version;
+	alpm_event_package_operation_t event = {
+		.type = ALPM_EVENT_PACKAGE_OPERATION_START,
+		.operation = ALPM_PACKAGE_REMOVE,
+		.oldpkg = oldpkg,
+		.newpkg = NULL
+	};
 
 	if(newpkg) {
 		_alpm_log(handle, ALPM_LOG_DEBUG, "removing old package first (%s-%s)\n",
 				pkgname, pkgver);
 	} else {
-		EVENT(handle, ALPM_EVENT_REMOVE_START, oldpkg, NULL);
+		EVENT(handle, &event);
 		_alpm_log(handle, ALPM_LOG_DEBUG, "removing package %s-%s\n",
 				pkgname, pkgver);
 
@@ -696,7 +717,8 @@ int _alpm_remove_single_package(alpm_handle_t *handle,
 	}
 
 	if(!newpkg) {
-		EVENT(handle, ALPM_EVENT_REMOVE_DONE, oldpkg, NULL);
+		event.type = ALPM_EVENT_PACKAGE_OPERATION_DONE;
+		EVENT(handle, &event);
 	}
 
 	/* remove the package from the database */

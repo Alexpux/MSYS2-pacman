@@ -149,12 +149,12 @@ static void fill_progress(const int bar_percent, const int disp_percent,
 }
 
 /* callback to handle messages/notifications from libalpm transactions */
-void cb_event(alpm_event_t event, void *data1, void *data2)
+void cb_event(alpm_event_t *event)
 {
 	if(config->print) {
 		return;
 	}
-	switch(event) {
+	switch(event->type) {
 		case ALPM_EVENT_CHECKDEPS_START:
 			printf(_("checking dependencies...\n"));
 			break;
@@ -169,38 +169,43 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 		case ALPM_EVENT_INTERCONFLICTS_START:
 			printf(_("looking for conflicting packages...\n"));
 			break;
-		case ALPM_EVENT_ADD_START:
+		case ALPM_EVENT_PACKAGE_OPERATION_START:
 			if(config->noprogressbar) {
-				printf(_("installing %s...\n"), alpm_pkg_get_name(data1));
+				alpm_event_package_operation_t *e = (alpm_event_package_operation_t *) event;
+				switch(e->operation) {
+					case ALPM_PACKAGE_INSTALL:
+						printf(_("installing %s...\n"), alpm_pkg_get_name(e->newpkg));
+						break;
+					case ALPM_PACKAGE_UPGRADE:
+						printf(_("upgrading %s...\n"), alpm_pkg_get_name(e->newpkg));
+						break;
+					case ALPM_PACKAGE_REINSTALL:
+						printf(_("reinstalling %s...\n"), alpm_pkg_get_name(e->newpkg));
+						break;
+					case ALPM_PACKAGE_DOWNGRADE:
+						printf(_("downgrading %s...\n"), alpm_pkg_get_name(e->newpkg));
+						break;
+					case ALPM_PACKAGE_REMOVE:
+						printf(_("removing %s...\n"), alpm_pkg_get_name(e->oldpkg));
+						break;
+				}
 			}
 			break;
-		case ALPM_EVENT_ADD_DONE:
-			display_optdepends(data1);
-			break;
-		case ALPM_EVENT_REMOVE_START:
-			if(config->noprogressbar) {
-			printf(_("removing %s...\n"), alpm_pkg_get_name(data1));
-			}
-			break;
-		case ALPM_EVENT_UPGRADE_START:
-			if(config->noprogressbar) {
-				printf(_("upgrading %s...\n"), alpm_pkg_get_name(data1));
-			}
-			break;
-		case ALPM_EVENT_UPGRADE_DONE:
-			display_new_optdepends(data2, data1);
-			break;
-		case ALPM_EVENT_DOWNGRADE_START:
-			if(config->noprogressbar) {
-				printf(_("downgrading %s...\n"), alpm_pkg_get_name(data1));
-			}
-			break;
-		case ALPM_EVENT_DOWNGRADE_DONE:
-			display_new_optdepends(data2, data1);
-			break;
-		case ALPM_EVENT_REINSTALL_START:
-			if(config->noprogressbar) {
-				printf(_("reinstalling %s...\n"), alpm_pkg_get_name(data1));
+		case ALPM_EVENT_PACKAGE_OPERATION_DONE:
+			{
+				alpm_event_package_operation_t *e = (alpm_event_package_operation_t *) event;
+				switch(e->operation) {
+					case ALPM_PACKAGE_INSTALL:
+						display_optdepends(e->newpkg);
+						break;
+					case ALPM_PACKAGE_UPGRADE:
+					case ALPM_PACKAGE_DOWNGRADE:
+						display_new_optdepends(e->oldpkg, e->newpkg);
+						break;
+					case ALPM_PACKAGE_REINSTALL:
+					case ALPM_PACKAGE_REMOVE:
+						break;
+				}
 			}
 			break;
 		case ALPM_EVENT_INTEGRITY_START:
@@ -228,7 +233,10 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			printf(_("applying deltas...\n"));
 			break;
 		case ALPM_EVENT_DELTA_PATCH_START:
-			printf(_("generating %s with %s... "), (char *)data1, (char *)data2);
+			{
+				alpm_event_delta_patch_t *e = (alpm_event_delta_patch_t *) event;
+				printf(_("generating %s with %s... "), e->delta->to, e->delta->delta);
+			}
 			break;
 		case ALPM_EVENT_DELTA_PATCH_DONE:
 			printf(_("success!\n"));
@@ -237,7 +245,7 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			printf(_("failed.\n"));
 			break;
 		case ALPM_EVENT_SCRIPTLET_INFO:
-			fputs((const char *)data1, stdout);
+			fputs(((alpm_event_scriptlet_info_t *) event)->line, stdout);
 			break;
 		case ALPM_EVENT_RETRIEVE_START:
 			colon_printf(_("Retrieving packages ...\n"));
@@ -248,18 +256,87 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 			}
 			break;
 		case ALPM_EVENT_OPTDEP_REMOVAL:
-			colon_printf(_("%s optionally requires %s\n"), alpm_pkg_get_name(data1),
-				alpm_dep_compute_string(data2));
+			{
+				alpm_event_optdep_removal_t *e = (alpm_event_optdep_removal_t *) event;
+				colon_printf(_("%s optionally requires %s\n"),
+						alpm_pkg_get_name(e->pkg),
+						alpm_dep_compute_string(e->optdep));
+			}
 			break;
 		case ALPM_EVENT_DATABASE_MISSING:
 			if(!config->op_s_sync) {
 				pm_printf(ALPM_LOG_WARNING,
-					"database file for '%s' does not exist\n", (char *)data1);
+					"database file for '%s' does not exist\n",
+					((alpm_event_database_missing_t *) event)->dbname);
+			}
+			break;
+		case ALPM_EVENT_LOG:
+			{
+				alpm_event_log_t *e = (alpm_event_log_t *) event;
+				if(!e->fmt || strlen(e->fmt) == 0) {
+					break;
+				}
+
+				if(on_progress) {
+					char *string = NULL;
+					pm_vasprintf(&string, e->level, e->fmt, e->args);
+					if(string != NULL) {
+						output = alpm_list_add(output, string);
+					}
+				} else {
+					pm_vfprintf(stderr, e->level, e->fmt, e->args);
+				}
+			}
+			break;
+		case ALPM_EVENT_PACNEW_CREATED:
+			{
+				alpm_event_pacnew_created_t *e = (alpm_event_pacnew_created_t *) event;
+				if(on_progress) {
+					char *string = NULL;
+					pm_sprintf(&string, ALPM_LOG_WARNING, _("%s installed as %s.pacnew\n"),
+							e->file, e->file);
+					if(string != NULL) {
+						output = alpm_list_add(output, string);
+					}
+				} else {
+					pm_printf(ALPM_LOG_WARNING, _("%s installed as %s.pacnew\n"),
+							e->file, e->file);
+				}
+			}
+			break;
+		case ALPM_EVENT_PACSAVE_CREATED:
+			{
+				alpm_event_pacsave_created_t *e = (alpm_event_pacsave_created_t *) event;
+				if(on_progress) {
+					char *string = NULL;
+					pm_sprintf(&string, ALPM_LOG_WARNING, _("%s saved as %s.pacsave\n"),
+							e->file, e->file);
+					if(string != NULL) {
+						output = alpm_list_add(output, string);
+					}
+				} else {
+					pm_printf(ALPM_LOG_WARNING, _("%s saved as %s.pacsave\n"),
+							e->file, e->file);
+				}
+			}
+			break;
+		case ALPM_EVENT_PACORIG_CREATED:
+			{
+				alpm_event_pacorig_created_t *e = (alpm_event_pacorig_created_t *) event;
+				if(on_progress) {
+					char *string = NULL;
+					pm_sprintf(&string, ALPM_LOG_WARNING, _("%s saved as %s.pacorig\n"),
+							e->file, e->file);
+					if(string != NULL) {
+						output = alpm_list_add(output, string);
+					}
+				} else {
+					pm_printf(ALPM_LOG_WARNING, _("%s saved as %s.pacorig\n"),
+							e->file, e->file);
+				}
 			}
 			break;
 		/* all the simple done events, with fallthrough for each */
-		case ALPM_EVENT_REINSTALL_DONE:
-		case ALPM_EVENT_REMOVE_DONE:
 		case ALPM_EVENT_FILECONFLICTS_DONE:
 		case ALPM_EVENT_CHECKDEPS_DONE:
 		case ALPM_EVENT_RESOLVEDEPS_DONE:
@@ -271,6 +348,12 @@ void cb_event(alpm_event_t event, void *data1, void *data2)
 		case ALPM_EVENT_DELTA_INTEGRITY_DONE:
 		case ALPM_EVENT_DELTA_PATCHES_DONE:
 		case ALPM_EVENT_DISKSPACE_DONE:
+		case ALPM_EVENT_RETRIEVE_DONE:
+		case ALPM_EVENT_RETRIEVE_FAILED:
+		/* we can safely ignore those as well */
+		case ALPM_EVENT_PKGDOWNLOAD_START:
+		case ALPM_EVENT_PKGDOWNLOAD_DONE:
+		case ALPM_EVENT_PKGDOWNLOAD_FAILED:
 			/* nothing */
 			break;
 	}
@@ -764,24 +847,6 @@ void cb_dl_progress(const char *filename, off_t file_xfered, off_t file_total)
 		fill_progress(file_percent, file_percent, cols - infolen);
 	}
 	return;
-}
-
-/* Callback to handle notifications from the library */
-void cb_log(alpm_loglevel_t level, const char *fmt, va_list args)
-{
-	if(!fmt || strlen(fmt) == 0) {
-		return;
-	}
-
-	if(on_progress) {
-		char *string = NULL;
-		pm_vasprintf(&string, level, fmt, args);
-		if(string != NULL) {
-			output = alpm_list_add(output, string);
-		}
-	} else {
-		pm_vfprintf(stderr, level, fmt, args);
-	}
 }
 
 /* vim: set noet: */

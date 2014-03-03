@@ -81,85 +81,45 @@ if ($ARGV[0] eq "--nocolor" || $ARGV[0] eq "-n") {
 # localization
 my $LC_INSTALLED = `gettext pacman installed`;
 
-# Color a "repo/pkgname pkgver (groups) [installed]" line.
-# We try to stick to pacman colors.
-sub to_color {
+# Print a "repo/pkgname pkgver (groups) [installed]" line.
+# We stick to pacman colors.
+sub print_pkg {
 	my @v = @_;
-	my $line = "$RESET$BOLD";
+	print "$RESET$BOLD";
 	if ( "$v[0]" eq "local" ) {
-		$line .= "$RED";
+		print "$RED";
 	} else {
-		$line .= "$MAGENTA";
+		print "$MAGENTA";
 	}
-	$line .= "$v[0]/$RESET$BOLD$v[1] $GREEN$v[2]";
-	$line .= " $BLUE$v[3]" if $v[3] ne "";
-	$line .= " $CYAN$v[4]" if $v[4] ne "";
-	$line .= " $RESET";
-	return $line;
+	print "$v[0]/$RESET$BOLD$v[1] $GREEN$v[2]$BLUE$v[3]$CYAN$v[4]$RESET\n";
+	print "$v[5]";
 }
 
-my %allpkgs = ();
-
-my $syncout = `pacman -Ss '@ARGV'`;
-# split each sync search entry into its own array entry
-my @syncpkgs = split(/\n^(?=\w)/m, $syncout);
-# remove the extra \n from the last desc entry
-if ($#syncpkgs >= 0) {
-	chomp($syncpkgs[$#syncpkgs]);
-}
-
-# counter var for packages, used here and in the query loop too
-my $cnt = 0;
-foreach $_ (@syncpkgs) {
-	# we grab the following fields: repo, name, ver, group, installed, and desc
-	my @pkgfields = /^(.*?)\/(.*?) (.*?) ?(\(.*?\))? ?(\[.*\])?\n(.*)$/s;
-	if(not @pkgfields) {
-		# skip any non-matching line and just print it for the user
-		print $_, "\n";
-		next;
-	}
-	# since 'group' and 'installed' are optional, we should fill it in if necessary
-	$pkgfields[3] = "" if not defined $pkgfields[3];
-	$pkgfields[4] = "" if not defined $pkgfields[4];
-	# add a last field that indicates original order
-	push (@pkgfields, $cnt++);
-	# add each sync pkg by name/ver to a hash table for quick lookup
-	$allpkgs{$pkgfields[1]} = [ @pkgfields ];
-}
-
-my $queryout = `pacman -Qs '@ARGV'`;
-# split each querysearch entry into its own array entry
-my @querypkgs = split(/\n^(?=\w)/m, $queryout);
-# remove the extra \n from the last desc entry
-if ($#querypkgs >= 0) {
-	chomp ($querypkgs[$#querypkgs]);
-}
-
-foreach $_ (@querypkgs) {
-	# we grab the following fields: repo, name, ver, group, installed, and desc
-	my @pkgfields = /^(.*?)\/(.*?) (.*?) ?(\(.*?\))? ?(\[.*\])?\n(.*)$/s;
-	# my @pkgfields = /^(.*?)\/(.*?) ?(\[.*\])?\n(.*)$/s;
-	# skip any non-matching line
-	next if not defined $pkgfields[1];
-	# check if the package was listed in the sync out
-	if (not exists $allpkgs{$pkgfields[1]}) {
-		# since 'group' is optional, we should fill it in if necessary
+sub list_pkg {
+	my $db = shift;
+	open (my $out, '-|', 'pacman', $db, '--', @ARGV) or exit 1;
+	my @pkglist = ();
+	while ( readline($out) ) {
+		# We grab the following fields: repo, name, ver, group, installed, and
+		# desc. We grab leading space for 'group' and 'installed' so that we do
+		# not need to test if non-empty when printing.
+		my @pkgfields = /^(.*?)\/(.*?) (.*?)( \(.*?\))?( \[.*\])?$/s;
+		my $desc = readline($out);
+		# since 'group' and 'installed' are optional, we should fill it in if
+		# necessary
 		$pkgfields[3] = "" if not defined $pkgfields[3];
-		$pkgfields[4] = "[$LC_INSTALLED]";
-		# add a last field that indicates original order (after sync)
-		push (@pkgfields, $cnt++);
-		# add our local-only package to the hash
-		$allpkgs{$pkgfields[1]} = [ @pkgfields ];
+		$pkgfields[4] = "" if not defined $pkgfields[4];
+		$pkgfields[5] = $desc;
+		push (@pkglist, \@pkgfields);
 	}
+	close ($out);
+	return @pkglist;
 }
 
-# sort by original order (the last field) and print
-foreach $_ ( sort{ @{$allpkgs{$a}}[6] <=> @{$allpkgs{$b}}[6] } keys %allpkgs) {
-	my @v = @{$allpkgs{$_}};
-	my $line = to_color(@v);
-	# print colorized "repo/pkgname pkgver ..." string with possible installed text
-	print "$line\n";
-	print "$v[5]\n";
-}
+my @sync = list_pkg('-Ss', @ARGV);
+my %allpkgs = map {$_->[1] . $_->[2] => 1} @sync;
+my @query = grep { not $allpkgs{$_->[1] . $_->[2]}} list_pkg('-Qs', @ARGV);
+$_->[4] = " [$LC_INSTALLED]" foreach @query;
+print_pkg (@{$_}) foreach (@sync, @query);
 
 #vim: set noet:

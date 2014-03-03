@@ -353,6 +353,184 @@ int _alpm_pkg_validate_internal(alpm_handle_t *handle,
 }
 
 /**
+ * Handle the existance of simple paths for _alpm_load_pkg_internal()
+ * @param pkg package to change
+ * @param path path to examine
+ * @return 0 if path doesn't match any rule, 1 if it has been handled
+ */
+static int handle_simple_path(alpm_pkg_t *pkg, const char *path)
+{
+	if(strcmp(path, ".INSTALL") == 0) {
+		pkg->scriptlet = 1;
+		return 1;
+	} else if(*path == '.') {
+		/* for now, ignore all files starting with '.' that haven't
+		 * already been handled (for future possibilities) */
+		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ * Add a file to the files list for pkg.
+ *
+ * @param pkg package to add the file to
+ * @param files_size size of pkg->files.files
+ * @param entry archive entry of the file to add to the list
+ * @param path path of the file to be added
+ * @return <0 on error, 0 on success
+ */
+static int add_entry_to_files_list(alpm_pkg_t *pkg, size_t *files_size,
+		struct archive_entry *entry, const char *path)
+{
+	const size_t files_count = pkg->files.count;
+	alpm_file_t *current_file;
+	mode_t type;
+	size_t pathlen;
+
+	if(!_alpm_greedy_grow((void **)&pkg->files.files, files_size, (files_count + 1) * sizeof(alpm_file_t))) {
+		return -1;
+	}
+
+	type = archive_entry_filetype(entry);
+
+	pathlen = strlen(path);
+
+	current_file = pkg->files.files + files_count;
+
+	/* mtree paths don't contain a tailing slash, those we get from
+	 * the archive directly do (expensive way)
+	 * Other code relies on it to detect directories so add it here.*/
+	if(type == AE_IFDIR && path[pathlen - 1] != '/') {
+		/* 2 = 1 for / + 1 for \0 */
+		char *newpath = malloc(pathlen + 2);
+		if (!newpath) {
+			_alpm_alloc_fail(pathlen + 2);
+			return -1;
+		}
+		strcpy(newpath, path);
+		newpath[pathlen] = '/';
+		newpath[pathlen + 1] = '\0';
+		current_file->name = newpath;
+	} else {
+		STRDUP(current_file->name, path, return -1);
+	}
+	current_file->size = archive_entry_size(entry);
+	current_file->mode = archive_entry_mode(entry);
+	pkg->files.count++;
+	return 0;
+}
+
+/**
+ * Generate a new file list from an mtree file and add it to the package.
+ * An existing file list will be free()d first.
+ *
+ * archive should point to an archive struct which is already at the
+ * position of the mtree's header.
+ *
+ * @param handle
+ * @param pkg package to add the file list to
+ * @param archive archive containing the mtree
+ * @return 0 on success, <0 on error
+ */
+static int build_filelist_from_mtree(alpm_handle_t *handle, alpm_pkg_t *pkg, struct archive *archive)
+{
+	int ret = 0;
+	size_t mtree_maxsize = 0;
+	size_t mtree_cursize = 0;
+	size_t files_size = 0; /* we clean up the existing array so this is fine */
+	char *mtree_data = NULL;
+	struct archive *mtree;
+	struct archive_entry *mtree_entry = NULL;
+
+	_alpm_log(handle, ALPM_LOG_DEBUG,
+			"found mtree for package %s, getting file list\n", pkg->filename);
+
+	/* throw away any files we might have already found */
+	for (size_t i = 0; i < pkg->files.count; i++) {
+		free(pkg->files.files[i].name);
+	}
+	free(pkg->files.files);
+	pkg->files.files = NULL;
+	pkg->files.count = 0;
+
+	/* create a new archive to parse the mtree and load it from archive into memory */
+	/* TODO: split this into a function */
+	if((mtree = archive_read_new()) == NULL) {
+		handle->pm_errno = ALPM_ERR_LIBARCHIVE;
+		goto error;
+	}
+
+	_alpm_archive_read_support_filter_all(mtree);
+	archive_read_support_format_mtree(mtree);
+
+	/* TODO: split this into a function */
+	while(1) {
+		ssize_t size;
+
+		if(!_alpm_greedy_grow((void **)&mtree_data, &mtree_maxsize, mtree_cursize + ALPM_BUFFER_SIZE)) {
+			goto error;
+		}
+
+		size = archive_read_data(archive, mtree_data + mtree_cursize, ALPM_BUFFER_SIZE);
+
+		if(size < 0) {
+			_alpm_log(handle, ALPM_LOG_ERROR, _("error while reading package %s: %s\n"),
+					pkg->filename, archive_error_string(archive));
+			handle->pm_errno = ALPM_ERR_LIBARCHIVE;
+			goto error;
+		}
+		if(size == 0) {
+			break;
+		}
+
+		mtree_cursize += size;
+	}
+
+	if(archive_read_open_memory(mtree, mtree_data, mtree_cursize)) {
+		_alpm_log(handle, ALPM_LOG_ERROR,
+				_("error while reading mtree of package %s: %s\n"),
+				pkg->filename, archive_error_string(mtree));
+		handle->pm_errno = ALPM_ERR_LIBARCHIVE;
+		goto error;
+	}
+
+	while((ret = archive_read_next_header(mtree, &mtree_entry)) == ARCHIVE_OK) {
+		const char *path = archive_entry_pathname(mtree_entry);
+
+		/* strip leading "./" from path entries */
+		if(path[0] == '.' && path[1] == '/') {
+			path += 2;
+		}
+
+		if(handle_simple_path(pkg, path)) {
+			continue;
+		}
+
+		if(add_entry_to_files_list(pkg, &files_size, mtree_entry, path) < 0) {
+			goto error;
+		}
+	}
+
+	if(ret != ARCHIVE_EOF && ret != ARCHIVE_OK) { /* An error occurred */
+		_alpm_log(handle, ALPM_LOG_ERROR, _("error while reading mtree of package %s: %s\n"),
+				pkg->filename, archive_error_string(mtree));
+		handle->pm_errno = ALPM_ERR_LIBARCHIVE;
+		goto error;
+	}
+
+	free(mtree_data);
+	_alpm_archive_read_free(mtree);
+	_alpm_log(handle, ALPM_LOG_DEBUG, "finished mtree reading for %s\n", pkg->filename);
+	return 0;
+error:
+	free(mtree_data);
+	_alpm_archive_read_free(mtree);
+	return -1;
+}
+
+/**
  * Load a package and create the corresponding alpm_pkg_t struct.
  * @param handle the context handle
  * @param pkgfile path to the package file
@@ -362,7 +540,7 @@ int _alpm_pkg_validate_internal(alpm_handle_t *handle,
 alpm_pkg_t *_alpm_pkg_load_internal(alpm_handle_t *handle,
 		const char *pkgfile, int full)
 {
-	int ret, fd, config = 0;
+	int ret, fd, config, hit_mtree = 0;
 	struct archive *archive;
 	struct archive_entry *entry;
 	alpm_pkg_t *newpkg;
@@ -423,40 +601,22 @@ alpm_pkg_t *_alpm_pkg_load_internal(alpm_handle_t *handle,
 			}
 			config = 1;
 			continue;
-		} else if(strcmp(entry_name, ".INSTALL") == 0) {
-			newpkg->scriptlet = 1;
-		} else if(*entry_name == '.') {
-			/* for now, ignore all files starting with '.' that haven't
-			 * already been handled (for future possibilities) */
-		} else if(full) {
-			const size_t files_count = newpkg->files.count;
-			alpm_file_t *current_file;
-			/* Keep track of all files for filelist generation */
-			if(files_count >= files_size) {
-				size_t old_size = files_size;
-				alpm_file_t *newfiles;
-				if(files_size == 0) {
-					files_size = 4;
-				} else {
-					files_size *= 2;
-				}
-				newfiles = realloc(newpkg->files.files,
-						sizeof(alpm_file_t) * files_size);
-				if(!newfiles) {
-					_alpm_alloc_fail(sizeof(alpm_file_t) * files_size);
-					goto error;
-				}
-				/* ensure all new memory is zeroed out, in both the initial
-				 * allocation and later reallocs */
-				memset(newfiles + old_size, 0,
-						sizeof(alpm_file_t) * (files_size - old_size));
-				newpkg->files.files = newfiles;
+		} else if(full && strcmp(entry_name, ".MTREE") == 0) {
+			/* building the file list: cheap way
+			 * get the filelist from the mtree file rather than scanning
+			 * the whole archive  */
+			if(build_filelist_from_mtree(handle, newpkg, archive) < 0) {
+				goto error;
 			}
-			current_file = newpkg->files.files + files_count;
-			STRDUP(current_file->name, entry_name, goto error);
-			current_file->size = archive_entry_size(entry);
-			current_file->mode = archive_entry_mode(entry);
-			newpkg->files.count++;
+			hit_mtree = 1;
+			continue;
+		} else if(handle_simple_path(newpkg, entry_name)) {
+			continue;
+		} else if(full && !hit_mtree) {
+			/* building the file list: expensive way */
+			if(add_entry_to_files_list(newpkg, &files_size, entry, entry_name) < 0) {
+				goto error;
+			}
 		}
 
 		if(archive_read_data_skip(archive)) {
@@ -467,7 +627,7 @@ alpm_pkg_t *_alpm_pkg_load_internal(alpm_handle_t *handle,
 		}
 
 		/* if we are not doing a full read, see if we have all we need */
-		if(!full && config) {
+		if((!full || hit_mtree) && config) {
 			break;
 		}
 	}

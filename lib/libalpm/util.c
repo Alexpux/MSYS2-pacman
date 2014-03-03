@@ -577,10 +577,14 @@ int _alpm_run_chroot(alpm_handle_t *handle, const char *cmd, char *const argv[])
 		} else {
 			while(!feof(pipe_file)) {
 				char line[PATH_MAX];
+				alpm_event_scriptlet_info_t event = {
+					.type = ALPM_EVENT_SCRIPTLET_INFO,
+					.line = line
+				};
 				if(fgets(line, PATH_MAX, pipe_file) == NULL)
 					break;
 				alpm_logaction(handle, "ALPM-SCRIPTLET", "%s", line);
-				EVENT(handle, ALPM_EVENT_SCRIPTLET_INFO, line, NULL);
+				EVENT(handle, &event);
 			}
 			fclose(pipe_file);
 		}
@@ -1292,6 +1296,68 @@ int _alpm_fnmatch_patterns(alpm_list_t *patterns, const char *string)
 int _alpm_fnmatch(const void *pattern, const void *string)
 {
 	return fnmatch(pattern, string, 0);
+}
+
+/** Think of this as realloc with error handling. If realloc fails NULL will be
+ * returned and data will not be changed.
+ *
+ * Newly created memory will be zeroed.
+ *
+ * @param data source memory space
+ * @param current size of the space pointed to by data
+ * @param required size you want
+ * @return new memory; NULL on error
+ */
+void *_alpm_realloc(void **data, size_t *current, const size_t required)
+{
+	char *newdata;
+
+	newdata = realloc(*data, required);
+	if(!newdata) {
+		_alpm_alloc_fail(required);
+		return NULL;
+	}
+
+	if (*current < required) {
+		/* ensure all new memory is zeroed out, in both the initial
+		 * allocation and later reallocs */
+		memset(newdata + *current, 0, required - *current);
+	}
+	*current = required;
+	*data = newdata;
+	return newdata;
+}
+
+/** This automatically grows data based on current/required.
+ *
+ * The memory space will be initialised to required bytes and doubled in size when required.
+ *
+ * Newly created memory will be zeroed.
+ * @param data source memory space
+ * @param current size of the space pointed to by data
+ * @param required size you want
+ * @return new memory if grown; old memory otherwise; NULL on error
+ */
+void *_alpm_greedy_grow(void **data, size_t *current, const size_t required)
+{
+	size_t newsize = 0;
+
+	if(*current >= required) {
+		return data;
+	}
+
+	if(*current == 0) {
+		newsize = required;
+	} else {
+		newsize = *current * 2;
+	}
+
+	/* check for overflows */
+	if (newsize < required) {
+		return NULL;
+	}
+
+	return _alpm_realloc(data, current, required);
 }
 
 void _alpm_alloc_fail(size_t size)
