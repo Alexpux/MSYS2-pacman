@@ -1651,6 +1651,58 @@ tidy_install() {
 			-o -type f -executable ! -name '*.dll' ! -name '*.exe' ! -name '*.so' ! -name '*.so.[0-9]*' ! -name '*.oct' ! -name '*.cmxs' ! -name '*.a' ! -name '*.la' ! -name '*.lib' ! -name '*.exe.manifest' ! -name '*.exe.config' ! -name '*.dll.config' ! -name '*.mdb' ! -name '*-config' ! -name '*.csh' ! -name '*.sh' ! -name '*.pl' ! -name '*.pm' ! -name '*.py' ! -name '*.rb' ! -name '*.tcl' -print0 | \
 		while read -d $'\0' binary
 		do
+			# assure this is actually a binary object
+			if [ "$(head -c 2 "${binary}")" = '#!' ]
+			then
+				# sometimes .exe will be appended where it does not belong
+				case "${exe}" in
+					usr/lib/hevea/*.exe) ;;
+					*.exe)	mv "${binary}" "${binary%.exe}" ;;
+				esac
+				continue
+			fi
+
+			# OCaml bytecode must not be stripped
+			# Magic number is at end of file:
+			# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=256900#74
+			# http://cygwin.com/ml/cygwin-apps/2010-10/msg00057.html
+			case $(tail -c 12 "${binary}") in
+				Caml1999X0[0-9][0-9])  continue ;;
+			esac
+
+			# Perl Archive (PAR) binaries must not be stripped
+			# https://rt.cpan.org/Public/Bug/Display.html?id=18536
+			# http://cygwin.com/ml/cygwin-apps/2012-07/msg00088.html
+			case $(tail -c 8 "${binary}" | tr '\012' '%') in
+				%PAR\.pm%)  continue ;;
+			esac
+			
+			# Mono assemblies must not be stripped, but remove .mdb debug symbols,
+			# and make them non-executable so they're not launched by MS .NET
+			if LC_ALL=C file -b "${binary}" 2>&1 | grep -q "Mono/\.Net assembly"
+			then
+				chmod 0644 "${binary}"
+				rm -f "${binary}.mdb"
+				continue
+			fi
+			
+			# check for .exe from non-automake Makefile which install(1) didn't fix
+			# strip(1) used to take care of this, but not anymore
+			case ${CHOST} in
+			*-*-cygwin*|*-*-mingw*|*-*-msys*)
+				case "${binary##*/}" in
+				*.dll|*.exe|*.sfx|*.so|*.so.[0-9]*|*.oct|*.cmxs) ;;
+				# make sure this isn't some oddly named DLL
+				*)	if LC_ALL=C objdump -f "${binary}" | grep -Eq '^start address 0x(0000000[01])?00401[0-9a-e][0-9a-e]0'
+					then
+						mv "${binary}" "${binary}.exe"
+						binary+=.exe
+					fi ;;
+				esac
+				;;
+			esac
+			chmod 0755 "${binary}";
+			
 			case "$(file -bi "$binary")" in
 				*application/x-dosexec*) # Windows executables and dlls
 					strip_flags="$STRIP_SHARED";;
