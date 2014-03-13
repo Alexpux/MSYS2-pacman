@@ -2565,10 +2565,10 @@ usage() {
 	echo
 	printf -- "$(/bin/gettext "These options can be passed to %s:")\n" "pacman"
 	echo
-	printf -- "$(gettext "  --asdeps         Install packages as non-explicitly installed")\n"
-	printf -- "$(gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
-	printf -- "$(gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
-	printf -- "$(gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
+	printf -- "$(/bin/gettext "  --asdeps         Install packages as non-explicitly installed")\n"
+	printf -- "$(/bin/gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
+	printf -- "$(/bin/gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
+	printf -- "$(/bin/gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
 	echo
 	printf -- "$(/bin/gettext "If %s is not specified, %s will look for '%s'")\n" "-p" "makepkg" "$BUILDSCRIPT"
 	echo
