@@ -566,6 +566,9 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 
 			/* if conflict->package2 (the local package) is not elected for removal,
 			   we ask the user */
+			if(alpm_pkg_find(trans->remove, conflict->package2)) {
+				found = 1;
+			}
 			for(j = trans->add; j && !found; j = j->next) {
 				alpm_pkg_t *spkg = j->data;
 				if(alpm_pkg_find(spkg->removes, conflict->package2)) {
@@ -1132,8 +1135,9 @@ static int check_validity(alpm_handle_t *handle,
 
 		if(_alpm_pkg_validate_internal(handle, v.path, v.pkg,
 					v.level, &v.siglist, &v.validation) == -1) {
+			struct validity *invalid;
 			v.error = handle->pm_errno;
-			struct validity *invalid = malloc(sizeof(struct validity));
+			MALLOC(invalid, sizeof(struct validity), return -1);
 			memcpy(invalid, &v, sizeof(struct validity));
 			errors = alpm_list_add(errors, invalid);
 		} else {

@@ -72,6 +72,7 @@ IGNOREARCH=0
 INSTALL=0
 LOGGING=0
 NEEDED=0
+NOARCHIVE=0
 NOBUILD=0
 NODEPS=0
 NOEXTRACT=0
@@ -81,7 +82,6 @@ PKGVERFUNC=0
 PREPAREFUNC=0
 REPKG=0
 RMDEPS=0
-SETUPFUNC=0
 SKIPCHECKSUMS=0
 SKIPPGPCHECK=0
 SIGNPKG=''
@@ -1484,11 +1484,6 @@ run_check() {
 	run_function_safe "check"
 }
 
-run_setup() {
-	mkdir -p "$destdir"
-	run_function_safe "setup"
-}
-
 run_package() {
 	local pkgfunc
 	if [[ -z $1 ]]; then
@@ -1902,6 +1897,8 @@ write_pkginfo() {
 }
 
 create_package() {
+	(( NOARCHIVE )) && return
+
 	if [[ ! -d $pkgdir ]]; then
 		error "$(/bin/gettext "Missing %s directory.")" "\$pkgdir/"
 		plain "$(/bin/gettext "Aborting...")"
@@ -2106,6 +2103,7 @@ create_srcpackage() {
 	rm -rf "${srclinks}"
 }
 
+# this function always returns 0 to make sure clean-up will still occur
 install_package() {
 	(( ! INSTALL )) && return
 
@@ -2422,11 +2420,11 @@ check_build_status() {
 		fullver=$(get_full_version)
 		pkgarch=$(get_pkg_arch)
 		if [[ -f $PKGDEST/${pkgname}-${fullver}-${pkgarch}${PKGEXT} ]] \
-				 && ! (( FORCE || SOURCEONLY || NOBUILD )); then
+				 && ! (( FORCE || SOURCEONLY || NOBUILD || NOARCHIVE)); then
 			if (( INSTALL )); then
 				warning "$(/bin/gettext "A package has already been built, installing existing package...")"
 				install_package
-				exit $?
+				exit 0
 			else
 				error "$(/bin/gettext "A package has already been built. (use %s to overwrite)")" "-f"
 				exit 1
@@ -2444,12 +2442,12 @@ check_build_status() {
 				allpkgbuilt=0
 			fi
 		done
-		if ! (( FORCE || SOURCEONLY || NOBUILD )); then
+		if ! (( FORCE || SOURCEONLY || NOBUILD || NOARCHIVE)); then
 			if (( allpkgbuilt )); then
 				if (( INSTALL )); then
 					warning "$(/bin/gettext "The package group has already been built, installing existing packages...")"
 					install_package
-					exit $?
+					exit 0
 				else
 					error "$(/bin/gettext "The package group has already been built. (use %s to overwrite)")" "-f"
 					exit 1
@@ -2550,11 +2548,11 @@ usage() {
 	printf -- "$(/bin/gettext "  -S, --source     Generate a source-only tarball without downloaded sources")\n"
 	printf -- "$(/bin/gettext "  -V, --version    Show version information and exit")\n"
 	printf -- "$(/bin/gettext "  --allsource      Generate a source-only tarball including downloaded sources")\n"
-	printf -- "$(/bin/gettext "  --verifysource   Download source files (if needed) and perform integrity checks")\n"
 	printf -- "$(/bin/gettext "  --check          Run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
 	printf -- "$(/bin/gettext "  --config <file>  Use an alternate config file (instead of '%s')")\n" "$confdir/makepkg.conf"
 	printf -- "$(/bin/gettext "  --holdver        Do not update VCS sources")\n"
 	printf -- "$(/bin/gettext "  --key <key>      Specify a key to use for %s signing instead of the default")\n" "gpg"
+	printf -- "$(/bin/gettext "  --noarchive      Do not create package archive")\n"
 	printf -- "$(/bin/gettext "  --nocheck        Do not run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
 	printf -- "$(/bin/gettext "  --noprepare      Do not run the %s function in the %s")\n" "prepare()" "$BUILDSCRIPT"
 	printf -- "$(/bin/gettext "  --nosign         Do not create a signature for the package")\n"
@@ -2563,13 +2561,14 @@ usage() {
 	printf -- "$(/bin/gettext "  --skipchecksums  Do not verify checksums of the source files")\n"
 	printf -- "$(/bin/gettext "  --skipinteg      Do not perform any verification checks on source files")\n"
 	printf -- "$(/bin/gettext "  --skippgpcheck   Do not verify source files with PGP signatures")\n"
+	printf -- "$(/bin/gettext "  --verifysource   Download source files (if needed) and perform integrity checks")\n"
 	echo
 	printf -- "$(/bin/gettext "These options can be passed to %s:")\n" "pacman"
 	echo
-	printf -- "$(/bin/gettext "  --asdeps         Install packages as non-explicitly installed")\n"
-	printf -- "$(/bin/gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
-	printf -- "$(/bin/gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
-	printf -- "$(/bin/gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
+	printf -- "$(gettext "  --asdeps         Install packages as non-explicitly installed")\n"
+	printf -- "$(gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
+	printf -- "$(gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
+	printf -- "$(gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
 	echo
 	printf -- "$(/bin/gettext "If %s is not specified, %s will look for '%s'")\n" "-p" "makepkg" "$BUILDSCRIPT"
 	echo
@@ -2600,10 +2599,10 @@ ARGLIST=("$@")
 
 # Parse Command Line Options.
 OPT_SHORT="AcCdefFghiLmop:rRsSV"
-OPT_LONG=('allsource' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
+OPT_LONG=('allsource' 'asroot' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
           'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'nobuild' 'nocolor'
-          'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'pkg:' 'repackage' 'rmdeps'
-          'sign' 'skipchecksums' 'skipinteg' 'skippgpcheck' 'source' 'syncdeps'
+          'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'pkg:' 'repackage'
+          'rmdeps' 'sign' 'skipchecksums' 'skipinteg' 'skippgpcheck' 'source' 'syncdeps'
           'verifysource' 'version')
 
 # Pacman Options
@@ -2619,8 +2618,8 @@ while true; do
 	case "$1" in
 		# Pacman Options
 		--asdeps)         ASDEPS=1;;
-		--noconfirm)      PACMAN_OPTS+=" --noconfirm" ;;
 		--needed)         NEEDED=1;;
+		--noconfirm)      PACMAN_OPTS+=" --noconfirm" ;;
 		--noprogressbar)  PACMAN_OPTS+=" --noprogressbar" ;;
 
 		# Makepkg Options
@@ -2639,6 +2638,7 @@ while true; do
 		--key)            shift; GPGKEY=$1 ;;
 		-L|--log)         LOGGING=1 ;;
 		-m|--nocolor)     USE_COLOR='n' ;;
+		--noarchive)      NOARCHIVE=1 ;;
 		--nocheck)        RUN_CHECK='n' ;;
 		--noprepare)      RUN_PREPARE='n' ;;
 		--nosign)         SIGNPKG='n' ;;
@@ -2647,10 +2647,10 @@ while true; do
 		--pkg)            shift; IFS=, read -ra p <<<"$1"; PKGLIST+=("${p[@]}"); unset p ;;
 		-r|--rmdeps)      RMDEPS=1 ;;
 		-R|--repackage)   REPKG=1 ;;
+		--sign)           SIGNPKG='y' ;;
 		--skipchecksums)  SKIPCHECKSUMS=1 ;;
 		--skipinteg)      SKIPCHECKSUMS=1; SKIPPGPCHECK=1 ;;
 		--skippgpcheck)   SKIPPGPCHECK=1;;
-		--sign)           SIGNPKG='y' ;;
 		-s|--syncdeps)    DEP_BIN=1 ;;
 		-S|--source)      SOURCEONLY=1 ;;
 		--verifysource)   VERIFYSOURCE=1 ;;
@@ -2825,11 +2825,10 @@ epoch=${epoch:-0}
 if [[ $BUILDDIR = "$startdir" ]]; then
 	srcdir="$BUILDDIR/src"
 	pkgdirbase="$BUILDDIR/pkg"
-	destdir="$BUILDDIR/dest"
 else
 	srcdir="$BUILDDIR/$pkgbase/src"
 	pkgdirbase="$BUILDDIR/$pkgbase/pkg"
-	destdir="$BUILDDIR/$pkgbase/dest"
+
 fi
 
 # set pkgdir to something "sensible" for (not recommended) use during build()
@@ -2872,12 +2871,6 @@ if have_function check; then
 	# "Hide" check() function if not going to be run
 	if [[ $RUN_CHECK = 'y' ]] || { ! check_buildenv "check" "n" && [[ $RUN_CHECK != "n" ]]; }; then
 		CHECKFUNC=1
-	fi
-fi
-if have_function setup; then
-	# "Hide" setup() function if not going to be run
-	if [[ $RUN_SETUP != "n" ]]; then
-		SETUPFUNC=1
 	fi
 fi
 if have_function package; then
@@ -2988,10 +2981,6 @@ elif (( !REPKG )); then
 	if (( CLEANBUILD )); then
 		msg "$(/bin/gettext "Removing existing %s directory...")" "\$srcdir/"
 		rm -rf "$srcdir"/*
-		if [[ -n "$destdir" ]]; then
-			msg "$(/bin/gettext "Removing existing %s directory...")" "\$destdir/"
-			rm -rf "$destdir"/*
-		fi
 	fi
 
 	extract_sources
@@ -3024,13 +3013,14 @@ else
 		fi
 		(( BUILDFUNC )) && run_build
 		(( CHECKFUNC )) && run_check
+		cd_safe "$startdir"
 	fi
-	if (( SETUPFUNC )); then
-		rm -rf "$destdir"
-		mkdir -p "$destdir"
-		chmod 755 "$destdir"
-		run_setup
-	fi
+
+# if inhibiting archive creation, go no further
+if (( NOARCHIVE )); then
+	msg "$(/bin/gettext "Package folder is ready.")"
+	exit 0
+fi
 	chmod 755 "$pkgdirbase"
 	if (( ! SPLITPKG )); then
 		pkgdir="$pkgdirbase/$pkgname"
