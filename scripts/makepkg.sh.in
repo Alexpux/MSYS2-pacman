@@ -2600,7 +2600,7 @@ ARGLIST=("$@")
 # Parse Command Line Options.
 OPT_SHORT="AcCdefFghiLmop:rRsSV"
 OPT_LONG=('allsource' 'asroot' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
-          'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'nobuild' 'nocolor'
+          'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'noarchive' 'nobuild'
           'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'pkg:' 'repackage'
           'rmdeps' 'sign' 'skipchecksums' 'skipinteg' 'skippgpcheck' 'source' 'syncdeps'
           'verifysource' 'version')
