@@ -2988,9 +2988,10 @@ elif (( !REPKG )); then
 		update_pkgver
 		check_build_status
 	fi
-	if (( PREPAREFUNC )); then
-		run_prepare
-	fi
+fi
+
+if (( PREPAREFUNC )); then
+	run_prepare
 fi
 
 if (( NOBUILD )); then
