@@ -2990,7 +2990,7 @@ elif (( !REPKG )); then
 	fi
 fi
 
-if (( PREPAREFUNC )); then
+if (( PREPAREFUNC && !REPKG )); then
 	run_prepare
 fi
 
