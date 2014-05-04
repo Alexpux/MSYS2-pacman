@@ -2707,7 +2707,7 @@ fi
 
 # Source user-specific makepkg.conf overrides, but only if no override config
 # file was specified
-if [[ $MAKEPKG_CONF = "$confdir/makepkg.conf" && -r ~/.makepkg.conf ]]; then
+if [[ $MAKEPKG_CONF =~ $confdir/makepkg.*\.conf && -r ~/.makepkg.conf ]]; then
 	source_safe ~/.makepkg.conf
 fi
 
