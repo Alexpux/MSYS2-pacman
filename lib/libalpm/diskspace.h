@@ -48,8 +48,8 @@ typedef struct __alpm_mountpoint_t {
 	char *mount_dir;
 	size_t mount_dir_len;
 	/* storage for additional disk usage calculations */
-	fsblkcnt_t blocks_needed;
-	fsblkcnt_t max_blocks_needed;
+	blkcnt_t blocks_needed;
+	blkcnt_t max_blocks_needed;
 	enum mount_used_level used;
 	int read_only;
 	enum mount_fsinfo fsinfo_loaded;
