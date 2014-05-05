@@ -373,11 +373,6 @@ int _alpm_unpack(alpm_handle_t *handle, const char *path, const char *prefix,
 		}
 
 		/* Extract the archive entry. */
-		if (strncmp(entryname, "usr/", 4) == 0) {
-			char filename[PATH_MAX];
-			snprintf(filename, PATH_MAX, "%s", entryname+4);
-			archive_entry_set_pathname(entry, filename);
-		}
 		int readret = archive_read_extract(archive, entry, 0);
 		if(readret == ARCHIVE_WARN) {
 			/* operation succeeded but a non-critical error was encountered */
