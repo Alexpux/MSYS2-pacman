@@ -336,16 +336,16 @@ static int check_mountpoint(alpm_handle_t *handle, alpm_mountpoint_t *mp)
 	fsblkcnt_t fivepc = (mp->fsp.f_blocks / 20) + 1;
 	fsblkcnt_t twentymb = (20 * 1024 * 1024 / mp->fsp.f_bsize) + 1;
 	fsblkcnt_t cushion = fivepc < twentymb ? fivepc : twentymb;
-	blkcnt_t needed = mp->max_blocks_needed + cushion;
+	fsblkcnt_t needed = mp->max_blocks_needed + cushion;
 
 	_alpm_log(handle, ALPM_LOG_DEBUG,
 			"partition %s, needed %jd, cushion %ju, free %ju\n",
-			mp->mount_dir, (intmax_t)mp->max_blocks_needed,
+			mp->mount_dir, (uintmax_t)mp->max_blocks_needed,
 			(uintmax_t)cushion, (uintmax_t)mp->fsp.f_bfree);
-	if(needed >= 0 && (fsblkcnt_t)needed > mp->fsp.f_bfree) {
+	if(needed >= 0 && needed > mp->fsp.f_bfree) {
 		_alpm_log(handle, ALPM_LOG_ERROR,
-				_("Partition %s too full: %jd blocks needed, %jd blocks free\n"),
-				mp->mount_dir, (intmax_t)needed, (uintmax_t)mp->fsp.f_bfree);
+				_("Partition %s too full: %ju blocks needed, %ju blocks free\n"),
+				mp->mount_dir, (uintmax_t)needed, (uintmax_t)mp->fsp.f_bfree);
 		return 1;
 	}
 	return 0;
