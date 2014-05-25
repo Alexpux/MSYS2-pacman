@@ -3094,12 +3094,16 @@ if (( NOBUILD )); then
 	exit 0 #E_OK
 else
 	# clean existing pkg directory
+	# .. changed for MSYS2 to allow pkg itself to be kept
+	# and only have its contents removed (so a symlink to
+	# a spacious drive can be used).
 	if [[ -d $pkgdirbase ]]; then
 		msg "$(/bin/gettext "Removing existing %s directory...")" "\$pkgdir/"
-		rm -rf "$pkgdirbase"
+		rm -rf "$pkgdirbase/*"
+	else
+		mkdir -p "$pkgdirbase"
+		chmod a-srwx "$pkgdirbase"
 	fi
-	mkdir -p "$pkgdirbase"
-	chmod a-srwx "$pkgdirbase"
 	cd_safe "$startdir"
 
 	if (( ! REPKG )); then
