@@ -3099,7 +3099,7 @@ else
 	# a spacious drive can be used).
 	if [[ -d $pkgdirbase ]]; then
 		msg "$(/bin/gettext "Removing existing %s directory...")" "\$pkgdir/"
-		rm -rf "$pkgdirbase/*"
+		rm -rf "$pkgdirbase"/*
 	else
 		mkdir -p "$pkgdirbase"
 		chmod a-srwx "$pkgdirbase"
