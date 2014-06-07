@@ -1504,7 +1504,9 @@ run_function() {
 	cd_safe "$srcdir"
 
 	# ensure all necessary build variables are exported
-	export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS MAKEFLAGS CHOST MINGW_CHOST MINGW_PREFIX
+	export CPPFLAGS CFLAGS CXXFLAGS LDFLAGS MAKEFLAGS CHOST
+	export MINGW_CHOST MINGW_PREFIX MINGW_PACKAGE_PREFIX
+	export DXSDK_DIR ACLOCAL_PATH PKG_CONFIG_PATH
 	# save our shell options so pkgfunc() can't override what we need
 	local shellopts=$(shopt -p)
 
