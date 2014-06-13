@@ -384,7 +384,7 @@ extract_file() {
 	local cmd=''
 	case "$file_type" in
 		*application/x-tar*|*application/zip*|*application/x-zip*|*application/x-cpio*)
-			cmd="/bin/bsdtar" ;;
+			cmd="/usr/bin/bsdtar" ;;
 		*application/x-gzip*)
 			case "$ext" in
 				gz|z|Z) cmd="/bin/gzip" ;;
