@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #   pkgdelta - create delta files for use with pacman and repo-add
 #   @configure_input@
@@ -48,24 +48,24 @@ m4_include(library/output_format.sh)
 usage() {
 	printf "pkgdelta (pacman) %s\n" "${myver}"
 	echo
-	printf -- "$(/bin/gettext "Usage: pkgdelta [options] <package1> <package2>\n")"
+	printf -- "$(/usr/bin/gettext "Usage: pkgdelta [options] <package1> <package2>\n")"
 	echo
-	printf -- "$(/bin/gettext "\
+	printf -- "$(/usr/bin/gettext "\
 pkgdelta will create a delta file between two packages.\n\
 This delta file can then be added to a database using repo-add.\n")"
 	echo
-	printf -- "$(/bin/gettext "Example:  pkgdelta pacman-3.0.0.pkg.tar.gz pacman-3.0.1.pkg.tar.gz")\n"
+	printf -- "$(/usr/bin/gettext "Example:  pkgdelta pacman-3.0.0.pkg.tar.gz pacman-3.0.1.pkg.tar.gz")\n"
 	echo
-	printf -- "$(/bin/gettext "Options:\n")"
-	printf -- "$(/bin/gettext "  -q, --quiet       minimize output\n")"
-	printf -- "$(/bin/gettext "  --nocolor         remove color from output\n")"
-	printf -- "$(/bin/gettext "  --min-pkg-size    minimum package size before deltas are generated\n")"
-	printf -- "$(/bin/gettext "  --max-delta-size  percent of new package above which the delta will be discarded\n")"
+	printf -- "$(/usr/bin/gettext "Options:\n")"
+	printf -- "$(/usr/bin/gettext "  -q, --quiet       minimize output\n")"
+	printf -- "$(/usr/bin/gettext "  --nocolor         remove color from output\n")"
+	printf -- "$(/usr/bin/gettext "  --min-pkg-size    minimum package size before deltas are generated\n")"
+	printf -- "$(/usr/bin/gettext "  --max-delta-size  percent of new package above which the delta will be discarded\n")"
 }
 
 version() {
 	printf "pkgdelta (pacman) %s\n" "$myver"
-	printf -- "$(/bin/gettext "\
+	printf -- "$(/usr/bin/gettext "\
 Copyright (c) 2009 Xavier Chantry <shiningxc@gmail.com>.\n\n\
 This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"
@@ -89,9 +89,9 @@ read_pkginfo() {
 		declare -g "${field% }=${value# }"
 
 		[[ $pkgname && $pkgver && $arch ]] && return 0
-	done < <(/bin/bsdtar -xOqf "$1" .PKGINFO 2>/dev/null)
+	done < <(/usr/bin/bsdtar -xOqf "$1" .PKGINFO 2>/dev/null)
 
-	error "$(/bin/gettext "Invalid package file '%s'.")" "$1"
+	error "$(/usr/bin/gettext "Invalid package file '%s'.")" "$1"
 	return 1
 }
 
@@ -117,44 +117,44 @@ create_xdelta()
 	pkgsize="$(@SIZECMD@ -L "$newfile")"
 
 	if ((pkgsize < min_pkg_size)); then
-		msg "$(/bin/gettext "Skipping delta creation for small package: %s - size %s")" "$newname" "$pkgsize"
+		msg "$(/usr/bin/gettext "Skipping delta creation for small package: %s - size %s")" "$newname" "$pkgsize"
 		return 0
 	fi
 
 	if [[ $oldname != "$newname" ]]; then
-		error "$(/bin/gettext "The package names don't match : '%s' and '%s'")" "$oldname" "$newname"
+		error "$(/usr/bin/gettext "The package names don't match : '%s' and '%s'")" "$oldname" "$newname"
 		return 1
 	fi
 
 	if [[ $oldarch != "$newarch" ]]; then
-		error "$(/bin/gettext "The package architectures don't match : '%s' and '%s'")" "$oldarch" "$newarch"
+		error "$(/usr/bin/gettext "The package architectures don't match : '%s' and '%s'")" "$oldarch" "$newarch"
 		return 1
 	fi
 
 	if [[ $oldver == "$newver" ]]; then
-		error "$(/bin/gettext "Both packages have the same version : '%s'")" "$newver"
+		error "$(/usr/bin/gettext "Both packages have the same version : '%s'")" "$newver"
 		return 1
 	fi
 
-	msg "$(/bin/gettext "Generating delta from version %s to version %s")" "$oldver" "$newver"
+	msg "$(/usr/bin/gettext "Generating delta from version %s to version %s")" "$oldver" "$newver"
 	deltafile=$(dirname "$newfile")/$pkgname-${oldver}_to_${newver}-$arch.delta
 	local ret=0
 
 	xdelta3 -q -f -s "$oldfile" "$newfile" "$deltafile" || ret=$?
 	if (( ret )); then
-		error "$(/bin/gettext "Delta could not be created.")"
+		error "$(/usr/bin/gettext "Delta could not be created.")"
 		return 1
 	fi
 
 	deltasize="$(@SIZECMD@ -L "$deltafile")"
 
 	if ((max_delta_size * pkgsize / 100 < deltasize)); then
-		msg "$(/bin/gettext "Delta package larger than maximum size. Removing.")"
+		msg "$(/usr/bin/gettext "Delta package larger than maximum size. Removing.")"
 		rm -f "$deltafile"
 		return 0
 	fi
 
-	msg "$(/bin/gettext "Generated delta : '%s'")" "$deltafile"
+	msg "$(/usr/bin/gettext "Generated delta : '%s'")" "$deltafile"
 	(( QUIET )) && echo "$deltafile"
 
 	return 0
@@ -211,13 +211,13 @@ fi
 
 for i in "$@"; do
 	if [[ ! -f $i ]]; then
-		error "$(/bin/gettext "File '%s' does not exist")" "$i"
+		error "$(/usr/bin/gettext "File '%s' does not exist")" "$i"
 		exit 1
 	fi
 done
 
 if ! type xdelta3 &>/dev/null; then
-	error "$(/bin/gettext "Cannot find the xdelta3 binary! Is xdelta3 installed?")"
+	error "$(/usr/bin/gettext "Cannot find the xdelta3 binary! Is xdelta3 installed?")"
 	exit 1
 fi
 

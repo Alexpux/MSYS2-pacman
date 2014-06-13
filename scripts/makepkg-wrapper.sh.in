@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 #   makepkg - a wrapper for running the real makepkg in the source tree
 #

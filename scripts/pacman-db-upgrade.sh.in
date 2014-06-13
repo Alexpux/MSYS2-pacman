@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash -e
 #
 #   pacman-db-upgrade - upgrade the local pacman db to a newer format
 #   @configure_input@
@@ -35,9 +35,9 @@ m4_include(library/output_format.sh)
 usage() {
 	printf "pacman-db-upgrade (pacman) %s\n" "${myver}"
 	echo
-	printf -- "$(/bin/gettext "Upgrade the local pacman database to a newer format")\n"
+	printf -- "$(/usr/bin/gettext "Upgrade the local pacman database to a newer format")\n"
 	echo
-	printf -- "$(/bin/gettext "Usage: %s [--nocolor] [pacman_db_root]")\n" "$0"
+	printf -- "$(/usr/bin/gettext "Usage: %s [--nocolor] [pacman_db_root]")\n" "$0"
 }
 
 version() {
@@ -89,15 +89,15 @@ if [[ -n $1 ]]; then
 fi
 
 if [[ ! -d $dbroot ]]; then
-	die "$(/bin/gettext "%s does not exist or is not a directory.")" "$dbroot"
+	die "$(/usr/bin/gettext "%s does not exist or is not a directory.")" "$dbroot"
 fi
 
 if [[ ! -d $dbroot/local ]]; then
-	die "$(/bin/gettext "%s is not a pacman database directory.")" "$dbroot"
+	die "$(/usr/bin/gettext "%s is not a pacman database directory.")" "$dbroot"
 fi
 
 if [[ ! -w $dbroot ]]; then
-	die "$(/bin/gettext "You must have correct permissions to upgrade the database.")"
+	die "$(/usr/bin/gettext "You must have correct permissions to upgrade the database.")"
 fi
 
 # strip any trailing slash from our dbroot
@@ -114,14 +114,14 @@ touch "$lockfile"
 
 # pacman-3.4 to 3.5 upgrade - merge depends into desc
 if [[ $(find "$dbroot"/local -name depends) ]]; then
-	msg "$(/bin/gettext "Pre-3.5 database format detected - upgrading...")"
+	msg "$(/usr/bin/gettext "Pre-3.5 database format detected - upgrading...")"
 	for i in "$dbroot"/local/*; do
 		if [[ -f "$i"/depends ]]; then
 			cat "$i"/depends >> "$i"/desc
 			rm "$i"/depends
 		fi
 	done
-	msg "$(/bin/gettext "Done.")"
+	msg "$(/usr/bin/gettext "Done.")"
 fi
 
 # remove the lock file
