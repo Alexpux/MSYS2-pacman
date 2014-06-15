@@ -696,7 +696,7 @@ download_svn() {
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
-		msg2 "$(/bin/gettext "Updating %s %s repo...")" "${repo}" "svn"
+		msg2 "$(/usr/bin/gettext "Updating %s %s repo...")" "${repo}" "svn"
 		cd_safe "$dir"
 		if ! svn update; then
 			# only warn on failure to allow offline builds
