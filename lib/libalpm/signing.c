@@ -342,6 +342,10 @@ static int key_search(alpm_handle_t *handle, const char *fpr,
 		case GPGME_PK_ELG:
 		case GPGME_PK_ECDSA:
 		case GPGME_PK_ECDH:
+/* value added in gpgme 1.5.0 */
+#if GPGME_VERSION_NUMBER >= 0x010500
+		case GPGME_PK_ECC:
+#endif
 			pgpkey->pubkey_algo = 'E';
 			break;
 	}
@@ -413,7 +417,7 @@ gpg_error:
  */
 int _alpm_key_import(alpm_handle_t *handle, const char *fpr)
 {
-	int answer = 0, ret = -1;
+	int ret = -1;
 	alpm_pgpkey_t fetch_key;
 	memset(&fetch_key, 0, sizeof(fetch_key));
 
@@ -421,9 +425,13 @@ int _alpm_key_import(alpm_handle_t *handle, const char *fpr)
 		_alpm_log(handle, ALPM_LOG_DEBUG,
 				"unknown key, found %s on keyserver\n", fetch_key.uid);
 		if(!_alpm_access(handle, handle->gpgdir, "pubring.gpg", W_OK)) {
-			QUESTION(handle, ALPM_QUESTION_IMPORT_KEY,
-					&fetch_key, NULL, NULL, &answer);
-			if(answer) {
+			alpm_question_import_key_t question = {
+				.type = ALPM_QUESTION_IMPORT_KEY,
+				.import = 0,
+				.key = &fetch_key
+			};
+			QUESTION(handle, &question);
+			if(question.import) {
 				if(key_import(handle, &fetch_key) == 0) {
 					ret = 0;
 				} else {

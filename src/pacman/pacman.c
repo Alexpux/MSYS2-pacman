@@ -139,7 +139,7 @@ static void usage(int op, const char * const myname)
 			addlist(_("  -g, --groups         view all members of a package group\n"));
 			addlist(_("  -i, --info           view package information (-ii for backup files)\n"));
 			addlist(_("  -k, --check          check that package files exist (-kk for file properties)\n"));
-			addlist(_("  -l, --list           list the contents of the queried package\n"));
+			addlist(_("  -l, --list           list the files owned by the queried package\n"));
 			addlist(_("  -m, --foreign        list installed packages not found in sync db(s) [filter]\n"));
 			addlist(_("  -n, --native         list installed packages only found in sync db(s) [filter]\n"));
 			addlist(_("  -o, --owns <file>    query the package that owns <file>\n"));
@@ -301,7 +301,7 @@ static void handler(int signum)
 			"Please submit a full bug report with --debug if appropriate.\n";
 		xwrite(err, msg, strlen(msg));
 		exit(signum);
-	} else if(signum == SIGINT || signum == SIGHUP) {
+	} else if(signum != SIGTERM) {
 		if(signum == SIGINT) {
 			msg = "\nInterrupt signal received\n";
 		} else {
@@ -313,8 +313,8 @@ static void handler(int signum)
 			return;
 		}
 	}
-	/* SIGINT: no committing transaction, release it now and then exit pacman
-	 * SIGHUP, SIGTERM: release no matter what */
+	/* SIGINT/SIGHUP: no committing transaction, release it now and then exit pacman
+	 * SIGTERM: release no matter what */
 	alpm_trans_release(config->handle);
 	/* output a newline to be sure we clear any line we may be on */
 	xwrite(out, "\n", 1);
@@ -549,7 +549,8 @@ static int parsearg_query(int opt)
 			break;
 		case OP_UPGRADES:
 		case 'u':
-			config->op_q_upgrade = 1; break;
+			config->op_q_upgrade = 1;
+			break;
 		default:
 			return 1;
 	}
