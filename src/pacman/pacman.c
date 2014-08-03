@@ -301,7 +301,7 @@ static void handler(int signum)
 			"Please submit a full bug report with --debug if appropriate.\n";
 		xwrite(err, msg, strlen(msg));
 		exit(signum);
-	} else if(signum != SIGTERM) {
+	} else if(signum == SIGINT || signum == SIGHUP) {
 		if(signum == SIGINT) {
 			msg = "\nInterrupt signal received\n";
 		} else {
@@ -312,6 +312,9 @@ static void handler(int signum)
 			/* a transaction is being interrupted, don't exit pacman yet. */
 			return;
 		}
+	} else if(signum == SIGWINCH) {
+		columns_cache_reset();
+		return;
 	}
 	/* SIGINT/SIGHUP: no committing transaction, release it now and then exit pacman
 	 * SIGTERM: release no matter what */
@@ -1019,7 +1022,7 @@ int main(int argc, char *argv[])
 	int ret = 0;
 	size_t i;
 	struct sigaction new_action, old_action;
-	const int signals[] = { SIGHUP, SIGINT, SIGTERM, SIGSEGV };
+	const int signals[] = { SIGHUP, SIGINT, SIGTERM, SIGSEGV, SIGWINCH };
 #ifndef __MSYS__
 	uid_t myuid = getuid();
 #endif

@@ -49,7 +49,7 @@ def create_parser():
                       help = "set debug level for pacman")
     parser.add_option("-p", "--pacman", action = "callback",
                       callback = resolve_binary_path, type = "string",
-                      dest = "bin", default = "pacman",
+                      dest = "bin", default = util.which("pacman"),
                       help = "specify location of the pacman binary")
     parser.add_option("--keep-root", action = "store_true",
                       dest = "keeproot", default = False,
@@ -79,11 +79,21 @@ if __name__ == "__main__":
         tap.bail("Python versions before 2.7 are not supported.")
         sys.exit(1)
 
-    # instantiate env and parser objects
-    root_path = tempfile.mkdtemp(prefix='pactest-')
-    env = pmenv.pmenv(root=root_path)
+    # parse options
     opt_parser = create_parser()
     (opts, args) = opt_parser.parse_args()
+
+    if opts.bin is None or not os.access(opts.bin, os.X_OK):
+        tap.bail("cannot locate pacman binary")
+        sys.exit(2)
+
+    if args is None or len(args) == 0:
+        tap.bail("no tests defined, nothing to do")
+        sys.exit(2)
+
+    # instantiate env
+    root_path = tempfile.mkdtemp(prefix='pactest-')
+    env = pmenv.pmenv(root=root_path)
 
     # add parsed options to env object
     util.verbose = opts.verbose
@@ -94,11 +104,6 @@ if __name__ == "__main__":
     env.pacman["valgrind"] = opts.valgrind
     env.pacman["manual-confirm"] = opts.manualconfirm
     env.pacman["scriptlet-shell"] = opts.scriptletshell
-
-    if args is None or len(args) == 0:
-        tap.bail("no tests defined, nothing to do")
-        os.rmdir(root_path)
-        sys.exit(2)
 
     try:
         for i in args:

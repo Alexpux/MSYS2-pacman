@@ -26,11 +26,11 @@
 #include "conf.h"
 #include "util.h"
 
-static int check_file_exists(const char *pkgname, const char * filepath,
-		struct stat * st)
+static int check_file_exists(const char *pkgname, char *filepath,
+		struct stat *st)
 {
 	/* use lstat to prevent errors from symlinks */
-	if(lstat(filepath, st) != 0) {
+	if(llstat(filepath, st) != 0) {
 		if(config->quiet) {
 			printf("%s %s\n", pkgname, filepath);
 		} else {
@@ -212,14 +212,25 @@ int check_pkg_fast(alpm_pkg_t *pkg)
 		const alpm_file_t *file = filelist->files + i;
 		struct stat st;
 		const char *path = file->name;
+		size_t plen = strlen(path);
 
-		if(rootlen + 1 + strlen(path) > PATH_MAX) {
+		if(rootlen + 1 + plen > PATH_MAX) {
 			pm_printf(ALPM_LOG_WARNING, _("path too long: %s%s\n"), root, path);
 			continue;
 		}
 		strcpy(filepath + rootlen, path);
 
-		errors += check_file_exists(pkgname, filepath, &st);
+		if(check_file_exists(pkgname, filepath, &st) == 0) {
+			int expect_dir = path[plen - 1] == '/' ? 1 : 0;
+			int is_dir = S_ISDIR(st.st_mode) ? 1 : 0;
+			if(expect_dir != is_dir) {
+				pm_printf(ALPM_LOG_WARNING, _("%s: %s (File type mismatch)\n"),
+						pkgname, filepath);
+				++errors;
+			}
+		} else {
+			++errors;
+		}
 	}
 
 	if(!config->quiet) {

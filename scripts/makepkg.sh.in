@@ -805,6 +805,7 @@ update_pkgver() {
 			fi
 			@SEDINPLACE@ "s:^pkgrel=[^ ]*:pkgrel=1:" "$BUILDFILE"
 			source_safe "$BUILDFILE"
+			epoch=${epoch:-0}
 			local fullver=$(get_full_version)
 			msg "$(/usr/bin/gettext "Updated version: %s")" "$pkgbase $fullver"
 		else
@@ -827,10 +828,10 @@ missing_source_file() {
 ##
 get_full_version() {
 	if [[ -z $1 ]]; then
-		if [[ $epoch ]] && (( ! $epoch )); then
-			printf "%s\n" "$pkgver-$pkgrel"
-		else
+		if [[ -n $epoch ]] && (( $epoch )); then
 			printf "%s\n" "$epoch:$pkgver-$pkgrel"
+		else
+			printf "%s\n" "$pkgver-$pkgrel"
 		fi
 	else
 		for i in pkgver pkgrel epoch; do
@@ -838,10 +839,10 @@ get_full_version() {
 			eval $(declare -f package_$1 | sed -n "s/\(^[[:space:]]*$i=\)/${i}_override=/p")
 			[[ -z ${!indirect} ]] && eval ${indirect}=\"${!i}\"
 		done
-		if (( ! $epoch_override )); then
-			printf "%s\n" "$pkgver_override-$pkgrel_override"
-		else
+		if [[ -n $epoch_override ]] && (( $epoch_override )); then
 			printf "%s\n" "$epoch_override:$pkgver_override-$pkgrel_override"
+		else
+			printf "%s\n" "$pkgver_override-$pkgrel_override"
 		fi
 	fi
 }
@@ -2694,8 +2695,8 @@ fi
 ARGLIST=("$@")
 
 # Parse Command Line Options.
-OPT_SHORT="AcCdefFghiLmop:rRsSV"
-OPT_LONG=('allsource' 'asroot' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
+OPT_SHORT="AcCdefghiLmop:rRsSV"
+OPT_LONG=('allsource' 'check' 'clean' 'cleanbuild' 'config:' 'force' 'geninteg'
           'help' 'holdver' 'ignorearch' 'install' 'key:' 'log' 'noarchive' 'nobuild'
           'nocolor' 'nocheck' 'nodeps' 'noextract' 'noprepare' 'nosign' 'pkg:' 'repackage'
           'rmdeps' 'sign' 'skipchecksums' 'skipinteg' 'skippgpcheck' 'source' 'syncdeps'
@@ -2803,8 +2804,13 @@ fi
 
 # Source user-specific makepkg.conf overrides, but only if no override config
 # file was specified
-if [[ $MAKEPKG_CONF =~ $confdir/makepkg.*\.conf && -r ~/.makepkg.conf ]]; then
-	source_safe ~/.makepkg.conf
+XDG_PACMAN_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/pacman"
+if [[ "$MAKEPKG_CONF" = "$confdir/makepkg.conf" ]]; then
+	if [[ -r "$XDG_PACMAN_DIR/makepkg.conf" ]]; then
+		source_safe "$XDG_PACMAN_DIR/makepkg.conf"
+	elif [[ -r "$HOME/.makepkg.conf" ]]; then
+		source_safe "$HOME/.makepkg.conf"
+	fi
 fi
 
 # set pacman command if not already defined
@@ -2909,7 +2915,7 @@ else
 	fi
 
 	if [[ ${BUILDFILE##*/} != "${BUILDFILE}" && ${BUILDFILE} != "${startdir}/${BUILDFILE##*/}" ]]; then
-		error "$(usr/bin/gettext "%s must be in the build directory.")" "$BUILDFILE"
+		error "$(/usr/bin/gettext "%s must be in the build directory.")" "$BUILDFILE"
 		exit 1
 	fi
 
