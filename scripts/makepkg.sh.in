@@ -116,12 +116,12 @@ msg2() {
 
 warning() {
 	local mesg=$1; shift
-	printf "${YELLOW}==> $(/usr/bin/gettext "WARNING:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+	printf "${YELLOW}==> $(gettext "WARNING:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
 }
 
 error() {
 	local mesg=$1; shift
-	printf "${RED}==> $(/usr/bin/gettext "ERROR:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
+	printf "${RED}==> $(gettext "ERROR:")${ALL_OFF}${BOLD} ${mesg}${ALL_OFF}\n" "$@" >&2
 }
 
 
@@ -153,7 +153,7 @@ clean_up() {
 		local pkg file
 
 		# If it's a clean exit and -c/--clean has been passed...
-		msg "$(/usr/bin/gettext "Cleaning up...")"
+		msg "$(gettext "Cleaning up...")"
 		rm -rf "$pkgdirbase" "$srcdir" "$destdir"
 		if [[ -n $pkgbase ]]; then
 			local fullver=$(get_full_version)
@@ -286,8 +286,8 @@ get_downloadclient() {
 
 	# if we didn't find an agent, return an error
 	if [[ -z $agent ]]; then
-		error "$(/usr/bin/gettext "Unknown download protocol: %s")" "$proto"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Unknown download protocol: %s")" "$proto"
+		plain "$(gettext "Aborting...")"
 		exit 1 # $E_CONFIG_ERROR
 	fi
 
@@ -295,8 +295,8 @@ get_downloadclient() {
 	local program="${agent%% *}"
 	if [[ ! -x $program ]]; then
 		local baseprog="${program##*/}"
-		error "$(/usr/bin/gettext "The download program %s is not installed.")" "$baseprog"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "The download program %s is not installed.")" "$baseprog"
+		plain "$(gettext "Aborting...")"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
 
@@ -308,10 +308,10 @@ download_local() {
 	local filepath=$(get_filepath "$netfile")
 
 	if [[ -n "$filepath" ]]; then
-		msg2 "$(/usr/bin/gettext "Found %s")" "${filepath##*/}"
+		msg2 "$(gettext "Found %s")" "${filepath##*/}"
 	else
 		local filename=$(get_filename "$netfile")
-		error "$(/usr/bin/gettext "%s was not found in the build directory and is not a URL.")" "$filename"
+		error "$(gettext "%s was not found in the build directory and is not a URL.")" "$filename"
 		exit 1 # $E_MISSING_FILE
 	fi
 }
@@ -321,7 +321,7 @@ download_file() {
 
 	local filepath=$(get_filepath "$netfile")
 	if [[ -n "$filepath" ]]; then
-		msg2 "$(/usr/bin/gettext "Found %s")" "${filepath##*/}"
+		msg2 "$(gettext "Found %s")" "${filepath##*/}"
 		return
 	fi
 
@@ -339,7 +339,7 @@ download_file() {
 		url="${url##*://}"
 	fi
 
-	msg2 "$(/usr/bin/gettext "Downloading %s...")" "$filename"
+	msg2 "$(gettext "Downloading %s...")" "$filename"
 
 	# temporary download file, default to last component of the URL
 	local dlfile="${url##*/}"
@@ -360,8 +360,8 @@ download_file() {
 	eval "$dlcmd >&2 || ret=\$?"
 	if (( ret )); then
 		[[ ! -s $dlfile ]] && rm -f -- "$dlfile"
-		error "$(/usr/bin/gettext "Failure while downloading %s")" "$filename"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failure while downloading %s")" "$filename"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 
@@ -410,7 +410,7 @@ extract_file() {
 	esac
 
 	local ret=0
-	msg2 "$(/usr/bin/gettext "Extracting %s with %s")" "$file" "$cmd"
+	msg2 "$(gettext "Extracting %s with %s")" "$file" "$cmd"
 	if [[ $cmd = "/usr/bin/bsdtar" ]]; then
 		$cmd -xf "$file" || ret=$?
 	else
@@ -418,8 +418,8 @@ extract_file() {
 		$cmd -dcf "$file" > "${file%.*}" || ret=$?
 	fi
 	if (( ret )); then
-		error "$(/usr/bin/gettext "Failed to extract %s")" "$file"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failed to extract %s")" "$file"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 }
@@ -438,10 +438,10 @@ download_bzr() {
 	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(/usr/bin/gettext "Branching %s ...")" "${displaylocation}"
+		msg2 "$(gettext "Branching %s ...")" "${displaylocation}"
 		if ! bzr branch "$url" "$dir" --no-tree --use-existing-dir; then
-			error "$(/usr/bin/gettext "Failure while branching %s")" "${displaylocation}"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while branching %s")" "${displaylocation}"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
@@ -450,23 +450,23 @@ download_bzr() {
 		local local_url="$(bzr config parent_location -d $dir)"
 		if [[ -n $distant_url ]]; then
 			if [[ $distant_url != "$local_url" ]]; then
-				error "$(/usr/bin/gettext "%s is not a branch of %s")" "$dir" "$url"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "%s is not a branch of %s")" "$dir" "$url"
+				plain "$(gettext "Aborting...")"
 				exit 1
 			fi
 		else
 			if [[ $url != "$local_url" ]] ; then
-				error "$(/usr/bin/gettext "%s is not a branch of %s")" "$dir" "$url"
-				error "$(/usr/bin/gettext "The local URL is %s")" "$local_url"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "%s is not a branch of %s")" "$dir" "$url"
+				error "$(gettext "The local URL is %s")" "$local_url"
+				plain "$(gettext "Aborting...")"
 				exit 1
 			fi
 		fi
-		msg2 "$(/usr/bin/gettext "Pulling %s ...")" "${displaylocation}"
+		msg2 "$(gettext "Pulling %s ...")" "${displaylocation}"
 		cd_safe "$dir"
 		if ! bzr pull "$url" --overwrite; then
 			# only warn on failure to allow offline builds
-			warning "$(/usr/bin/gettext "Failure while pulling %s")" "${displaylocation}"
+			warning "$(gettext "Failure while pulling %s")" "${displaylocation}"
 		fi
 	fi
 }
@@ -487,8 +487,8 @@ extract_bzr() {
 				displaylocation="$url -r ${fragment#*=}"
 				;;
 			*)
-				error "$(/usr/bin/gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
+				plain "$(gettext "Aborting...")"
 				exit 1
 		esac
 	fi
@@ -502,8 +502,8 @@ extract_bzr() {
 
 	if ! { bzr checkout "$dir" "${revision[@]}" --lightweight &&
 		( cd "$repo" && bzr pull "$dir" -q --overwrite "${revision[@]}" ); }; then
-		error "$(/usr/bin/gettext "Failure while creating working copy of %s %s repo")" "${repo}" "bzr"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "bzr"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 
@@ -523,24 +523,24 @@ download_git() {
 	url=${url%%#*}
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(/usr/bin/gettext "Cloning %s %s repo...")" "${repo}" "git"
+		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "git"
 		if ! git clone --mirror "$url" "$dir"; then
-			error "$(/usr/bin/gettext "Failure while downloading %s %s repo")" "${repo}" "git"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "git"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
 		cd_safe "$dir"
 		# Make sure we are fetching the right repo
 		if [[ "$url" != "$(/usr/bin/git config --get remote.origin.url)" ]] ; then
-			error "$(/usr/bin/gettext "%s is not a clone of %s")" "$dir" "$url"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "%s is not a clone of %s")" "$dir" "$url"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
-		msg2 "$(/usr/bin/gettext "Updating %s %s repo...")" "${repo}" "git"
+		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "git"
 		if ! git fetch --all -p; then
 			# only warn on failure to allow offline builds
-			warning "$(/usr/bin/gettext "Failure while updating %s %s repo")" "${repo}" "git"
+			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "git"
 		fi
 	fi
 }
@@ -565,8 +565,8 @@ extract_git() {
 	rm -rf "${dir##*/}"
 
 	if ! git clone "$dir"; then
-		error "$(/usr/bin/gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 
@@ -582,16 +582,16 @@ extract_git() {
 				ref=origin/${fragment##*=}
 				;;
 			*)
-				error "$(/usr/bin/gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
+				plain "$(gettext "Aborting...")"
 				exit 1
 		esac
 	fi
 
 	if [[ -n $ref ]]; then
 		if ! /usr/bin/git checkout -b makepkg $ref; then
-			error "$(/usr/bin/gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	fi
@@ -612,18 +612,18 @@ download_hg() {
 	url=${url%%#*}
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(/usr/bin/gettext "Cloning %s %s repo...")" "${repo}" "hg"
+		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "hg"
 		if ! /usr/bin/hg clone -U "$url" "$dir"; then
-			error "$(/usr/bin/gettext "Failure while downloading %s %s repo")" "${repo}" "hg"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "hg"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
-		msg2 "$(/usr/bin/gettext "Updating %s %s repo...")" "${repo}" "hg"
+		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "hg"
 		cd_safe "$dir"
 		if ! /usr/bin/hg pull; then
 			# only warn on failure to allow offline builds
-			warning "$(/usr/bin/gettext "Failure while updating %s %s repo")" "${repo}" "hg"
+			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "hg"
 		fi
 	fi
 }
@@ -642,7 +642,7 @@ extract_hg() {
 	local repo=${netfile##*/}
 	repo=${repo%%#*}
 
-	msg2 "$(/usr/bin/gettext "Creating working copy of %s %s repo...")" "${repo}" "hg"
+	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "hg"
 	pushd "$srcdir" &>/dev/null
 	rm -rf "${dir##*/}"
 
@@ -653,15 +653,15 @@ extract_hg() {
 				ref=('-u' "${fragment##*=}")
 				;;
 			*)
-				error "$(/usr/bin/gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
+				plain "$(gettext "Aborting...")"
 				exit 1
 		esac
 	fi
 
 	if ! /usr/bin/hg clone "${ref[@]}" "$dir" "${dir##*/}"; then
-		error "$(/usr/bin/gettext "Failure while creating working copy of %s %s repo")" "${repo}" "hg"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "hg"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 
@@ -688,19 +688,19 @@ download_svn() {
 	url=${url%%#*}
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(/usr/bin/gettext "Cloning %s %s repo...")" "${repo}" "svn"
+		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "svn"
 		mkdir -p "$dir/.makepkg"
 		if ! /usr/bin/svn checkout --config-dir "$dir/.makepkg" "$url" "$dir"; then
-			error "$(/usr/bin/gettext "Failure while downloading %s %s repo")" "${repo}" "svn"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "svn"
+			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
-		msg2 "$(/usr/bin/gettext "Updating %s %s repo...")" "${repo}" "svn"
+		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "svn"
 		cd_safe "$dir"
 		if ! svn update; then
 			# only warn on failure to allow offline builds
-			warning "$(/usr/bin/gettext "Failure while updating %s %s repo")" "${repo}" "svn"
+			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "svn"
 		fi
 	fi
 }
@@ -719,7 +719,7 @@ extract_svn() {
 	local repo=${netfile##*/}
 	repo=${repo%%#*}
 
-	msg2 "$(/usr/bin/gettext "Creating working copy of %s %s repo...")" "${repo}" "svn"
+	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "svn"
 	pushd "$srcdir" &>/dev/null
 	rm -rf "${dir##*/}"
 
@@ -730,8 +730,8 @@ extract_svn() {
 				ref="${fragment##*=}"
 				;;
 			*)
-				error "$(/usr/bin/gettext "Unrecognized reference: %s")" "${fragment}"
-				plain "$(/usr/bin/gettext "Aborting...")"
+				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
+				plain "$(gettext "Aborting...")"
 				exit 1
 		esac
 	fi
@@ -741,8 +741,8 @@ extract_svn() {
 	if [[ -n ${ref} ]]; then
 		cd_safe "$(get_filename "$netfile")"
 		if ! /usr/bin/svn update -r ${ref}; then
-			error "$(/usr/bin/gettext "Failure while creating working copy of %s %s repo")" "${repo}" "svn"
-			plain "$(/usr/bin/gettext "Aborting...")"
+			error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "svn"
+			plain "$(gettext "Aborting...")"
 		fi
 	fi
 
@@ -750,7 +750,7 @@ extract_svn() {
 }
 
 download_sources() {
-	msg "$(/usr/bin/gettext "Retrieving sources...")"
+	msg "$(gettext "Retrieving sources...")"
 
 	local GET_VCS=1
 	if [[ $1 == "fast" ]]; then
@@ -792,14 +792,14 @@ download_sources() {
 update_pkgver() {
 	newpkgver=$(run_function_safe pkgver)
 	if ! validate_pkgver "$newpkgver"; then
-		error "$(/usr/bin/gettext "pkgver() generated an invalid version: %s")" "$newpkgver"
+		error "$(gettext "pkgver() generated an invalid version: %s")" "$newpkgver"
 		exit 1
 	fi
 
 	if [[ -n $newpkgver && $newpkgver != "$pkgver" ]]; then
 		if [[ -f $BUILDFILE && -w $BUILDFILE ]]; then
 			if ! @SEDINPLACE@ "s:^pkgver=[^ ]*:pkgver=$newpkgver:" "$BUILDFILE"; then
-				error "$(/usr/bin/gettext "Failed to update %s from %s to %s")" \
+				error "$(gettext "Failed to update %s from %s to %s")" \
 						"pkgver" "$pkgver" "$newpkgver"
 				exit 1
 			fi
@@ -807,9 +807,9 @@ update_pkgver() {
 			source_safe "$BUILDFILE"
 			epoch=${epoch:-0}
 			local fullver=$(get_full_version)
-			msg "$(/usr/bin/gettext "Updated version: %s")" "$pkgbase $fullver"
+			msg "$(gettext "Updated version: %s")" "$pkgbase $fullver"
 		else
-			warning "$(/usr/bin/gettext "%s is not writeable -- pkgver will not be updated")" \
+			warning "$(gettext "%s is not writeable -- pkgver will not be updated")" \
 					"$BUILDFILE"
 		fi
 	fi
@@ -817,8 +817,8 @@ update_pkgver() {
 
 # Print 'source not found' error message and exit makepkg
 missing_source_file() {
-	error "$(/usr/bin/gettext "Unable to find source file %s.")" "$(get_filename "$1")"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "Unable to find source file %s.")" "$(get_filename "$1")"
+	plain "$(gettext "Aborting...")"
 	exit 1 # $E_MISSING_FILE
 }
 
@@ -989,7 +989,7 @@ check_deps() {
 	if (( ret == 127 )); then #unresolved deps
 		printf "%s\n" "$pmout"
 	elif (( ret )); then
-		error "$(/usr/bin/gettext "'%s' returned a fatal error (%i): %s")" "$PACMAN" "$ret" "$pmout"
+		error "$(gettext "'%s' returned a fatal error (%i): %s")" "$PACMAN" "$ret" "$pmout"
 		return "$ret"
 	fi
 }
@@ -1008,10 +1008,10 @@ handle_deps() {
 
 	if (( DEP_BIN )); then
 		# install missing deps from binary packages (using pacman -S)
-		msg "$(/usr/bin/gettext "Installing missing dependencies...")"
+		msg "$(gettext "Installing missing dependencies...")"
 
 		if ! run_pacman -S --asdeps $deplist; then
-			error "$(/usr/bin/gettext "'%s' failed to install missing dependencies.")" "$PACMAN"
+			error "$(gettext "'%s' failed to install missing dependencies.")" "$PACMAN"
 			exit 1 # TODO: error code
 		fi
 	fi
@@ -1042,7 +1042,7 @@ resolve_deps() {
 		[[ -z $deplist ]] && return $R_DEPS_SATISFIED
 	fi
 
-	msg "$(/usr/bin/gettext "Missing dependencies:")"
+	msg "$(gettext "Missing dependencies:")"
 	local dep
 	for dep in $deplist; do
 		msg2 "$dep"
@@ -1058,7 +1058,7 @@ remove_deps() {
 	# removing all installed packages is risky in this case
 	if [[ -n $(grep -xvFf <(printf '%s\n' "${current_pkglist[@]}") \
 			<(printf '%s\n' "${original_pkglist[@]}")) ]]; then
-		warning "$(/usr/bin/gettext "Failed to remove installed dependencies.")"
+		warning "$(gettext "Failed to remove installed dependencies.")"
 		return 0
 	fi
 
@@ -1072,7 +1072,7 @@ remove_deps() {
 	msg "Removing installed dependencies..."
 	# exit cleanly on failure to remove deps as package has been built successfully
 	if ! run_pacman -Rn ${deplist[@]}; then
-		warning "$(/usr/bin/gettext "Failed to remove installed dependencies.")"
+		warning "$(gettext "Failed to remove installed dependencies.")"
 		return 0
 	fi
 }
@@ -1096,10 +1096,10 @@ get_integlist() {
 }
 
 generate_checksums() {
-	msg "$(/usr/bin/gettext "Generating checksums for source files...")"
+	msg "$(gettext "Generating checksums for source files...")"
 
 	if ! type -p /usr/bin/openssl >/dev/null; then
-		error "$(/usr/bin/gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "openssl"
+		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "openssl"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
 
@@ -1113,7 +1113,7 @@ generate_checksums() {
 	local integ
 	for integ in "${integlist[@]}"; do
 		if ! in_array "$integ" "${known_hash_algos[@]}"; then
-			error "$(/usr/bin/gettext "Invalid integrity algorithm '%s' specified.")" "$integ"
+			error "$(gettext "Invalid integrity algorithm '%s' specified.")" "$integ"
 			exit 1 # $E_CONFIG_ERROR
 		fi
 
@@ -1162,7 +1162,7 @@ check_checksums() {
 		local sumname="${integ}sums[@]"
 		local integrity_sums=("${!sumname}")
 		if (( ${#integrity_sums[@]} == ${#source[@]} )); then
-			msg "$(/usr/bin/gettext "Validating source files with %s...")" "${integ}sums"
+			msg "$(gettext "Validating source files with %s...")" "${integ}sums"
 			correlation=1
 			local idx errors=0
 			for (( idx = 0; idx < ${#source[*]}; idx++ )); do
@@ -1170,12 +1170,12 @@ check_checksums() {
 				printf '    %s ... ' "$file" >&2
 
 				if [[ ${integrity_sums[idx]} = 'SKIP' ]]; then
-					printf '%s\n' "$(/usr/bin/gettext "Skipped")" >&2
+					printf '%s\n' "$(gettext "Skipped")" >&2
 					continue
 				fi
 
 				if ! file="$(get_filepath "$file")"; then
-					printf '%s\n' "$(/usr/bin/gettext "NOT FOUND")" >&2
+					printf '%s\n' "$(gettext "NOT FOUND")" >&2
 					errors=1
 					continue
 				fi
@@ -1184,25 +1184,25 @@ check_checksums() {
 				local realsum="$(/usr/bin/openssl dgst -${integ} "$file")"
 				realsum="${realsum##* }"
 				if [[ $expectedsum = "$realsum" ]]; then
-					printf '%s\n' "$(/usr/bin/gettext "Passed")" >&2
+					printf '%s\n' "$(gettext "Passed")" >&2
 				else
-					printf '%s\n' "$(/usr/bin/gettext "FAILED")" >&2
+					printf '%s\n' "$(gettext "FAILED")" >&2
 					errors=1
 				fi
 			done
 
 			if (( errors )); then
-				error "$(/usr/bin/gettext "One or more files did not pass the validity check!")"
+				error "$(gettext "One or more files did not pass the validity check!")"
 				exit 1 # TODO: error code
 			fi
 		elif (( ${#integrity_sums[@]} )); then
-			error "$(/usr/bin/gettext "Integrity checks (%s) differ in size from the source array.")" "$integ"
+			error "$(gettext "Integrity checks (%s) differ in size from the source array.")" "$integ"
 			exit 1 # TODO: error code
 		fi
 	done
 
 	if (( ! correlation )); then
-		error "$(/usr/bin/gettext "Integrity checks are missing.")"
+		error "$(gettext "Integrity checks are missing.")"
 		exit 1 # TODO: error code
 	fi
 }
@@ -1269,7 +1269,7 @@ check_pgpsigs() {
 	(( SKIPPGPCHECK )) && return 0
 	! source_has_signatures && return 0
 
-	msg "$(/usr/bin/gettext "Verifying source file signatures with %s...")" "gpg"
+	msg "$(gettext "Verifying source file signatures with %s...")" "gpg"
 
 	local file ext decompress found pubkey success status fingerprint trusted
 	local warning=0
@@ -1285,7 +1285,7 @@ check_pgpsigs() {
 		printf "    %s ... " "${file%.*}" >&2
 
 		if ! file="$(get_filepath "$file")"; then
-			printf '%s\n' "$(/usr/bin/gettext "SIGNATURE NOT FOUND")" >&2
+			printf '%s\n' "$(gettext "SIGNATURE NOT FOUND")" >&2
 			errors=1
 			continue
 		fi
@@ -1298,7 +1298,7 @@ check_pgpsigs() {
 			fi
 		done
 		if (( ! found )); then
-			printf '%s\n' "$(/usr/bin/gettext "SOURCE FILE NOT FOUND")" >&2
+			printf '%s\n' "$(gettext "SOURCE FILE NOT FOUND")" >&2
 			errors=1
 			continue
 		fi
@@ -1322,38 +1322,38 @@ check_pgpsigs() {
 		trusted=
 		parse_gpg_statusfile "$statusfile"
 		if (( ! $success )); then
-			printf '%s' "$(/usr/bin/gettext "FAILED")" >&2
+			printf '%s' "$(gettext "FAILED")" >&2
 			case "$status" in
 				"missingkey")
-					printf ' (%s)' "$(/usr/bin/gettext "unknown public key") $pubkey" >&2
+					printf ' (%s)' "$(gettext "unknown public key") $pubkey" >&2
 					;;
 				"revokedkey")
-					printf " ($(/usr/bin/gettext "public key %s has been revoked"))" "$pubkey" >&2
+					printf " ($(gettext "public key %s has been revoked"))" "$pubkey" >&2
 					;;
 				"bad")
-					printf ' (%s)' "$(/usr/bin/gettext "bad signature from public key") $pubkey" >&2
+					printf ' (%s)' "$(gettext "bad signature from public key") $pubkey" >&2
 					;;
 				"error")
-					printf ' (%s)' "$(/usr/bin/gettext "error during signature verification")" >&2
+					printf ' (%s)' "$(gettext "error during signature verification")" >&2
 					;;
 			esac
 			errors=1
 		else
 			if (( ${#validpgpkeys[@]} == 0 && ! $trusted )); then
-				printf "%s ($(/usr/bin/gettext "the public key %s is not trusted"))" $(/usr/bin/gettext "FAILED") "$pubkey" >&2
+				printf "%s ($(gettext "the public key %s is not trusted"))" $(gettext "FAILED") "$pubkey" >&2
 				errors=1
 			elif (( ${#validpgpkeys[@]} > 0 )) && ! in_array "$fingerprint" "${validpgpkeys[@]}"; then
-				printf "%s (%s $pubkey)" "$(/usr/bin/gettext "FAILED")" "$(/usr/bin/gettext "invalid public key")"
+				printf "%s (%s $pubkey)" "$(gettext "FAILED")" "$(gettext "invalid public key")"
 				errors=1
 			else
-				printf '%s' "$(/usr/bin/gettext "Passed")" >&2
+				printf '%s' "$(gettext "Passed")" >&2
 				case "$status" in
 					"expired")
-						printf ' (%s)' "$(/usr/bin/gettext "WARNING:") $(/usr/bin/gettext "the signature has expired.")" >&2
+						printf ' (%s)' "$(gettext "WARNING:") $(gettext "the signature has expired.")" >&2
 						warnings=1
 						;;
 					"expiredkey")
-						printf ' (%s)' "$(/usr/bin/gettext "WARNING:") $(/usr/bin/gettext "the key has expired.")" >&2
+						printf ' (%s)' "$(gettext "WARNING:") $(gettext "the key has expired.")" >&2
 						warnings=1
 						;;
 				esac
@@ -1365,24 +1365,24 @@ check_pgpsigs() {
 	rm -f "$statusfile"
 
 	if (( errors )); then
-		error "$(/usr/bin/gettext "One or more PGP signatures could not be verified!")"
+		error "$(gettext "One or more PGP signatures could not be verified!")"
 		exit 1
 	fi
 
 	if (( warnings )); then
-		warning "$(/usr/bin/gettext "Warnings have occurred while verifying the signatures.")"
-		plain "$(/usr/bin/gettext "Please make sure you really trust them.")"
+		warning "$(gettext "Warnings have occurred while verifying the signatures.")"
+		plain "$(gettext "Please make sure you really trust them.")"
 	fi
 }
 
 check_source_integrity() {
 	if (( SKIPCHECKSUMS && SKIPPGPCHECK )); then
-		warning "$(/usr/bin/gettext "Skipping all source file integrity checks.")"
+		warning "$(gettext "Skipping all source file integrity checks.")"
 	elif (( SKIPCHECKSUMS )); then
-		warning "$(/usr/bin/gettext "Skipping verification of source file checksums.")"
+		warning "$(gettext "Skipping verification of source file checksums.")"
 		check_pgpsigs
 	elif (( SKIPPGPCHECK )); then
-		warning "$(/usr/bin/gettext "Skipping verification of source file PGP signatures.")"
+		warning "$(gettext "Skipping verification of source file PGP signatures.")"
 		check_checksums
 	else
 		check_checksums
@@ -1391,7 +1391,7 @@ check_source_integrity() {
 }
 
 extract_sources() {
-	msg "$(/usr/bin/gettext "Extracting sources...")"
+	msg "$(gettext "Extracting sources...")"
 	local netfile
 	for netfile in "${source[@]}"; do
 		local file=$(get_filename "$netfile")
@@ -1427,16 +1427,16 @@ error_function() {
 	fi
 	# first exit all subshells, then print the error
 	if (( ! BASH_SUBSHELL )); then
-		error "$(/usr/bin/gettext "A failure occurred in %s().")" "$1"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "A failure occurred in %s().")" "$1"
+		plain "$(gettext "Aborting...")"
 	fi
 	exit 2 # $E_BUILD_FAILED
 }
 
 cd_safe() {
 	if ! cd "$1"; then
-		error "$(/usr/bin/gettext "Failed to change to directory %s")" "$1"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Failed to change to directory %s")" "$1"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 }
@@ -1444,7 +1444,7 @@ cd_safe() {
 source_safe() {
 	shopt -u extglob
 	if ! source "$@"; then
-		error "$(/usr/bin/gettext "Failed to source %s")" "$1"
+		error "$(gettext "Failed to source %s")" "$1"
 		exit 1
 	fi
 	shopt -s extglob
@@ -1506,7 +1506,7 @@ run_function() {
 		unset MAKEFLAGS
 	fi
 
-	msg "$(/usr/bin/gettext "Starting %s()...")" "$pkgfunc"
+	msg "$(gettext "Starting %s()...")" "$pkgfunc"
 	cd_safe "$srcdir"
 
 	# ensure all necessary build variables are exported
@@ -1631,15 +1631,15 @@ strip_file() {
 
 tidy_install() {
 	cd_safe "$pkgdir"
-	msg "$(/usr/bin/gettext "Tidying install...")"
+	msg "$(gettext "Tidying install...")"
 
 	if check_option "docs" "n" && [[ -n ${DOC_DIRS[*]} ]]; then
-		msg2 "$(/usr/bin/gettext "Removing doc files...")"
+		msg2 "$(gettext "Removing doc files...")"
 		rm -rf -- ${DOC_DIRS[@]}
 	fi
 
 	if check_option "purge" "y" && [[ -n ${PURGE_TARGETS[*]} ]]; then
-		msg2 "$(/usr/bin/gettext "Purging unwanted files...")"
+		msg2 "$(gettext "Purging unwanted files...")"
 		local pt
 		for pt in "${PURGE_TARGETS[@]}"; do
 			if [[ ${pt} = "${pt//\/}" ]]; then
@@ -1651,12 +1651,12 @@ tidy_install() {
 	fi
 
 	if check_option "libtool" "n"; then
-		msg2 "$(/usr/bin/gettext "Removing "%s" files...")" "libtool"
+		msg2 "$(gettext "Removing "%s" files...")" "libtool"
 		find . ! -type d -name "*.la" -exec rm -f -- '{}' +
 	fi
 
 	if check_option "staticlibs" "n"; then
-		msg2 "$(/usr/bin/gettext "Removing static library files...")"
+		msg2 "$(gettext "Removing static library files...")"
 		local l
 		while read -rd '' l; do
 			if [[ -f "${l%.a}.dll.a" ]]; then
@@ -1666,7 +1666,7 @@ tidy_install() {
 	fi
 
 	if check_option "emptydirs" "n"; then
-		msg2 "$(/usr/bin/gettext "Removing empty directories...")"
+		msg2 "$(gettext "Removing empty directories...")"
 		find . -depth -type d -exec rmdir '{}' + 2>/dev/null
 	fi
 
@@ -1674,20 +1674,20 @@ tidy_install() {
 	local file
 	for file in "${backup[@]}"; do
 		if [[ ! -f $file ]]; then
-			warning "$(/usr/bin/gettext "%s entry file not in package : %s")" "backup" "$file"
+			warning "$(gettext "%s entry file not in package : %s")" "backup" "$file"
 		fi
 	done
 
 	# check for references to the build and package directory
 	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${srcdir}" ; then
-		warning "$(/usr/bin/gettext "Package contains reference to %s")" "\$srcdir"
+		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
 	fi
 	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${pkgdirbase}" ; then
-		warning "$(/usr/bin/gettext "Package contains reference to %s")" "\$pkgdir"
+		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
 	fi
 
 	if check_option "zipman" "y" && [[ -n ${MAN_DIRS[*]} ]]; then
-		msg2 "$(/usr/bin/gettext "Compressing man and info pages...")"
+		msg2 "$(gettext "Compressing man and info pages...")"
 		local file files inode link
 		while read -rd ' ' inode; do
 			read file
@@ -1715,7 +1715,7 @@ tidy_install() {
 	fi
 
 	if check_option "strip" "y"; then
-		msg2 "$(/usr/bin/gettext "Stripping unneeded symbols from binaries and libraries...")"
+		msg2 "$(gettext "Stripping unneeded symbols from binaries and libraries...")"
 		# make sure library stripping variables are defined to prevent excess stripping
 		[[ -z ${STRIP_SHARED+x} ]] && STRIP_SHARED="-S"
 		[[ -z ${STRIP_STATIC+x} ]] && STRIP_STATIC="-S"
@@ -1810,12 +1810,12 @@ tidy_install() {
 	fi
 
 	if check_option "upx" "y"; then
-		msg2 "$(/usr/bin/gettext "Compressing binaries with %s...")" "UPX"
+		msg2 "$(gettext "Compressing binaries with %s...")" "UPX"
 		local binary
 		find . -type f -perm -u+w 2>/dev/null | while read -r binary ; do
 			if [[ $(file -bi "$binary") = *'application/x-executable'* ]]; then
 				upx $UPXFLAGS "$binary" &>/dev/null ||
-						warning "$(/usr/bin/gettext "Could not compress binary : %s")" "${binary/$pkgdir\//}"
+						warning "$(gettext "Could not compress binary : %s")" "${binary/$pkgdir\//}"
 			fi
 		done
 	fi
@@ -1877,7 +1877,7 @@ find_libdepends() {
 						libdepends+=("$d=$v")
 					done
 				else
-					warning "$(/usr/bin/gettext "Library listed in %s is not required by any files: %s")" "'depends'" "$d"
+					warning "$(gettext "Library listed in %s is not required by any files: %s")" "'depends'" "$d"
 					libdepends+=("$d")
 				fi
 				;;
@@ -1925,7 +1925,7 @@ find_libprovides() {
 		esac
 
 		if (( missing )); then
-			warning "$(/usr/bin/gettext "Cannot find library listed in %s: %s")" "'provides'" "$p"
+			warning "$(gettext "Cannot find library listed in %s: %s")" "'provides'" "$p"
 		fi
 	done
 
@@ -1999,13 +1999,13 @@ create_package() {
 	(( NOARCHIVE )) && return
 
 	if [[ ! -d $pkgdir ]]; then
-		error "$(/usr/bin/gettext "Missing %s directory.")" "\$pkgdir/"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Missing %s directory.")" "\$pkgdir/"
+		plain "$(gettext "Aborting...")"
 		exit 1 # $E_MISSING_PKGDIR
 	fi
 
 	cd_safe "$pkgdir"
-	msg "$(/usr/bin/gettext "Creating package \"%s\"...")" "$pkgname"
+	msg "$(gettext "Creating package \"%s\"...")" "$pkgname"
 
 	pkgarch=$(get_pkg_arch)
 	write_pkginfo > .PKGINFO
@@ -2017,7 +2017,7 @@ create_package() {
 		IFS='/' read -r orig dest < <(printf '%s\n' "$i")
 
 		if [[ -n ${!orig} ]]; then
-			msg2 "$(/usr/bin/gettext "Adding %s file...")" "$orig"
+			msg2 "$(gettext "Adding %s file...")" "$orig"
 			cp "$startdir/${!orig}" "$dest"
 			chmod 644 "$dest"
 			comp_files+=("$dest")
@@ -2036,13 +2036,13 @@ create_package() {
 	# the null string rather than itself
 	shopt -s nullglob
 
-	msg2 "$(/usr/bin/gettext "Generating .MTREE file...")"
+	msg2 "$(gettext "Generating .MTREE file...")"
 	LANG=C /usr/bin/bsdtar -czf .MTREE --format=mtree \
 		--options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
 		"${comp_files[@]}" *
 	comp_files+=(".MTREE")
 
-	msg2 "$(/usr/bin/gettext "Compressing package...")"
+	msg2 "$(gettext "Compressing package...")"
 	# TODO: Maybe this can be set globally for robustness
 	shopt -s -o pipefail
 	# bsdtar's gzip compression always saves the time stamp, making one
@@ -2057,7 +2057,7 @@ create_package() {
 		*tar.lzo) ${COMPRESSLZO[@]:-lzop -q} ;;
 		*tar.Z)   ${COMPRESSZ[@]:-compress -c -f} ;;
 		*tar)     cat ;;
-		*) warning "$(/usr/bin/gettext "'%s' is not a valid archive extension.")" \
+		*) warning "$(gettext "'%s' is not a valid archive extension.")" \
 			"$PKGEXT"; cat ;;
 	esac > "${pkg_file}" || ret=$?
 
@@ -2065,7 +2065,7 @@ create_package() {
 	shopt -u -o pipefail
 
 	if (( ret )); then
-		error "$(/usr/bin/gettext "Failed to create package file.")"
+		error "$(gettext "Failed to create package file.")"
 		exit 1 # TODO: error code
 	fi
 
@@ -2082,7 +2082,7 @@ create_package() {
 	fi
 
 	if (( ret )); then
-		warning "$(/usr/bin/gettext "Failed to create symlink to package file.")"
+		warning "$(gettext "Failed to create symlink to package file.")"
 	fi
 }
 
@@ -2114,7 +2114,7 @@ create_signature() {
 	fi
 	local ret=0
 	local filename="$1"
-	msg "$(/usr/bin/gettext "Signing package...")"
+	msg "$(gettext "Signing package...")"
 
 	local SIGNWITHKEY=""
 	if [[ -n $GPGKEY ]]; then
@@ -2125,19 +2125,19 @@ create_signature() {
 
 
 	if (( ! ret )); then
-		msg2 "$(/usr/bin/gettext "Created signature file %s.")" "$filename.sig"
+		msg2 "$(gettext "Created signature file %s.")" "$filename.sig"
 	else
-		warning "$(/usr/bin/gettext "Failed to sign package file.")"
+		warning "$(gettext "Failed to sign package file.")"
 	fi
 }
 
 create_srcpackage() {
 	local ret=0
-	msg "$(/usr/bin/gettext "Creating source package...")"
+	msg "$(gettext "Creating source package...")"
 	local srclinks="$(mktemp -d "$startdir"/srclinks.XXXXXXXXX)"
 	mkdir "${srclinks}"/${pkgbase}
 
-	msg2 "$(/usr/bin/gettext "Adding %s...")" "$BUILDSCRIPT"
+	msg2 "$(gettext "Adding %s...")" "$BUILDSCRIPT"
 	ln -s "${BUILDFILE}" "${srclinks}/${pkgbase}/${BUILDSCRIPT}"
 
 	local file
@@ -2145,7 +2145,7 @@ create_srcpackage() {
 		if [[ "$file" = "$(get_filename "$file")" ]] || (( SOURCEONLY == 2 )); then
 			local absfile
 			absfile=$(get_filepath "$file") || missing_source_file "$file"
-			msg2 "$(/usr/bin/gettext "Adding %s...")" "${absfile##*/}"
+			msg2 "$(gettext "Adding %s...")" "${absfile##*/}"
 			ln -s "$absfile" "$srclinks/$pkgbase"
 		fi
 	done
@@ -2163,7 +2163,7 @@ create_srcpackage() {
 
 		for file in "${files[@]}"; do
 			if [[ $file && ! -f "${srclinks}/${pkgbase}/$file" ]]; then
-				msg2 "$(/usr/bin/gettext "Adding %s file (%s)...")" "$i" "${file}"
+				msg2 "$(gettext "Adding %s file (%s)...")" "$i" "${file}"
 				ln -s "${startdir}/$file" "${srclinks}/${pkgbase}/"
 			fi
 		done
@@ -2178,7 +2178,7 @@ create_srcpackage() {
 		*tar.lzo) TAR_OPT="--lzop" ;;
 		*tar.Z)   TAR_OPT="-Z" ;;
 		*tar)     TAR_OPT=""  ;;
-		*) warning "$(/usr/bin/gettext "'%s' is not a valid archive extension.")" \
+		*) warning "$(gettext "'%s' is not a valid archive extension.")" \
 		"$SRCEXT" ;;
 	esac
 
@@ -2186,10 +2186,10 @@ create_srcpackage() {
 	local pkg_file="$SRCPKGDEST/${pkgbase}-${fullver}${SRCEXT}"
 
 	# tar it up
-	msg2 "$(/usr/bin/gettext "Compressing source package...")"
+	msg2 "$(gettext "Compressing source package...")"
 	cd_safe "${srclinks}"
 	if ! LANG=C /usr/bin/bsdtar -cL ${TAR_OPT} -f "$pkg_file" ${pkgbase}; then
-		error "$(/usr/bin/gettext "Failed to create source package file.")"
+		error "$(gettext "Failed to create source package file.")"
 		exit 1 # TODO: error code
 	fi
 
@@ -2206,7 +2206,7 @@ create_srcpackage() {
 	fi
 
 	if (( ret )); then
-		warning "$(/usr/bin/gettext "Failed to create symlink to source package file.")"
+		warning "$(gettext "Failed to create symlink to source package file.")"
 	fi
 
 	cd_safe "${startdir}"
@@ -2218,9 +2218,9 @@ install_package() {
 	(( ! INSTALL )) && return
 
 	if (( ! SPLITPKG )); then
-		msg "$(/usr/bin/gettext "Installing package %s with %s...")" "$pkgname" "$PACMAN -U"
+		msg "$(gettext "Installing package %s with %s...")" "$pkgname" "$PACMAN -U"
 	else
-		msg "$(/usr/bin/gettext "Installing %s package group with %s...")" "$pkgbase" "$PACMAN -U"
+		msg "$(gettext "Installing %s package group with %s...")" "$pkgbase" "$PACMAN -U"
 	fi
 
 	local fullver pkgarch pkg pkglist
@@ -2238,7 +2238,7 @@ install_package() {
 	done
 
 	if ! run_pacman -U "${pkglist[@]}"; then
-		warning "$(/usr/bin/gettext "Failed to install built package(s).")"
+		warning "$(gettext "Failed to install built package(s).")"
 		return 0
 	fi
 }
@@ -2330,7 +2330,7 @@ pkgbuild_get_attribute() {
 
 lint_pkgbase() {
 	if [[ ${pkgbase:0:1} = "-" ]]; then
-		error "$(/usr/bin/gettext "%s is not allowed to start with a hyphen.")" "pkgname"
+		error "$(gettext "%s is not allowed to start with a hyphen.")" "pkgname"
 		return 1
 	fi
 }
@@ -2340,20 +2340,20 @@ lint_pkgname() {
 
 	for i in "${pkgname[@]}"; do
 		if [[ -z $i ]]; then
-			error "$(/usr/bin/gettext "%s is not allowed to be empty.")" "pkgname"
+			error "$(gettext "%s is not allowed to be empty.")" "pkgname"
 			ret=1
 			continue
 		fi
 		if [[ ${i:0:1} = "-" ]]; then
-			error "$(/usr/bin/gettext "%s is not allowed to start with a hyphen.")" "pkgname"
+			error "$(gettext "%s is not allowed to start with a hyphen.")" "pkgname"
 			ret=1
 		fi
 		if [[ ${i:0:1} = "." ]]; then
-			error "$(/usr/bin/gettext "%s is not allowed to start with a dot.")" "pkgname"
+			error "$(gettext "%s is not allowed to start with a dot.")" "pkgname"
 			ret=1
 		fi
 		if [[ $i = *[^[:alnum:]+_.@-]* ]]; then
-			error "$(/usr/bin/gettext "%s contains invalid characters: '%s'")" \
+			error "$(gettext "%s contains invalid characters: '%s'")" \
 					'pkgname' "${i//[[:alnum:]+_.@-]}"
 			ret=1
 		fi
@@ -2364,12 +2364,12 @@ lint_pkgname() {
 
 lint_pkgrel() {
 	if [[ -z $pkgrel ]]; then
-		error "$(/usr/bin/gettext "%s is not allowed to be empty.")" "pkgrel"
+		error "$(gettext "%s is not allowed to be empty.")" "pkgrel"
 		return 1
 	fi
 
 	if [[ $pkgrel != +([0-9])?(.+([0-9])) ]]; then
-		error "$(/usr/bin/gettext "%s must be a decimal, not %s.")" "pkgrel" "$pkgrel"
+		error "$(gettext "%s must be a decimal, not %s.")" "pkgrel" "$pkgrel"
 		return 1
 	fi
 }
@@ -2385,7 +2385,7 @@ lint_pkgver() {
 
 lint_epoch() {
 	if [[ $epoch != *([[:digit:]]) ]]; then
-		error "$(/usr/bin/gettext "%s must be an integer, not %s.")" "epoch" "$epoch"
+		error "$(gettext "%s must be an integer, not %s.")" "epoch" "$epoch"
 		return 1
 	fi
 }
@@ -2398,9 +2398,9 @@ lint_arch() {
 	fi
 
 	if ! in_array "$CARCH" "${list[@]}" && (( ! IGNOREARCH )); then
-		error "$(/usr/bin/gettext "%s is not available for the '%s' architecture.")" "$pkgbase" "$CARCH"
-		plain "$(/usr/bin/gettext "Note that many packages may need a line added to their %s")" "$BUILDSCRIPT"
-		plain "$(/usr/bin/gettext "such as %s.")" "arch=('$CARCH')"
+		error "$(gettext "%s is not available for the '%s' architecture.")" "$pkgbase" "$CARCH"
+		plain "$(gettext "Note that many packages may need a line added to their %s")" "$BUILDSCRIPT"
+		plain "$(gettext "such as %s.")" "arch=('$CARCH')"
 		return 1
 	fi
 
@@ -2408,7 +2408,7 @@ lint_arch() {
 		pkgbuild_get_attribute "$name" 'arch' list 1
 		if [[ $list && $list != 'any' ]] && ! in_array $CARCH "${list[@]}"; then
 			if (( ! IGNOREARCH )); then
-				error "$(/usr/bin/gettext "%s is not available for the '%s' architecture.")" "$name" "$CARCH"
+				error "$(gettext "%s is not available for the '%s' architecture.")" "$name" "$CARCH"
 				ret=1
 			fi
 		fi
@@ -2438,7 +2438,7 @@ lint_provides() {
 
 	for provide in "${provides_list[@]}"; do
 		if [[ $provide == *['<>']* ]]; then
-			error "$(/usr/bin/gettext "%s array cannot contain comparison (< or >) operators.")" "provides"
+			error "$(gettext "%s array cannot contain comparison (< or >) operators.")" "provides"
 			ret=1
 		fi
 	done
@@ -2458,7 +2458,7 @@ lint_backup() {
 
 	for name in "${backup_list[@]}"; do
 		if [[ ${name:0:1} = "/" ]]; then
-			error "$(/usr/bin/gettext "%s entry should not contain leading slash : %s")" "backup" "$name"
+			error "$(gettext "%s entry should not contain leading slash : %s")" "backup" "$name"
 			ret=1
 		fi
 	done
@@ -2491,7 +2491,7 @@ lint_optdepends() {
 		local pkg=${name%%:[[:space:]]*}
 		# the '-' character _must_ be first or last in the character range
 		if [[ $pkg != +([-[:alnum:]><=.+_:]) ]]; then
-			error "$(/usr/bin/gettext "Invalid syntax for %s: '%s'")" "optdepend" "$name"
+			error "$(gettext "Invalid syntax for %s: '%s'")" "optdepend" "$name"
 			ret=1
 		fi
 	done
@@ -2504,7 +2504,7 @@ check_files_exist() {
 
 	for file in "${files[@]}"; do
 		if [[ $file && ! -f $file ]]; then
-			error "$(/usr/bin/gettext "%s file (%s) does not exist or is not a regular file.")" \
+			error "$(gettext "%s file (%s) does not exist or is not a regular file.")" \
 				"$kind" "$file"
 			ret=1
 		fi
@@ -2557,7 +2557,7 @@ lint_options() {
 			fi
 		done
 
-		error "$(/usr/bin/gettext "%s array contains unknown option '%s'")" "options" "$i"
+		error "$(gettext "%s array contains unknown option '%s'")" "options" "$i"
 		ret=1
 	done
 
@@ -2568,7 +2568,7 @@ lint_source() {
 	local idx=("${!source[@]}")
 
 	if (( ${#source[*]} > 0 && (idx[-1] + 1) != ${#source[*]} )); then
-		error "$(/usr/bin/gettext "Sparse arrays are not allowed for source")"
+		error "$(gettext "Sparse arrays are not allowed for source")"
 		return 1
 	fi
 }
@@ -2578,7 +2578,7 @@ lint_pkglist() {
 
 	for i in "${PKGLIST[@]}"; do
 		if ! in_array "$i" "${pkgname[@]}"; then
-			error "$(/usr/bin/gettext "Requested package %s is not provided in %s")" "$i" "$BUILDFILE"
+			error "$(gettext "Requested package %s is not provided in %s")" "$i" "$BUILDFILE"
 			ret=1
 		fi
 	done
@@ -2591,13 +2591,13 @@ lint_packagefn() {
 
 	if (( ${#pkgname[@]} == 1 )); then
 		if have_function 'build' && ! { have_function 'package' || have_function "package_$pkgname"; }; then
-			error "$(/usr/bin/gettext "Missing %s function in %s")" "package()" "$BUILDFILE"
+			error "$(gettext "Missing %s function in %s")" "package()" "$BUILDFILE"
 			ret=1
 		fi
 	else
 		for i in "${pkgname[@]}"; do
 			if ! have_function "package_$i"; then
-				error "$(/usr/bin/gettext "Missing %s function for split package '%s'")" "package_$i()" "$i"
+				error "$(gettext "Missing %s function for split package '%s'")" "package_$i()" "$i"
 				ret=1
 			fi
 		done
@@ -2638,7 +2638,7 @@ check_sanity() {
 
 validate_pkgver() {
 	if [[ $1 = *[[:space:]:-]* ]]; then
-		error "$(/usr/bin/gettext "%s is not allowed to contain colons, hyphens or whitespace.")" "pkgver"
+		error "$(gettext "%s is not allowed to contain colons, hyphens or whitespace.")" "pkgver"
 		return 1
 	fi
 }
@@ -2666,8 +2666,8 @@ get_vcsclient() {
 
 	# if we didn't find an client, return an error
 	if [[ -z $client ]]; then
-		error "$(/usr/bin/gettext "Unknown download protocol: %s")" "$proto"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "Unknown download protocol: %s")" "$proto"
+		plain "$(gettext "Aborting...")"
 		exit 1 # $E_CONFIG_ERROR
 	fi
 
@@ -2683,7 +2683,7 @@ check_vcs_software() {
 	fi
 
 	if [[ -z $PACMAN_PATH ]]; then
-		warning "$(/usr/bin/gettext "Cannot find the %s binary needed to check VCS source requirements.")" "$PACMAN"
+		warning "$(gettext "Cannot find the %s binary needed to check VCS source requirements.")" "$PACMAN"
 		return $ret
 	fi
 
@@ -2724,7 +2724,7 @@ check_software() {
 	# check for PACMAN if we need it
 	if (( ! NODEPS || DEP_BIN || RMDEPS || INSTALL )); then
 		if [[ -z $PACMAN_PATH ]]; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for dependency operations.")" "$PACMAN"
+			error "$(gettext "Cannot find the %s binary required for dependency operations.")" "$PACMAN"
 			ret=1
 		fi
 	fi
@@ -2732,7 +2732,7 @@ check_software() {
 	# gpg - package signing
 	if [[ $SIGNPKG == 'y' ]] || { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; }; then
 		if ! type -p gpg >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for signing packages.")" "gpg"
+			error "$(gettext "Cannot find the %s binary required for signing packages.")" "gpg"
 			ret=1
 		fi
 	fi
@@ -2740,7 +2740,7 @@ check_software() {
 	# gpg - source verification
 	if (( ! SKIPPGPCHECK )) && source_has_signatures; then
 		if ! type -p gpg >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for verifying source files.")" "gpg"
+			error "$(gettext "Cannot find the %s binary required for verifying source files.")" "gpg"
 			ret=1
 		fi
 	fi
@@ -2748,7 +2748,7 @@ check_software() {
 	# openssl - checksum operations
 	if (( ! SKIPCHECKSUMS )); then
 		if ! type -p openssl >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "openssl"
+			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "openssl"
 			ret=1
 		fi
 	fi
@@ -2756,7 +2756,7 @@ check_software() {
 	# upx - binary compression
 	if check_option "upx" "y"; then
 		if ! type -p upx >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for compressing binaries.")" "upx"
+			error "$(gettext "Cannot find the %s binary required for compressing binaries.")" "upx"
 			ret=1
 		fi
 	fi
@@ -2764,7 +2764,7 @@ check_software() {
 	# distcc - compilation with distcc
 	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
 		if ! type -p distcc >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
+			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
 			ret=1
 		fi
 	fi
@@ -2772,7 +2772,7 @@ check_software() {
 	# ccache - compilation with ccache
 	if check_buildenv "ccache" "y" && ! check_option "ccache" "n"; then
 		if ! type -p ccache >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for compiler cache usage.")" "ccache"
+			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "ccache"
 			ret=1
 		fi
 	fi
@@ -2780,7 +2780,7 @@ check_software() {
 	# strip - strip symbols from binaries/libraries
 	if check_option "strip" "y"; then
 		if ! type -p strip >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for object file stripping.")" "strip"
+			error "$(gettext "Cannot find the %s binary required for object file stripping.")" "strip"
 			ret=1
 		fi
 	fi
@@ -2788,7 +2788,7 @@ check_software() {
 	# gzip - compressig man and info pages
 	if check_option "zipman" "y"; then
 		if ! type -p gzip >/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the %s binary required for compressing man and info pages.")" "gzip"
+			error "$(gettext "Cannot find the %s binary required for compressing man and info pages.")" "gzip"
 			ret=1
 		fi
 	fi
@@ -2808,11 +2808,11 @@ check_build_status() {
 		if [[ -f $PKGDEST/${pkgname}-${fullver}-${pkgarch}${PKGEXT} ]] \
 				 && ! (( FORCE || SOURCEONLY || NOBUILD || NOARCHIVE)); then
 			if (( INSTALL )); then
-				warning "$(/usr/bin/gettext "A package has already been built, installing existing package...")"
+				warning "$(gettext "A package has already been built, installing existing package...")"
 				install_package
 				exit 0
 			else
-				error "$(/usr/bin/gettext "A package has already been built. (use %s to overwrite)")" "-f"
+				error "$(gettext "A package has already been built. (use %s to overwrite)")" "-f"
 				exit 1
 			fi
 		fi
@@ -2831,16 +2831,16 @@ check_build_status() {
 		if ! (( FORCE || SOURCEONLY || NOBUILD || NOARCHIVE)); then
 			if (( allpkgbuilt )); then
 				if (( INSTALL )); then
-					warning "$(/usr/bin/gettext "The package group has already been built, installing existing packages...")"
+					warning "$(gettext "The package group has already been built, installing existing packages...")"
 					install_package
 					exit 0
 				else
-					error "$(/usr/bin/gettext "The package group has already been built. (use %s to overwrite)")" "-f"
+					error "$(gettext "The package group has already been built. (use %s to overwrite)")" "-f"
 					exit 1
 				fi
 			fi
 			if (( somepkgbuilt && ! PKGVERFUNC )); then
-				error "$(/usr/bin/gettext "Part of the package group has already been built. (use %s to overwrite)")" "-f"
+				error "$(gettext "Part of the package group has already been built. (use %s to overwrite)")" "-f"
 				exit 1
 			fi
 		fi
@@ -2910,59 +2910,59 @@ m4_include(library/parseopts.sh)
 usage() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
 	echo
-	printf -- "$(/usr/bin/gettext "Make packages compatible for use with pacman")\n"
+	printf -- "$(gettext "Make packages compatible for use with pacman")\n"
 	echo
-	printf -- "$(/usr/bin/gettext "Usage: %s [options]")\n" "$0"
+	printf -- "$(gettext "Usage: %s [options]")\n" "$0"
 	echo
-	printf -- "$(/usr/bin/gettext "Options:")\n"
-	printf -- "$(/usr/bin/gettext "  -A, --ignorearch Ignore incomplete %s field in %s")\n" "arch" "$BUILDSCRIPT"
-	printf -- "$(/usr/bin/gettext "  -c, --clean      Clean up work files after build")\n"
-	printf -- "$(/usr/bin/gettext "  -C, --cleanbuild Remove %s dir before building the package")\n" "\$srcdir/"
-	printf -- "$(/usr/bin/gettext "  -d, --nodeps     Skip all dependency checks")\n"
-	printf -- "$(/usr/bin/gettext "  -e, --noextract  Do not extract source files (use existing %s dir)")\n" "\$srcdir/"
-	printf -- "$(/usr/bin/gettext "  -f, --force      Overwrite existing package")\n"
-	printf -- "$(/usr/bin/gettext "  -g, --geninteg   Generate integrity checks for source files")\n"
-	printf -- "$(/usr/bin/gettext "  -h, --help       Show this help message and exit")\n"
-	printf -- "$(/usr/bin/gettext "  -i, --install    Install package after successful build")\n"
-	printf -- "$(/usr/bin/gettext "  -L, --log        Log package build process")\n"
-	printf -- "$(/usr/bin/gettext "  -m, --nocolor    Disable colorized output messages")\n"
-	printf -- "$(/usr/bin/gettext "  -o, --nobuild    Download and extract files only")\n"
-	printf -- "$(/usr/bin/gettext "  -p <file>        Use an alternate build script (instead of '%s')")\n" "$BUILDSCRIPT"
-	printf -- "$(/usr/bin/gettext "  -r, --rmdeps     Remove installed dependencies after a successful build")\n"
-	printf -- "$(/usr/bin/gettext "  -R, --repackage  Repackage contents of the package without rebuilding")\n"
-	printf -- "$(/usr/bin/gettext "  -s, --syncdeps   Install missing dependencies with %s")\n" "pacman"
-	printf -- "$(/usr/bin/gettext "  -S, --source     Generate a source-only tarball without downloaded sources")\n"
-	printf -- "$(/usr/bin/gettext "  -V, --version    Show version information and exit")\n"
-	printf -- "$(/usr/bin/gettext "  --allsource      Generate a source-only tarball including downloaded sources")\n"
-	printf -- "$(/usr/bin/gettext "  --check          Run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
-	printf -- "$(/usr/bin/gettext "  --config <file>  Use an alternate config file (instead of '%s')")\n" "$confdir/makepkg.conf"
-	printf -- "$(/usr/bin/gettext "  --holdver        Do not update VCS sources")\n"
-	printf -- "$(/usr/bin/gettext "  --key <key>      Specify a key to use for %s signing instead of the default")\n" "gpg"
-	printf -- "$(/usr/bin/gettext "  --noarchive      Do not create package archive")\n"
-	printf -- "$(/usr/bin/gettext "  --nocheck        Do not run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
-	printf -- "$(/usr/bin/gettext "  --noprepare      Do not run the %s function in the %s")\n" "prepare()" "$BUILDSCRIPT"
-	printf -- "$(/usr/bin/gettext "  --nosign         Do not create a signature for the package")\n"
-	printf -- "$(/usr/bin/gettext "  --pkg <list>     Only build listed packages from a split package")\n"
-	printf -- "$(/usr/bin/gettext "  --sign           Sign the resulting package with %s")\n" "gpg"
-	printf -- "$(/usr/bin/gettext "  --skipchecksums  Do not verify checksums of the source files")\n"
-	printf -- "$(/usr/bin/gettext "  --skipinteg      Do not perform any verification checks on source files")\n"
-	printf -- "$(/usr/bin/gettext "  --skippgpcheck   Do not verify source files with PGP signatures")\n"
-	printf -- "$(/usr/bin/gettext "  --verifysource   Download source files (if needed) and perform integrity checks")\n"
+	printf -- "$(gettext "Options:")\n"
+	printf -- "$(gettext "  -A, --ignorearch Ignore incomplete %s field in %s")\n" "arch" "$BUILDSCRIPT"
+	printf -- "$(gettext "  -c, --clean      Clean up work files after build")\n"
+	printf -- "$(gettext "  -C, --cleanbuild Remove %s dir before building the package")\n" "\$srcdir/"
+	printf -- "$(gettext "  -d, --nodeps     Skip all dependency checks")\n"
+	printf -- "$(gettext "  -e, --noextract  Do not extract source files (use existing %s dir)")\n" "\$srcdir/"
+	printf -- "$(gettext "  -f, --force      Overwrite existing package")\n"
+	printf -- "$(gettext "  -g, --geninteg   Generate integrity checks for source files")\n"
+	printf -- "$(gettext "  -h, --help       Show this help message and exit")\n"
+	printf -- "$(gettext "  -i, --install    Install package after successful build")\n"
+	printf -- "$(gettext "  -L, --log        Log package build process")\n"
+	printf -- "$(gettext "  -m, --nocolor    Disable colorized output messages")\n"
+	printf -- "$(gettext "  -o, --nobuild    Download and extract files only")\n"
+	printf -- "$(gettext "  -p <file>        Use an alternate build script (instead of '%s')")\n" "$BUILDSCRIPT"
+	printf -- "$(gettext "  -r, --rmdeps     Remove installed dependencies after a successful build")\n"
+	printf -- "$(gettext "  -R, --repackage  Repackage contents of the package without rebuilding")\n"
+	printf -- "$(gettext "  -s, --syncdeps   Install missing dependencies with %s")\n" "pacman"
+	printf -- "$(gettext "  -S, --source     Generate a source-only tarball without downloaded sources")\n"
+	printf -- "$(gettext "  -V, --version    Show version information and exit")\n"
+	printf -- "$(gettext "  --allsource      Generate a source-only tarball including downloaded sources")\n"
+	printf -- "$(gettext "  --check          Run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
+	printf -- "$(gettext "  --config <file>  Use an alternate config file (instead of '%s')")\n" "$confdir/makepkg.conf"
+	printf -- "$(gettext "  --holdver        Do not update VCS sources")\n"
+	printf -- "$(gettext "  --key <key>      Specify a key to use for %s signing instead of the default")\n" "gpg"
+	printf -- "$(gettext "  --noarchive      Do not create package archive")\n"
+	printf -- "$(gettext "  --nocheck        Do not run the %s function in the %s")\n" "check()" "$BUILDSCRIPT"
+	printf -- "$(gettext "  --noprepare      Do not run the %s function in the %s")\n" "prepare()" "$BUILDSCRIPT"
+	printf -- "$(gettext "  --nosign         Do not create a signature for the package")\n"
+	printf -- "$(gettext "  --pkg <list>     Only build listed packages from a split package")\n"
+	printf -- "$(gettext "  --sign           Sign the resulting package with %s")\n" "gpg"
+	printf -- "$(gettext "  --skipchecksums  Do not verify checksums of the source files")\n"
+	printf -- "$(gettext "  --skipinteg      Do not perform any verification checks on source files")\n"
+	printf -- "$(gettext "  --skippgpcheck   Do not verify source files with PGP signatures")\n"
+	printf -- "$(gettext "  --verifysource   Download source files (if needed) and perform integrity checks")\n"
 	echo
-	printf -- "$(/usr/bin/gettext "These options can be passed to %s:")\n" "pacman"
+	printf -- "$(gettext "These options can be passed to %s:")\n" "pacman"
 	echo
-	printf -- "$(/usr/bin/gettext "  --asdeps         Install packages as non-explicitly installed")\n"
-	printf -- "$(/usr/bin/gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
-	printf -- "$(/usr/bin/gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
-	printf -- "$(/usr/bin/gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
+	printf -- "$(gettext "  --asdeps         Install packages as non-explicitly installed")\n"
+	printf -- "$(gettext "  --needed         Do not reinstall the targets that are already up to date")\n"
+	printf -- "$(gettext "  --noconfirm      Do not ask for confirmation when resolving dependencies")\n"
+	printf -- "$(gettext "  --noprogressbar  Do not show a progress bar when downloading files")\n"
 	echo
-	printf -- "$(/usr/bin/gettext "If %s is not specified, %s will look for '%s'")\n" "-p" "makepkg" "$BUILDSCRIPT"
+	printf -- "$(gettext "If %s is not specified, %s will look for '%s'")\n" "-p" "makepkg" "$BUILDSCRIPT"
 	echo
 }
 
 version() {
 	printf "makepkg (pacman) %s\n" "$makepkg_version"
-	printf -- "$(/usr/bin/gettext "\
+	printf -- "$(gettext "\
 Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 Copyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\n\n\
 This is free software; see the source for copying conditions.\n\
@@ -2975,9 +2975,13 @@ There is NO WARRANTY, to the extent permitted by law.\n")"
 umask 0022
 
 # determine whether we have gettext; make it a no-op if we do not
-if ! type -p /usr/bin/gettext >/dev/null; then
+if ! type -p gettext >/dev/null; then
 	gettext() {
 		printf "%s\n" "$@"
+	}
+else
+	gettext() {
+		/usr/bin/gettext "$@"
 	}
 fi
 
@@ -3062,10 +3066,10 @@ done
 # setup signal traps
 trap 'clean_up' 0
 for signal in TERM HUP QUIT; do
-	trap "trap_exit $signal \"$(/usr/bin/gettext "%s signal caught. Exiting...")\" \"$signal\"" "$signal"
+	trap "trap_exit $signal \"$(gettext "%s signal caught. Exiting...")\" \"$signal\"" "$signal"
 done
-trap 'trap_exit INT "$(/usr/bin/gettext "Aborted by user! Exiting...")"' INT
-trap 'trap_exit USR1 "$(/usr/bin/gettext "An unknown error has occurred. Exiting...")"' ERR
+trap 'trap_exit INT "$(gettext "Aborted by user! Exiting...")"' INT
+trap 'trap_exit USR1 "$(gettext "An unknown error has occurred. Exiting...")"' ERR
 
 # preserve environment variables and canonicalize path
 [[ -n ${PKGDEST} ]] && _PKGDEST=$(canonicalize_path ${PKGDEST})
@@ -3086,8 +3090,8 @@ MAKEPKG_CONF=${MAKEPKG_CONF:-$confdir/makepkg.conf}
 if [[ -r $MAKEPKG_CONF ]]; then
 	source_safe "$MAKEPKG_CONF"
 else
-	error "$(/usr/bin/gettext "%s not found.")" "$MAKEPKG_CONF"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "%s not found.")" "$MAKEPKG_CONF"
+	plain "$(gettext "Aborting...")"
 	exit 1 # $E_CONFIG_ERROR
 fi
 
@@ -3134,15 +3138,15 @@ BUILDDIR=${_BUILDDIR:-$BUILDDIR}
 BUILDDIR=${BUILDDIR:-$startdir} #default to $startdir if undefined
 if [[ ! -d $BUILDDIR ]]; then
 	if ! mkdir -p "$BUILDDIR"; then
-		error "$(/usr/bin/gettext "You do not have write permission to create packages in %s.")" "$BUILDDIR"
-		plain "$(/usr/bin/gettext "Aborting...")"
+		error "$(gettext "You do not have write permission to create packages in %s.")" "$BUILDDIR"
+		plain "$(gettext "Aborting...")"
 		exit 1
 	fi
 	chmod a-s "$BUILDDIR"
 fi
 if [[ ! -w $BUILDDIR ]]; then
-	error "$(/usr/bin/gettext "You do not have write permission to create packages in %s.")" "$BUILDDIR"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "You do not have write permission to create packages in %s.")" "$BUILDDIR"
+	plain "$(gettext "Aborting...")"
 	exit 1
 fi
 
@@ -3154,32 +3158,32 @@ fi
 PKGDEST=${_PKGDEST:-$PKGDEST}
 PKGDEST=${PKGDEST:-$startdir} #default to $startdir if undefined
 if (( ! (NOBUILD || GENINTEG) )) && [[ ! -w $PKGDEST ]]; then
-	error "$(/usr/bin/gettext "You do not have write permission to store packages in %s.")" "$PKGDEST"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "You do not have write permission to store packages in %s.")" "$PKGDEST"
+	plain "$(gettext "Aborting...")"
 	exit 1
 fi
 
 SRCDEST=${_SRCDEST:-$SRCDEST}
 SRCDEST=${SRCDEST:-$startdir} #default to $startdir if undefined
 if [[ ! -w $SRCDEST ]] ; then
-	error "$(/usr/bin/gettext "You do not have write permission to store downloads in %s.")" "$SRCDEST"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "You do not have write permission to store downloads in %s.")" "$SRCDEST"
+	plain "$(gettext "Aborting...")"
 	exit 1
 fi
 
 SRCPKGDEST=${_SRCPKGDEST:-$SRCPKGDEST}
 SRCPKGDEST=${SRCPKGDEST:-$startdir} #default to $startdir if undefined
 if (( SOURCEONLY )) && [[ ! -w $SRCPKGDEST ]]; then
-	error "$(/usr/bin/gettext "You do not have write permission to store source tarballs in %s.")" "$SRCPKGDEST"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "You do not have write permission to store source tarballs in %s.")" "$SRCPKGDEST"
+	plain "$(gettext "Aborting...")"
 	exit 1
 fi
 
 LOGDEST=${_LOGDEST:-$LOGDEST}
 LOGDEST=${LOGDEST:-$startdir} #default to $startdir if undefined
 if (( LOGGING )) && [[ ! -w $LOGDEST ]]; then
-	error "$(/usr/bin/gettext "You do not have write permission to store logs in %s.")" "$LOGDEST"
-	plain "$(/usr/bin/gettext "Aborting...")"
+	error "$(gettext "You do not have write permission to store logs in %s.")" "$LOGDEST"
+	plain "$(gettext "Aborting...")"
 	exit 1
 fi
 
@@ -3195,16 +3199,16 @@ unset makedepends optdepends options noextract validpgpkeys
 
 BUILDFILE=${BUILDFILE:-$BUILDSCRIPT}
 if [[ ! -f $BUILDFILE ]]; then
-	error "$(/usr/bin/gettext "%s does not exist.")" "$BUILDFILE"
+	error "$(gettext "%s does not exist.")" "$BUILDFILE"
 	exit 1
 else
 	if [[ $(<"$BUILDFILE") = *$'\r'* ]]; then
-		error "$(/usr/bin/gettext "%s contains %s characters and cannot be sourced.")" "$BUILDFILE" "CRLF"
+		error "$(gettext "%s contains %s characters and cannot be sourced.")" "$BUILDFILE" "CRLF"
 		exit 1
 	fi
 
 	if [[ ! $BUILDFILE -ef $PWD/${BUILDFILE##*/} ]]; then
-		error "$(/usr/bin/gettext "%s must be in the current working directory.")" "$BUILDFILE"
+		error "$(gettext "%s must be in the current working directory.")" "$BUILDFILE"
 		exit 1
 	fi
 
@@ -3286,9 +3290,9 @@ if { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; } || [[ $SIGNPKG == 'y' ]];
 	SIGNPKG='y'
 	if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
 		if [[ ! -z $GPGKEY ]]; then
-			error "$(/usr/bin/gettext "The key %s does not exist in your keyring.")" "${GPGKEY}"
+			error "$(gettext "The key %s does not exist in your keyring.")" "${GPGKEY}"
 		else
-			error "$(/usr/bin/gettext "There is no key in your keyring.")"
+			error "$(gettext "There is no key in your keyring.")"
 		fi
 		exit 1
 	fi
@@ -3298,13 +3302,13 @@ if (( ! PKGVERFUNC )); then
 	check_build_status
 fi
 
-msg "$(/usr/bin/gettext "Making package: %s")" "$pkgbase $basever ($(date))"
+msg "$(gettext "Making package: %s")" "$pkgbase $basever ($(date))"
 
 # if we are creating a source-only package, go no further
 if (( SOURCEONLY )); then
 	if [[ -f $SRCPKGDEST/${pkgbase}-${basever}${SRCEXT} ]] \
 			&& (( ! FORCE )); then
-		error "$(/usr/bin/gettext "A source package has already been built. (use %s to overwrite)")" "-f"
+		error "$(gettext "A source package has already been built. (use %s to overwrite)")" "-f"
 		exit 1
 	fi
 
@@ -3323,14 +3327,14 @@ if (( SOURCEONLY )); then
 
 	create_srcpackage
 
-	msg "$(/usr/bin/gettext "Source package created: %s")" "$pkgbase ($(date))"
+	msg "$(gettext "Source package created: %s")" "$pkgbase ($(date))"
 	exit 0
 fi
 
 if (( NODEPS || ( VERIFYSOURCE && !DEP_BIN ) )); then
 	# no warning message needed for nobuild
 	if (( NODEPS )); then
-		warning "$(/usr/bin/gettext "Skipping dependency checks.")"
+		warning "$(gettext "Skipping dependency checks.")"
 	fi
 else
 	if (( RMDEPS && ! INSTALL )); then
@@ -3338,14 +3342,14 @@ else
 	fi
 	deperr=0
 
-	msg "$(/usr/bin/gettext "Checking runtime dependencies...")"
+	msg "$(gettext "Checking runtime dependencies...")"
 	resolve_deps ${depends[@]} || deperr=1
 
 	if (( RMDEPS && INSTALL )); then
 		original_pkglist=($(run_pacman -Qq))    # required by remove_dep
 	fi
 
-	msg "$(/usr/bin/gettext "Checking buildtime dependencies...")"
+	msg "$(gettext "Checking buildtime dependencies...")"
 	if (( CHECKFUNC )); then
 		resolve_deps "${makedepends[@]}" "${checkdepends[@]}" || deperr=1
 	else
@@ -3357,7 +3361,7 @@ else
 	fi
 
 	if (( deperr )); then
-		error "$(/usr/bin/gettext "Could not resolve all dependencies.")"
+		error "$(gettext "Could not resolve all dependencies.")"
 		exit 1
 	fi
 fi
@@ -3368,14 +3372,14 @@ chmod a-s "$srcdir"
 cd_safe "$srcdir"
 
 if (( NOEXTRACT && ! VERIFYSOURCE )); then
-	warning "$(/usr/bin/gettext "Using existing %s tree")" "\$srcdir/"
+	warning "$(gettext "Using existing %s tree")" "\$srcdir/"
 elif (( !REPKG )); then
 	download_sources
 	check_source_integrity
 	(( VERIFYSOURCE )) && exit 0 # $E_OK
 
 	if (( CLEANBUILD )); then
-		msg "$(/usr/bin/gettext "Removing existing %s directory...")" "\$srcdir/"
+		msg "$(gettext "Removing existing %s directory...")" "\$srcdir/"
 		rm -rf "$srcdir"/*
 	fi
 
@@ -3392,7 +3396,7 @@ if (( PREPAREFUNC && !REPKG )); then
 fi
 
 if (( NOBUILD )); then
-	msg "$(/usr/bin/gettext "Sources are ready.")"
+	msg "$(gettext "Sources are ready.")"
 	exit 0 #E_OK
 else
 	# clean existing pkg directory
@@ -3400,7 +3404,7 @@ else
 	# and only have its contents removed (so a symlink to
 	# a spacious drive can be used).
 	if [[ -d $pkgdirbase ]]; then
-		msg "$(/usr/bin/gettext "Removing existing %s directory...")" "\$pkgdir/"
+		msg "$(gettext "Removing existing %s directory...")" "\$pkgdir/"
 		rm -rf "$pkgdirbase"/*
 	else
 		mkdir -p "$pkgdirbase"
@@ -3420,7 +3424,7 @@ else
 
 # if inhibiting archive creation, go no further
 if (( NOARCHIVE )); then
-	msg "$(/usr/bin/gettext "Package folder is ready.")"
+	msg "$(gettext "Package folder is ready.")"
 	exit 0
 fi
 	chmod 755 "$pkgdirbase"
@@ -3438,7 +3442,7 @@ fi
 	fi
 fi
 
-msg "$(/usr/bin/gettext "Finished making: %s")" "$pkgbase $basever ($(date))"
+msg "$(gettext "Finished making: %s")" "$pkgbase $basever ($(date))"
 
 install_package
 
