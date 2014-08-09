@@ -30,6 +30,7 @@ Invoking pacman-key consists of supplying an operation with any potential
 options and targets to operate on. Depending on the operation, a 'target' may
 be a valid key identifier, filename, or directory.
 
+
 Operations
 ----------
 *-a, \--add*::
@@ -101,10 +102,11 @@ Operations
 *-v, \--verify*::
 	Verify the file(s) specified by the signature(s).
 
+
 Options
 -------
 *\--config* <file>::
-	Use an alternate config file instead of the +{sysconfdir}/pacman.conf+
+	Use an alternate configuration file instead of the +{sysconfdir}/pacman.conf+
 	default.
 
 *\--gpgdir* <dir>::

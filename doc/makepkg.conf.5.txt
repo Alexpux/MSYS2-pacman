@@ -47,17 +47,22 @@ Options
 	be replaced with the local file name, plus a ``.part'' extension, which allows
 	makepkg to handle resuming file downloads.
 
+**VCSCLIENTS=(**\'protocol::package' ...**)**::
+	Sets the packages required to fetch version controlled source files. When
+	required, makepkg will check that these packages are installed or are included
+	in the `depends` or `makedepends` arrays in the PKGBUILD.
+
 **CARCH=**"carch"::
 	Specifies your computer architecture; possible values include such things
 	as ``i686'', ``x86_64'', ``ppc'', etc. This should be automatically set on
 	installation.
 
 **CHOST=**"chost"::
-	A string such as ``i686-pc-linux-gnu''; do not touch unless you know what
+	A string such as ``i686-pc-linux-gnu''; do not touch this unless you know what
 	you are doing. This can be commented out by most users if desired.
 
 **CPPFLAGS=**"cppflags"::
-	Flags used for the C preprocessor; see CFLAGS for more info.
+	Flags used for the C preprocessor; see CFLAGS for more information.
 
 **CFLAGS=**"cflags"::
 	Flags used for the C compiler. This is a key part to the use of makepkg.
@@ -255,6 +260,7 @@ Options
 	Valid suffixes are `.tar`, `.tar.gz`, `.tar.bz2`, `.tar.xz`,
 	`.tar.lzo`, `.tar.lrz`, and `.tar.Z`.
 	Do not touch these unless you know what you are doing.
+
 
 See Also
 --------

@@ -183,17 +183,26 @@ If the dependency name appears to be a library (ends with .so), makepkg will
 try to find a binary that depends on the library in the built package and
 append the version needed by the binary. Appending the version yourself
 disables automatic detection.
++
+Additional architecture-specific depends can be added by appending an
+underscore and the architecture name e.g., 'depends_x86_64=()'.
 
 *makedepends (array)*::
 	An array of packages this package depends on to build but are not
 	needed at runtime. Packages in this list follow the same format as
 	depends.
++
+Additional architecture-specific makedepends can be added by appending an
+underscore and the architecture name e.g., 'makedepends_x86_64=()'.
 
 *checkdepends (array)*::
 	An array of packages this package depends on to run its test suite
 	but are not needed at runtime. Packages in this list follow the same
 	format as depends. These dependencies are only considered when the
 	check() function is present and is to be run by makepkg.
++
+Additional architecture-specific checkdepends can be added by appending an
+underscore and the architecture name e.g., 'checkdepends_x86_64=()'.
 
 *optdepends (array)*::
 	An array of packages (and accompanying reasons) that are not essential for
@@ -202,11 +211,19 @@ disables automatic detection.
 	and are not utilized by pacman during dependency resolution. The format
 	for specifying optdepends is:
 
+	optdepends=('fakeroot: for makepkg usage as normal user')
++
+Architecture-specific optdepends can be added by appending an underscore and
+the architecture name e.g., 'optdepends_x86_64=()'.
+
 *conflicts (array)*::
 	An array of packages that will conflict with this package (i.e. they
 	cannot both be installed at the same time). This directive follows the
 	same format as depends. Versioned conflicts are supported using the
 	operators as described in `depends`.
++
+Additional architecture-specific conflicts can be added by appending an
+underscore and the architecture name e.g., 'conflicts_x86_64=()'.
 
 *provides (array)*::
 	An array of ``virtual provisions'' this package provides. This allows
@@ -222,6 +239,9 @@ only specific versions of a package may be provided.
 If the provision name appears to be a library (ends with .so), makepkg will
 try to find the library in the built package and append the correct
 version. Appending the version yourself disables automatic detection.
++
+Additional architecture-specific provides can be added by appending an
+underscore and the architecture name e.g., 'provides_x86_64=()'.
 
 *replaces (array)*::
 	An array of packages this package should replace. This can be used
@@ -232,6 +252,9 @@ version. Appending the version yourself disables automatic detection.
 +
 Sysupgrade is currently the only pacman operation that utilizes this field.
 A normal sync or upgrade will not use its value.
++
+Additional architecture-specific replaces can be added by appending an
+underscore and the architecture name e.g., 'replaces_x86_64=()'.
 
 *options (array)*::
 	This array allows you to override some of makepkg's default behavior
@@ -299,7 +322,6 @@ A normal sync or upgrade will not use its value.
 
 Packaging Functions
 -------------------
-
 In addition to the above directives, PKGBUILDs require a set of functions that
 provide instructions to build and install the package. As a minimum, the
 PKGBUILD must contain a `package()` function which installs all the package's
@@ -353,6 +375,7 @@ variables for use during the build and install process:
 	located, which is usually the output of `$(pwd)` when makepkg is started.
 	Use of this variable is deprecated and strongly discouraged.
 
+
 Package Splitting
 -----------------
 makepkg supports building multiple packages from a single PKGBUILD. This is
@@ -363,9 +386,9 @@ Each split package uses a corresponding packaging function with name
 All options and directives for the split packages default to the global values
 given in the PKGBUILD. Nevertheless, the following ones can be overridden within
 each split package's packaging function:
-`pkgver`, `pkgrel`, `epoch`, `pkgdesc`, `arch`, `url`, `license`, `groups`,
-`depends`, `optdepends`, `provides`, `conflicts`, `replaces`, `backup`,
-`options`, `install` and `changelog`.
+`pkgdesc`, `arch`, `url`, `license`, `groups`, `depends`, `optdepends`,
+`provides`, `conflicts`, `replaces`, `backup`, `options`, `install`, and
+`changelog`.
 
 An optional global directive is available when building a split package:
 
@@ -374,6 +397,7 @@ An optional global directive is available when building a split package:
 	and in the naming of source-only tarballs. If not specified, the first
 	element in the `pkgname` array is used. The variable is not allowed to
 	begin with a hyphen.
+
 
 Install/Upgrade/Remove Scripting
 --------------------------------
@@ -422,6 +446,7 @@ The install script does not need to be specified in the source array. A
 template install file is available in '{pkgdatadir}' as 'proto.install' for
 reference with all of the available functions defined.
 
+
 Using VCS Sources[[VCS]]
 ------------------------
 Building a developmental version of a package using sources from a version
@@ -463,6 +488,7 @@ The source URL is divided into three components:
 	*svn*;;
 		revision
 
+
 Example
 -------
 The following is an example PKGBUILD for the 'patch' package. For more
@@ -473,6 +499,7 @@ those using Arch Linux, consult the Arch Build System (ABS) tree.
 -------------------------------
 include::PKGBUILD-example.txt[]
 -------------------------------
+
 
 See Also
 --------

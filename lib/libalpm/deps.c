@@ -90,11 +90,6 @@ static alpm_pkg_t *find_dep_satisfier(alpm_list_t *pkgs, alpm_depend_t *dep)
 	return NULL;
 }
 
-static int ptr_cmp(const void *p, const void *q)
-{
-	return (p != q);
-}
-
 /* Convert a list of alpm_pkg_t * to a graph structure,
  * with a edge for each dependency.
  * Returns a list of vertices (one vertex = one package)
@@ -106,7 +101,7 @@ static alpm_list_t *dep_graph_init(alpm_handle_t *handle,
 	alpm_list_t *i, *j;
 	alpm_list_t *vertices = NULL;
 	alpm_list_t *localpkgs = alpm_list_diff(
-			alpm_db_get_pkgcache(handle->db_local), ignore, ptr_cmp);
+			alpm_db_get_pkgcache(handle->db_local), ignore, _alpm_pkg_cmp);
 
 	/* We create the vertices */
 	for(i = targets; i; i = i->next) {
@@ -201,14 +196,14 @@ alpm_list_t *_alpm_sortbydeps(alpm_handle_t *handle,
 				/* child is an ancestor of vertex */
 				alpm_graph_t *transvertex = vertex;
 
-				if(!alpm_list_find(targets, nextchild->data, ptr_cmp)) {
+				if(!alpm_list_find_ptr(targets, nextchild->data)) {
 					/* child is not part of the transaction, not a problem */
 					continue;
 				}
 
 				/* find the nearest parent that's part of the transaction */
 				while(transvertex) {
-					if(alpm_list_find(targets, transvertex->data, ptr_cmp)) {
+					if(alpm_list_find_ptr(targets, transvertex->data)) {
 						break;
 					}
 					transvertex = transvertex->parent;
@@ -234,7 +229,7 @@ alpm_list_t *_alpm_sortbydeps(alpm_handle_t *handle,
 			}
 		}
 		if(!found) {
-			if(alpm_list_find(targets, vertex->data, ptr_cmp)) {
+			if(alpm_list_find_ptr(targets, vertex->data)) {
 				newtargs = alpm_list_add(newtargs, vertex->data);
 			}
 			/* mark that we've left this vertex */

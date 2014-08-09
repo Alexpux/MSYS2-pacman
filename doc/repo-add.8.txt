@@ -8,6 +8,7 @@ Name
 ----
 repo-add - package database maintenance utility
 
+
 Synopsis
 --------
 'repo-add' [options] <path-to-db> <package|delta> [<package|delta> ...]
@@ -41,7 +42,7 @@ to exist, but all parent directories must exist.
 Common Options
 --------------
 *-q, \--quiet*::
-	Force this program to keep quiet and run silent except for warning and
+	Force this program to keep quiet and run silently except for warning and
 	error messages.
 
 *-s, \--sign*::
@@ -61,7 +62,8 @@ Common Options
 	proceed.
 
 *\--nocolor*::
-	Remove color from repo-add and repo-remove output.
+	Remove color from 'repo-add' and 'repo-remove' output.
+
 
 repo-add Options
 ----------------
@@ -70,7 +72,7 @@ repo-add Options
 	new one, if the old package file is found next to the new one.
 
 *-f, \--files*::
-	Tells repo-add also to create and include a list of the files in the
+	Tells 'repo-add' also to create and include a list of the files in the
 	specified packages. This is useful for creating databases listing all files
 	in a given sync repository for tools that may use this information.
 
@@ -82,9 +84,9 @@ repo-add Options
 	Remove old package files from the disk when updating their entry in the
 	database.
 
+
 Example
 -------
-
 'repo-add' is often invoked twice to create two separate databases; a smaller
 database used by pacman and a large database containing package file lists for
 use by other utilities.
@@ -94,6 +96,7 @@ use by other utilities.
 
 While pacman can use the large database (if given a db.tar* extension), there
 is currently no additional benefit for the larger download.
+
 
 See Also
 --------

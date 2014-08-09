@@ -25,6 +25,7 @@ significantly.
 
 'pkgdelta' requires linkman:xdelta3[1] to do its job.
 
+
 Options
 -------
 *--max-delta-size <ratio>*::
@@ -35,16 +36,18 @@ Options
 
 *--min-pkg-size <size>*::
 	Minimal size of the package file in bytes to be considered for delta creation.
-	Default value: 1048576 bytes = 1MiB. This may be any absolute size in bytes, or
-	a human readable value such as `4 MiB` or `3.5MB`.
+	Default value: 1048576 bytes = 1 MiB. This may be any absolute size in bytes or
+	a human-readable value such as `4MiB` or `3.5MB`.
 
 *-q, \--quiet*::
 	Be quiet. Do not output anything but warnings and errors.
+
 
 Examples
 --------
 
   $ pkgdelta libreoffice-3.3.2-1-x86_64.pkg.tar.xz libreoffice-3.3.2-2-x86_64.pkg.tar.xz
+
 
 See Also
 --------
