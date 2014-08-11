@@ -1592,32 +1592,32 @@ strip_file() {
 		if [[ -f "$dbgdir/$dbgfile.debug" ]]; then
 			return
 		fi
-		msg2 "Create debug symbols - $dbgdir/$dbgfile.debug"
-		mkdir -p "$dbgdir/${dbgfile%/*}"
-		#   create a dbg file with proper debug info:
+
+		msg2 "Separating debug info from $binary into $dbgdir/$dbgfile.debug"
+		# create a dbg file with proper debug info:
 		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
-		
-		#   add a link to the original file, pointing at the dbg file (adds the
-		#   .gnu_debuglink section)
-		objcopy --add-gnu-debuglink="$dbgdir/${dbgfile#/}.debug" "$binary"
-		
-		#   re-create the dbg file; this time it will ALSO have the .gnu_debuglink
-		#   section
-		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
-		
-		#   remove old .gnu_debuglink section from the original file
+
 		objcopy --remove-section=.gnu_debuglink "$binary"
-		
-		#   strip debug-info from the original file
+
+		msg2 "Creating a debuginfo link to $dbgdir/$dbgfile.debug in $binary"
+		objcopy --add-gnu-debuglink="$dbgdir/$dbgfile.debug" "$binary"
+
+		msg2 "Separating (again) debug info from $binary into $dbgdir/$dbgfile.debug"
+		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
+
+		msg2 "Removing old .gnu_debuglink section from $binary"
+		objcopy --remove-section=.gnu_debuglink "$binary"
+
+		# strip debug-info from the original file
 		objcopy --strip-debug "$binary"
-		#   add a new .gnu_debuglink section to the original file
+		msg2 "Creating (again) a debuginfo link to $dbgdir/$dbgfile.debug in $binary"
 		objcopy --add-gnu-debuglink="$dbgdir/$dbgfile.debug" "$binary"
 		# This way dbg file gets a .gnu_debuglink section (doesn't matter where
 		# it's pointing), and its contents pass the CRC32 check
 
 		# create any needed hardlinks
 		while read -rd '' file ; do
-			local hardlinkfile = $(basename "${file}")
+			local hardlinkfile=$(basename "${file}")
 			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${hardlinkfile}.debug" ]]; then
 				mkdir -p "$dbgdir/${hardlinkfile%/*}"
 				ln "$dbgdir/${dbgfile}.debug" "$dbgdir/${hardlinkfile}.debug"
