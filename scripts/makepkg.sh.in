@@ -1585,26 +1585,25 @@ run_package() {
 
 strip_file() {
 	local binary=$1; shift
+	local dbgfile=$(basename "$binary")
 
 	if check_option "debug" "y"; then
 		
 		if [[ -f "$dbgdir/$binary.debug" ]]; then
 			return
 		fi
-		msg "$binary"
-		msg "$dbgdir/$binary.debug"
-		msg "$dbgdir/${binary%/*}"
-		mkdir -p "$dbgdir/${binary%/*}"
+		msg2 "Create debug symbols - $dbgdir/$dbgfile.debug"
+		mkdir -p "$dbgdir/${dbgfile%/*}"
 		#   create a dbg file with proper debug info:
-		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
+		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
 		
 		#   add a link to the original file, pointing at the dbg file (adds the
 		#   .gnu_debuglink section)
-		objcopy --add-gnu-debuglink="$dbgdir/${binary#/}.debug" "$binary"
+		objcopy --add-gnu-debuglink="$dbgdir/${dbgfile#/}.debug" "$binary"
 		
 		#   re-create the dbg file; this time it will ALSO have the .gnu_debuglink
 		#   section
-		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
+		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
 		
 		#   remove old .gnu_debuglink section from the original file
 		objcopy --remove-section=.gnu_debuglink "$binary"
@@ -1612,15 +1611,16 @@ strip_file() {
 		#   strip debug-info from the original file
 		objcopy --strip-debug "$binary"
 		#   add a new .gnu_debuglink section to the original file
-		objcopy --add-gnu-debuglink="$dbgdir/$binary.debug" "$binary"
+		objcopy --add-gnu-debuglink="$dbgdir/$dbgfile.debug" "$binary"
 		# This way dbg file gets a .gnu_debuglink section (doesn't matter where
 		# it's pointing), and its contents pass the CRC32 check
 
 		# create any needed hardlinks
 		while read -rd '' file ; do
-			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${file}.debug" ]]; then
-				mkdir -p "$dbgdir/${file%/*}"
-				ln "$dbgdir/${binary}.debug" "$dbgdir/${file}.debug"
+			local hardlinkfile = $(basename "${file}")
+			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${hardlinkfile}.debug" ]]; then
+				mkdir -p "$dbgdir/${hardlinkfile%/*}"
+				ln "$dbgdir/${dbgfile}.debug" "$dbgdir/${hardlinkfile}.debug"
 			fi
 		done < <(find . -type f -perm -u+w -print0 2>/dev/null)
 		
@@ -1721,7 +1721,11 @@ tidy_install() {
 		[[ -z ${STRIP_STATIC+x} ]] && STRIP_STATIC="-S"
 
 		if check_option "debug" "y"; then
-			dbgdir="$pkgdir-@DEBUGSUFFIX@/usr/lib/debug"
+			[[ -z ${MINGW_PREFIX} ]] && {
+				dbgdir="${pkgdir}-@DEBUGSUFFIX@/usr/src/debug"
+			} || {
+				dbgdir="${pkgdir}-@DEBUGSUFFIX@${MINGW_PREFIX}/src/debug"
+			}
 			mkdir -p "$dbgdir"
 		fi
 
@@ -2095,7 +2099,14 @@ create_debug_package() {
 	pkgdir="${pkgdir}-@DEBUGSUFFIX@"
 
 	# check if we have any debug symbols to package
-	if dir_is_empty "$pkgdir/usr/lib/debug"; then
+	local debugdir
+	[[ -z ${MINGW_PREFIX} ]] && {
+		debugdir=$pkgdir/usr/src/debug
+	} || {
+		debugdir=${pkgdir}${MINGW_PREFIX}/src/debug
+	}
+	# check if we have any debug symbols to package
+	if dir_is_empty "$debugdir"; then
 		return
 	fi
 
