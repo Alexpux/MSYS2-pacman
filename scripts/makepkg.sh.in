@@ -1589,7 +1589,7 @@ strip_file() {
 
 	if check_option "debug" "y"; then
 		
-		if [[ -f "$dbgdir/$binary.debug" ]]; then
+		if [[ -f "$dbgdir/$dbgfile.debug" ]]; then
 			return
 		fi
 		msg2 "Create debug symbols - $dbgdir/$dbgfile.debug"
