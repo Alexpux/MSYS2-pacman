@@ -1585,42 +1585,40 @@ run_package() {
 
 strip_file() {
 	local binary=$1; shift
-	local dbgfile=$(basename "$binary")
 
 	if check_option "debug" "y"; then
 		
-		if [[ -f "$dbgdir/$dbgfile.debug" ]]; then
+		if [[ -f "$dbgdir/$binary.debug" ]]; then
 			return
 		fi
 
-		msg2 "Separating debug info from $binary into $dbgdir/$dbgfile.debug"
+		msg2 "Separating debug info from $binary into $dbgdir/$binary.debug"
 		# create a dbg file with proper debug info:
-		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
+		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
 
 		objcopy --remove-section=.gnu_debuglink "$binary"
 
-		msg2 "Creating a debuginfo link to $dbgdir/$dbgfile.debug in $binary"
-		objcopy --add-gnu-debuglink="$dbgdir/$dbgfile.debug" "$binary"
+		msg2 "Creating a debuginfo link to $dbgdir/$binary.debug in $binary"
+		objcopy --add-gnu-debuglink="$dbgdir/$binary.debug" "$binary"
 
-		msg2 "Separating (again) debug info from $binary into $dbgdir/$dbgfile.debug"
-		objcopy --only-keep-debug "$binary" "$dbgdir/$dbgfile.debug"
+		msg2 "Separating (again) debug info from $binary into $dbgdir/$binary.debug"
+		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
 
 		msg2 "Removing old .gnu_debuglink section from $binary"
 		objcopy --remove-section=.gnu_debuglink "$binary"
 
 		# strip debug-info from the original file
 		objcopy --strip-debug "$binary"
-		msg2 "Creating (again) a debuginfo link to $dbgdir/$dbgfile.debug in $binary"
-		objcopy --add-gnu-debuglink="$dbgdir/$dbgfile.debug" "$binary"
+		msg2 "Creating (again) a debuginfo link to $dbgdir/$binary.debug in $binary"
+		objcopy --add-gnu-debuglink="$dbgdir/$binary.debug" "$binary"
 		# This way dbg file gets a .gnu_debuglink section (doesn't matter where
 		# it's pointing), and its contents pass the CRC32 check
 
 		# create any needed hardlinks
 		while read -rd '' file ; do
-			local hardlinkfile=$(basename "${file}")
-			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${hardlinkfile}.debug" ]]; then
-				mkdir -p "$dbgdir/${hardlinkfile%/*}"
-				ln "$dbgdir/${dbgfile}.debug" "$dbgdir/${hardlinkfile}.debug"
+			if [[ "${binary}" -ef "${file}" && ! -f "$dbgdir/${file}.debug" ]]; then
+				mkdir -p "$dbgdir/${file%/*}"
+				ln "$dbgdir/${binary}.debug" "$dbgdir/${file}.debug"
 			fi
 		done < <(find . -type f -perm -u+w -print0 2>/dev/null)
 		
@@ -2097,16 +2095,8 @@ create_debug_package() {
 	fi
 
 	pkgdir="${pkgdir}-@DEBUGSUFFIX@"
-
 	# check if we have any debug symbols to package
-	local debugdir
-	[[ -z ${MINGW_PREFIX} ]] && {
-		debugdir=$pkgdir/usr/src/debug
-	} || {
-		debugdir=${pkgdir}${MINGW_PREFIX}/src/debug
-	}
-	# check if we have any debug symbols to package
-	if dir_is_empty "$debugdir"; then
+	if dir_is_empty "$pkgdir"; then
 		return
 	fi
 
