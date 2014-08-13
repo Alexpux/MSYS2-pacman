@@ -1719,11 +1719,7 @@ tidy_install() {
 		[[ -z ${STRIP_STATIC+x} ]] && STRIP_STATIC="-S"
 
 		if check_option "debug" "y"; then
-			[[ -z ${MINGW_PREFIX} ]] && {
-				dbgdir="${pkgdir}-@DEBUGSUFFIX@/usr/src/debug"
-			} || {
-				dbgdir="${pkgdir}-@DEBUGSUFFIX@${MINGW_PREFIX}/src/debug"
-			}
+			dbgdir="$pkgdir-@DEBUGSUFFIX@"
 			mkdir -p "$dbgdir"
 		fi
 
