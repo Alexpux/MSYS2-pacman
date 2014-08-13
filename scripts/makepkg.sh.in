@@ -1592,6 +1592,7 @@ strip_file() {
 			return
 		fi
 
+		mkdir -p "$dbgdir/${binary%/*}"
 		msg2 "Separating debug info from $binary into $dbgdir/$binary.debug"
 		# create a dbg file with proper debug info:
 		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
@@ -1599,7 +1600,7 @@ strip_file() {
 		objcopy --remove-section=.gnu_debuglink "$binary"
 
 		msg2 "Creating a debuginfo link to $dbgdir/$binary.debug in $binary"
-		objcopy --add-gnu-debuglink="$dbgdir/$binary.debug" "$binary"
+		objcopy --add-gnu-debuglink="$dbgdir/${binary#/}.debug" "$binary"
 
 		msg2 "Separating (again) debug info from $binary into $dbgdir/$binary.debug"
 		objcopy --only-keep-debug "$binary" "$dbgdir/$binary.debug"
