@@ -290,8 +290,6 @@ for cachedir in "${cachedirs[@]}"; do
 	[[ -d $cachedir ]] ||
 		die "cachedir '%s' does not exist or is not a directory" "$cachedir"
 
-	fi
-
 	# unlikely that this will fail, but better make sure
 	pushd "$cachedir" &>/dev/null || die "failed to chdir to '%s'" "$cachedir"
 
