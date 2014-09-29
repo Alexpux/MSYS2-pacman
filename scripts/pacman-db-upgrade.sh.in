@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
 #
 #   pacman-db-upgrade - upgrade the local pacman db to a newer format
 #   @configure_input@
