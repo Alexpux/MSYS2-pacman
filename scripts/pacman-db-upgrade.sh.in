@@ -32,7 +32,7 @@ m4_include(library/parseopts.sh)
 usage() {
 	printf "pacman-db-upgrade (pacman) %s\n" "${myver}"
 	echo
-	printf -- "$(/usr/bin/gettext "Upgrade the local pacman database to a newer format")\n"
+	printf -- "$(gettext "Upgrade the local pacman database to a newer format")\n"
 	echo
 	printf -- "$(gettext "Usage: %s [options]")\n" "$0"
 	echo
@@ -82,12 +82,14 @@ resolve_dir() {
 	printf "%s" "$d"
 }
 
-# PROGRAM START
-
 # determine whether we have gettext; make it a no-op if we do not
-if ! type gettext &>/dev/null; then
+if ! type -p gettext >/dev/null; then
 	gettext() {
-		echo "$@"
+		printf "%s\n" "$@"
+	}
+else
+	gettext() {
+		/usr/bin/gettext "$@"
 	}
 fi
 
@@ -126,15 +128,15 @@ conffile=${conffile:-@sysconfdir@/pacman.conf}
 m4_include(library/term_colors.sh)
 
 if [[ ! -d $dbroot ]]; then
-	die "$(/usr/bin/gettext "%s does not exist or is not a directory.")" "$dbroot"
+	die "$(gettext "%s does not exist or is not a directory.")" "$dbroot"
 fi
 
 if [[ ! -d $dbroot/local ]]; then
-	die "$(/usr/bin/gettext "%s is not a pacman database directory.")" "$dbroot"
+	die "$(gettext "%s is not a pacman database directory.")" "$dbroot"
 fi
 
 if [[ ! -w $dbroot ]]; then
-	die "$(/usr/bin/gettext "You must have correct permissions to upgrade the database.")"
+	die "$(gettext "You must have correct permissions to upgrade the database.")"
 fi
 
 # strip any trailing slash from our dbroot

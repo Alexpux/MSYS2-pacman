@@ -35,11 +35,11 @@ m4_include(library/output_format.sh)
 
 usage() {
 	printf "pacman-optimize (pacman) %s\n\n" "$myver"
-	printf -- "$(/usr/bin/gettext "Usage: %s [--nocolor] [pacman_db_root]")\n\n" "$0"
-	printf -- "$(/usr/bin/gettext "\
+	printf -- "$(gettext "Usage: %s [--nocolor] [pacman_db_root]")\n\n" "$0"
+	printf -- "$(gettext "\
 pacman-optimize is a little hack that should improve the performance\n\
 of pacman when reading/writing to its filesystem-based database.\n\n")"
-	printf -- "$(/usr/bin/gettext "\
+	printf -- "$(gettext "\
 Because pacman uses many small files to keep track of packages,\n\
 there is a tendency for these files to become fragmented over time.\n\
 This script attempts to relocate these small files into one\n\
@@ -50,7 +50,7 @@ does not have to move around the disk as much.\n")"
 
 version() {
 	printf "pacman-optimize (pacman) %s\n" "$myver"
-	printf -- "$(/usr/bin/gettext "\
+	printf -- "$(gettext "\
 Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>.\n\
 Copyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\n\n\
 This is free software; see the source for copying conditions.\n\
@@ -67,12 +67,14 @@ die_r() {
 	die "$@"
 }
 
-# PROGRAM START
-
 # determine whether we have gettext; make it a no-op if we do not
-if ! type gettext &>/dev/null; then
+if ! type -p gettext >/dev/null; then
 	gettext() {
-		echo "$@"
+		printf "%s\n" "$@"
+	}
+else
+	gettext() {
+		/usr/bin/gettext "$@"
 	}
 fi
 
@@ -98,15 +100,15 @@ if [[ -n $1 ]]; then
 fi
 
 if ! type -p /usr/bin/openssl >/dev/null; then
-	die "$(/usr/bin/gettext "Cannot find the %s binary required for verifying integrity.")" "openssl"
+	die "$(gettext "Cannot find the %s binary required for verifying integrity.")" "openssl"
 fi
 
 if [[ ! -d $dbroot || ! -d $dbroot/local ]]; then
-	die "$(/usr/bin/gettext "%s does not exist or is not a directory.")" "$dbroot"
+	die "$(gettext "%s does not exist or is not a directory.")" "$dbroot"
 fi
 
 if [[ ! -w $dbroot ]]; then
-	die "$(/usr/bin/gettext "You must have correct permissions to optimize the database.")"
+	die "$(gettext "You must have correct permissions to optimize the database.")"
 fi
 
 # strip any trailing slash from our dbroot
@@ -116,54 +118,54 @@ localdb="${dbroot}/local"
 
 # make sure pacman isn't running
 if [[ -f $lockfile ]]; then
-	die "$(/usr/bin/gettext "Pacman lock file was found. Cannot run while pacman is running.")"
+	die "$(gettext "Pacman lock file was found. Cannot run while pacman is running.")"
 fi
 # do not let pacman run while we do this
 touch "$lockfile"
 
 workdir=$(mktemp -d "${TMPDIR:-/tmp}/pacman-optimize.XXXXXXXXXX") ||
-	die_r "$(/usr/bin/gettext "Cannot create temporary directory for database building.")\n" >&2
+	die_r "$(gettext "Cannot create temporary directory for database building.")\n" >&2
 
 # step 1: sum the old db
-msg "$(/usr/bin/gettext "MD5sum'ing the old database...")"
+msg "$(gettext "MD5sum'ing the old database...")"
 (cd "$localdb" && find . -type f -print0 | \
 	xargs -0 /usr/bin/openssl dgst -md5 | sort > "$workdir/pacsums.old")
 
 # step 2: tar it up
-msg "$(/usr/bin/gettext "Tar'ing up %s...")" "$localdb"
+msg "$(gettext "Tar'ing up %s...")" "$localdb"
 bsdtar -czf "$workdir/pacman-db.tar.gz" -C "$localdb" ./
 if (( $? )); then
 	rm -rf "$workdir"
-	die_r "$(/usr/bin/gettext "Tar'ing up %s failed.")" "$localdb"
+	die_r "$(gettext "Tar'ing up %s failed.")" "$localdb"
 fi
 
 # step 3: make and sum the new db side-by-side with the old
-msg "$(/usr/bin/gettext "Making and MD5sum'ing the new database...")"
+msg "$(gettext "Making and MD5sum'ing the new database...")"
 mkdir "$localdb.new"
 bsdtar -xpf "$workdir/pacman-db.tar.gz" -C "$localdb.new"
 if (( $? )); then
 	rm -rf "$workdir"
-	die_r "$(/usr/bin/gettext "Untar'ing %s failed.")" "$localdb"
+	die_r "$(gettext "Untar'ing %s failed.")" "$localdb"
 fi
 # immediate sync following extraction should get it written continuously on HDD
-msg "$(/usr/bin/gettext "Syncing database to disk...")"
+msg "$(gettext "Syncing database to disk...")"
 sync
 (cd "$localdb.new" && find . -type f -print0 | \
 	xargs -0 /usr/bin/openssl dgst -md5 | sort > "$workdir/pacsums.new")
 
 # step 4: compare the sums
-msg "$(/usr/bin/gettext "Checking integrity...")"
+msg "$(gettext "Checking integrity...")"
 read -ra old_dgst < <(/usr/bin/openssl dgst -md5 < "$workdir/pacsums.old")
 read -ra new_dgst < <(/usr/bin/openssl dgst -md5 < "$workdir/pacsums.new")
 if [[ ${old_dgst[@]:(-1)} != ${new_dgst[@]:(-1)} ]]; then
 	# failed
 	# leave our pacman-optimize tmpdir for checking to see what doesn't match up
 	rm -rf "$localdb.new"
-	die_r "$(/usr/bin/gettext "Integrity check FAILED, reverting to old database.")"
+	die_r "$(gettext "Integrity check FAILED, reverting to old database.")"
 fi
 
 # step 5: shuffle the newly extracted DB into the proper location
-msg "$(/usr/bin/gettext "Rotating database into place...")"
+msg "$(gettext "Rotating database into place...")"
 
 fail=0
 mv "$localdb" "$localdb.old" || fail=1
@@ -172,7 +174,7 @@ chmod $(@MODECMD@ "$localdb.old") "$localdb" || fail=1
 chown $(@OWNERCMD@ "$localdb.old") "$localdb" || fail=1
 if (( fail )); then
 	# failure with our directory shuffle
-	die_r "$(/usr/bin/gettext "New database substitution failed. Check for %s, %s, and %s directories.")" "$localdb" "$localdb.old" "$localdb.new"
+	die_r "$(gettext "New database substitution failed. Check for %s, %s, and %s directories.")" "$localdb" "$localdb.old" "$localdb.new"
 fi
 rm -rf "$localdb.old"
 
@@ -181,7 +183,7 @@ rm -f "$lockfile"
 rm -rf "$workdir"
 
 echo
-msg "$(/usr/bin/gettext "Finished. Your pacman database has been optimized.")"
+msg "$(gettext "Finished. Your pacman database has been optimized.")"
 echo
 
 exit 0

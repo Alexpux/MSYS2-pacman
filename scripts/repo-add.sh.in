@@ -50,49 +50,49 @@ usage() {
 	cmd=${0##*/}
 	printf -- "%s (pacman) %s\n\n" "$cmd" "$myver"
 	if [[ $cmd == "repo-add" ]] ; then
-		printf -- "$(/usr/bin/gettext "Usage: repo-add [options] <path-to-db> <package|delta> ...\n")"
+		printf -- "$(gettext "Usage: repo-add [options] <path-to-db> <package|delta> ...\n")"
 		printf -- "\n"
-		printf -- "$(/usr/bin/gettext "\
+		printf -- "$(gettext "\
 repo-add will update a package database by reading a package file.\n\
 Multiple packages to add can be specified on the command line.\n")"
 		printf -- "\n"
-		printf -- "$(/usr/bin/gettext "Options:\n")"
-		printf -- "$(/usr/bin/gettext "  -d, --delta       generate and add delta for package update\n")"
-		printf -- "$(/usr/bin/gettext "  -n, --new         only add packages that are not already in the database\n")"
-		printf -- "$(/usr/bin/gettext "  -R, --remove      remove package file from disk when updating database entry\n")"
-		printf -- "$(/usr/bin/gettext "  -f, --files       update database's file list\n")"
+		printf -- "$(gettext "Options:\n")"
+		printf -- "$(gettext "  -d, --delta       generate and add delta for package update\n")"
+		printf -- "$(gettext "  -n, --new         only add packages that are not already in the database\n")"
+		printf -- "$(gettext "  -R, --remove      remove package file from disk when updating database entry\n")"
+		printf -- "$(gettext "  -f, --files       update database's file list\n")"
 	elif [[ $cmd == "repo-remove" ]] ; then
-		printf -- "$(/usr/bin/gettext "Usage: repo-remove [options] <path-to-db> <packagename|delta> ...\n")"
+		printf -- "$(gettext "Usage: repo-remove [options] <path-to-db> <packagename|delta> ...\n")"
 		printf -- "\n"
-		printf -- "$(/usr/bin/gettext "\
+		printf -- "$(gettext "\
 repo-remove will update a package database by removing the package name\n\
 specified on the command line from the given repo database. Multiple\n\
 packages to remove can be specified on the command line.\n")"
 		printf -- "\n"
-		printf -- "$(/usr/bin/gettext "Options:\n")"
+		printf -- "$(gettext "Options:\n")"
 	else
-		printf -- "$(/usr/bin/gettext "Please move along, there is nothing to see here.\n")"
+		printf -- "$(gettext "Please move along, there is nothing to see here.\n")"
 		return
 	fi
-	printf -- "$(/usr/bin/gettext "  --nocolor         turn off color in output\n")"
-	printf -- "$(/usr/bin/gettext "  -q, --quiet       minimize output\n")"
-	printf -- "$(/usr/bin/gettext "  -s, --sign        sign database with GnuPG after update\n")"
-	printf -- "$(/usr/bin/gettext "  -k, --key <key>   use the specified key to sign the database\n")"
-	printf -- "$(/usr/bin/gettext "  -v, --verify      verify database's signature before update\n")"
-	printf -- "$(/usr/bin/gettext "\n\
+	printf -- "$(gettext "  --nocolor         turn off color in output\n")"
+	printf -- "$(gettext "  -q, --quiet       minimize output\n")"
+	printf -- "$(gettext "  -s, --sign        sign database with GnuPG after update\n")"
+	printf -- "$(gettext "  -k, --key <key>   use the specified key to sign the database\n")"
+	printf -- "$(gettext "  -v, --verify      verify database's signature before update\n")"
+	printf -- "$(gettext "\n\
 See %s(8) for more details and descriptions of the available options.\n")" $cmd
 	printf "\n"
 	if [[ $cmd == "repo-add" ]] ; then
-		printf -- "$(/usr/bin/gettext "Example:  repo-add /path/to/repo.db.tar.gz pacman-3.0.0-1-i686.pkg.tar.gz\n")"
+		printf -- "$(gettext "Example:  repo-add /path/to/repo.db.tar.gz pacman-3.0.0-1-i686.pkg.tar.gz\n")"
 	elif [[ $cmd == "repo-remove" ]] ; then
-		printf -- "$(/usr/bin/gettext "Example:  repo-remove /path/to/repo.db.tar.gz kernel26\n")"
+		printf -- "$(gettext "Example:  repo-remove /path/to/repo.db.tar.gz kernel26\n")"
 	fi
 }
 
 version() {
 	cmd=${0##*/}
 	printf "%s (pacman) %s\n\n" "$cmd" "$myver"
-	printf -- "$(/usr/bin/gettext "\
+	printf -- "$(gettext "\
 Copyright (c) 2006-2014 Pacman Development Team <pacman-dev@archlinux.org>\n\n\
 This is free software; see the source for copying conditions.\n\
 There is NO WARRANTY, to the extent permitted by law.\n")"
@@ -140,7 +140,7 @@ db_write_delta() {
 
 	pkgentry=$(find_pkgentry "$pkgname")
 	if [[ -z $pkgentry ]]; then
-		error "$(/usr/bin/gettext "No database entry for package '%s'.")" "$pkgname"
+		error "$(gettext "No database entry for package '%s'.")" "$pkgname"
 		return 1
 	fi
 	deltas=$pkgentry/deltas
@@ -158,7 +158,7 @@ db_write_delta() {
 	if grep -q "$oldfile.*$newfile" "$deltas"; then
 		sed -i.backup "/$oldfile.*$newfile/d" "$deltas" && rm -f "$deltas.backup"
 	fi
-	msg2 "$(/usr/bin/gettext "Adding 'deltas' entry : %s -> %s")" "$oldfile" "$newfile"
+	msg2 "$(gettext "Adding 'deltas' entry : %s -> %s")" "$oldfile" "$newfile"
 	echo "${deltafile##*/} $md5sum $csize $oldfile $newfile" >> "$deltas"
 
 	return 0
@@ -181,10 +181,10 @@ db_remove_delta() {
 	fi
 	if grep -q "$filename" "$deltas"; then
 		sed -i.backup "/$filename/d" "$deltas" && rm -f "$deltas.backup"
-		msg2 "$(/usr/bin/gettext "Removing existing entry '%s'...")" "$filename"
+		msg2 "$(gettext "Removing existing entry '%s'...")" "$filename"
 		# empty deltas file contains only "%DELTAS%"
 		if (( $(wc -l < "$deltas") == 1 )); then
-			msg2 "$(/usr/bin/gettext "Removing empty deltas file ...")"
+			msg2 "$(gettext "Removing empty deltas file ...")"
 			rm "$deltas"
 		fi
 		return 0
@@ -195,7 +195,7 @@ db_remove_delta() {
 
 check_gpg() {
 	if ! type -p gpg >/dev/null; then
-		error "$(/usr/bin/gettext "Cannot find the gpg binary! Is GnuPG installed?")"
+		error "$(gettext "Cannot find the gpg binary! Is GnuPG installed?")"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
 }
@@ -205,7 +205,7 @@ create_signature() {
 	(( ! SIGN )) && return
 	local dbfile=$1
 	local ret=0
-	msg "$(/usr/bin/gettext "Signing database...")"
+	msg "$(gettext "Signing database...")"
 
 	local SIGNWITHKEY=""
 	if [[ -n $GPGKEY ]]; then
@@ -214,9 +214,9 @@ create_signature() {
 	/usr/bin/gpg --detach-sign --use-agent ${SIGNWITHKEY} "$dbfile" &>/dev/null || ret=$?
 
 	if (( ! ret )); then
-		msg2 "$(/usr/bin/gettext "Created signature file '%s'")" "${dbfile##*/.tmp.}.sig"
+		msg2 "$(gettext "Created signature file '%s'")" "${dbfile##*/.tmp.}.sig"
 	else
-		warning "$(/usr/bin/gettext "Failed to sign package database.")"
+		warning "$(gettext "Failed to sign package database.")"
 	fi
 }
 
@@ -225,17 +225,17 @@ verify_signature() {
 	(( ! VERIFY )) && return
 	local dbfile=$1
 	local ret=0
-	msg "$(/usr/bin/gettext "Verifying database signature...")"
+	msg "$(gettext "Verifying database signature...")"
 
 	if [[ ! -f $dbfile.sig ]]; then
-		warning "$(/usr/bin/gettext "No existing signature found, skipping verification.")"
+		warning "$(gettext "No existing signature found, skipping verification.")"
 		return
 	fi
 	/usr/bin/gpg --verify "$dbfile.sig" || ret=$?
 	if (( ! ret )); then
-		msg2 "$(/usr/bin/gettext "Database signature file verified.")"
+		msg2 "$(gettext "Database signature file verified.")"
 	else
-		error "$(/usr/bin/gettext "Database signature was NOT valid!")"
+		error "$(gettext "Database signature was NOT valid!")"
 		exit 1
 	fi
 }
@@ -290,12 +290,12 @@ db_write_entry() {
 
 	# ensure $pkgname and $pkgver variables were found
 	if [[ -z $pkgname || -z $pkgver ]]; then
-		error "$(/usr/bin/gettext "Invalid package file '%s'.")" "$pkgfile"
+		error "$(gettext "Invalid package file '%s'.")" "$pkgfile"
 		return 1
 	fi
 
 	if [[ -d $tmpdir/tree/$pkgname-$pkgver ]]; then
-		warning "$(/usr/bin/gettext "An entry for '%s' already existed")" "$pkgname-$pkgver"
+		warning "$(gettext "An entry for '%s' already existed")" "$pkgname-$pkgver"
 		if (( ONLYADDNEW )); then
 			return 0;
 		fi
@@ -312,7 +312,7 @@ db_write_entry() {
 			if [[ -n $pkgentry ]]; then
 				local oldfilename="$(sed -n '/^%FILENAME%$/ {n;p;q;}' "$pkgentry/desc")"
 				local oldfile="$(dirname "$1")/$oldfilename"
-				msg2 "$(/usr/bin/gettext "Removing existing package '%s'")" "$oldfilename"
+				msg2 "$(gettext "Removing existing package '%s'")" "$oldfilename"
 				rm -f ${oldfile} ${oldfile}.sig
 			fi
 		fi
@@ -322,17 +322,17 @@ db_write_entry() {
 	if [[ -f "$pkgfile.sig" ]]; then
 		pgpsigsize=$(@SIZECMD@ -L "$pkgfile.sig")
 		if (( pgpsigsize > 16384 )); then
-			error "$(/usr/bin/gettext "Invalid package signature file '%s'.")" "$pkgfile.sig"
+			error "$(gettext "Invalid package signature file '%s'.")" "$pkgfile.sig"
 			return 1
 		fi
-		msg2 "$(/usr/bin/gettext "Adding package signature...")"
+		msg2 "$(gettext "Adding package signature...")"
 		pgpsig=$(/bin/openssl base64 -in "$pkgfile.sig" | tr -d '\n')
 	fi
 
 	csize=$(@SIZECMD@ -L "$pkgfile")
 
 	# compute checksums
-	msg2 "$(/usr/bin/gettext "Computing checksums...")"
+	msg2 "$(gettext "Computing checksums...")"
 	md5sum=$(/usr/bin/openssl dgst -md5 "$pkgfile")
 	md5sum=${md5sum##* }
 	sha256sum=$(/usr/bin/openssl dgst -sha256 "$pkgfile")
@@ -350,7 +350,7 @@ db_write_entry() {
 	[[ -f ../$pkgname.deltas ]] && mv "../$pkgname.deltas" deltas
 
 	# create desc entry
-	msg2 "$(/usr/bin/gettext "Creating '%s' db entry...")" 'desc'
+	msg2 "$(gettext "Creating '%s' db entry...")" 'desc'
 	{
 		format_entry "FILENAME"  "${1##*/}"
 		format_entry "NAME"      "$pkgname"
@@ -377,7 +377,7 @@ db_write_entry() {
 	} >'desc'
 
 	# create depends entry
-	msg2 "$(/usr/bin/gettext "Creating '%s' db entry...")" 'depends'
+	msg2 "$(gettext "Creating '%s' db entry...")" 'depends'
 	{
 		format_entry "DEPENDS" "${_depends[@]}"
 		format_entry "CONFLICTS" "${_conflicts[@]}"
@@ -392,7 +392,7 @@ db_write_entry() {
 
 	# create files file if wanted
 	if (( WITHFILES )); then
-		msg2 "$(/usr/bin/gettext "Creating '%s' db entry...")" 'files'
+		msg2 "$(gettext "Creating '%s' db entry...")" 'files'
 		local files_path="$tmpdir/tree/$pkgname-$pkgver/files"
 		echo "%FILES%" >"$files_path"
 		/usr/bin/bsdtar --exclude='^.*' -tf "$pkgfile" >>"$files_path"
@@ -407,7 +407,7 @@ db_write_entry() {
 					db_write_delta "$delta"
 				fi
 			else
-				warning "$(/usr/bin/gettext "Old package file not found: %s")" "$oldfilename"
+				warning "$(gettext "Old package file not found: %s")" "$oldfilename"
 			fi
 		fi
 	fi
@@ -426,7 +426,7 @@ db_remove_entry() {
 		if [[ -f $pkgentry/deltas ]]; then
 			mv "$pkgentry/deltas" "$tmpdir/tree/$pkgname.deltas"
 		fi
-		msg2 "$(/usr/bin/gettext "Removing existing entry '%s'...")" \
+		msg2 "$(gettext "Removing existing entry '%s'...")" \
 		"${pkgentry##*/}"
 		rm -rf "$pkgentry"
 		pkgentry=$(find_pkgentry "$pkgname")
@@ -456,7 +456,7 @@ check_repo_db() {
 	repodir=${LOCKFILE%/*}/
 
 	if [[ ! -d $repodir ]]; then
-		error "$(/usr/bin/gettext "%s does not exist or is not a directory.")" "$repodir"
+		error "$(gettext "%s does not exist or is not a directory.")" "$repodir"
 		exit 1
 	fi
 
@@ -464,8 +464,8 @@ check_repo_db() {
 	if ( set -o noclobber; echo "$$" > "$LOCKFILE") 2> /dev/null; then
 		CLEAN_LOCK=1
 	else
-		error "$(/usr/bin/gettext "Failed to acquire lockfile: %s.")" "$LOCKFILE"
-		[[ -f $LOCKFILE ]] && error "$(/usr/bin/gettext "Held by process %s")" "$(cat "$LOCKFILE")"
+		error "$(gettext "Failed to acquire lockfile: %s.")" "$LOCKFILE"
+		[[ -f $LOCKFILE ]] && error "$(gettext "Held by process %s")" "$(cat "$LOCKFILE")"
 		exit 1
 	fi
 
@@ -475,23 +475,23 @@ check_repo_db() {
 		if ! /usr/bin/bsdtar -tqf "$REPO_DB_FILE" '*/desc' >/dev/null 2>&1; then
 			# check empty case
 			if [[ -n $(/usr/bin/bsdtar -tqf "$REPO_DB_FILE" '*' 2>/dev/null) ]]; then
-				error "$(/usr/bin/gettext "Repository file '%s' is not a proper pacman database.")" "$REPO_DB_FILE"
+				error "$(gettext "Repository file '%s' is not a proper pacman database.")" "$REPO_DB_FILE"
 				exit 1
 			fi
 		fi
 		verify_signature "$REPO_DB_FILE"
-		msg "$(/usr/bin/gettext "Extracting database to a temporary location...")"
+		msg "$(gettext "Extracting database to a temporary location...")"
 		/usr/bin/bsdtar -xf "$REPO_DB_FILE" -C "$tmpdir/tree"
 	else
 		case $cmd in
 			repo-remove)
-			error "$(/usr/bin/gettext "Repository file '%s' was not found.")" "$REPO_DB_FILE"
+			error "$(gettext "Repository file '%s' was not found.")" "$REPO_DB_FILE"
 			exit 1
 			;;
 			repo-add)
 			# check if the file can be created (write permission, directory existence, etc)
 			if ! touch "$REPO_DB_FILE"; then
-				error "$(/usr/bin/gettext "Repository file '%s' could not be created.")" "$REPO_DB_FILE"
+				error "$(gettext "Repository file '%s' could not be created.")" "$REPO_DB_FILE"
 				exit 1
 			fi
 			rm -f "$REPO_DB_FILE"
@@ -502,15 +502,15 @@ check_repo_db() {
 
 add() {
 	if [[ ! -f $1 ]]; then
-		error "$(/usr/bin/gettext "File '%s' not found.")" "$1"
+		error "$(gettext "File '%s' not found.")" "$1"
 		return 1
 	fi
 
 	if [[ ${1##*.} == "delta" ]]; then
 		deltafile=$1
-		msg "$(/usr/bin/gettext "Adding delta '%s'")" "$deltafile"
+		msg "$(gettext "Adding delta '%s'")" "$deltafile"
 		if ! type xdelta3 &>/dev/null; then
-			error "$(/usr/bin/gettext "Cannot find the xdelta3 binary! Is xdelta3 installed?")"
+			error "$(gettext "Cannot find the xdelta3 binary! Is xdelta3 installed?")"
 			exit 1
 		fi
 		if db_write_delta "$deltafile"; then
@@ -522,11 +522,11 @@ add() {
 
 	pkgfile=$1
 	if ! /usr/bin/bsdtar -tqf "$pkgfile" .PKGINFO >/dev/null 2>&1; then
-		error "$(/usr/bin/gettext "'%s' is not a package file, skipping")" "$pkgfile"
+		error "$(gettext "'%s' is not a package file, skipping")" "$pkgfile"
 		return 1
 	fi
 
-	msg "$(/usr/bin/gettext "Adding package '%s'")" "$pkgfile"
+	msg "$(gettext "Adding package '%s'")" "$pkgfile"
 
 	db_write_entry "$pkgfile"
 }
@@ -534,23 +534,23 @@ add() {
 remove() {
 	if [[ ${1##*.} == "delta" ]]; then
 		deltafile=$1
-		msg "$(/usr/bin/gettext "Searching for delta '%s'...")" "$deltafile"
+		msg "$(gettext "Searching for delta '%s'...")" "$deltafile"
 		if db_remove_delta "$deltafile"; then
 			return 0
 		else
-			error "$(/usr/bin/gettext "Delta matching '%s' not found.")" "$deltafile"
+			error "$(gettext "Delta matching '%s' not found.")" "$deltafile"
 			return 1
 		fi
 	fi
 
 	pkgname=$1
-	msg "$(/usr/bin/gettext "Searching for package '%s'...")" "$pkgname"
+	msg "$(gettext "Searching for package '%s'...")" "$pkgname"
 
 	if db_remove_entry "$pkgname"; then
 		rm -f "$tmpdir/tree/$pkgname.deltas"
 		return 0
 	else
-		error "$(/usr/bin/gettext "Package matching '%s' not found.")" "$pkgname"
+		error "$(gettext "Package matching '%s' not found.")" "$pkgname"
 		return 1
 	fi
 }
@@ -576,12 +576,14 @@ clean_up() {
 	exit $exit_code
 }
 
-# PROGRAM START
-
 # determine whether we have gettext; make it a no-op if we do not
-if ! type gettext &>/dev/null; then
+if ! type -p gettext >/dev/null; then
 	gettext() {
-		echo "$@"
+		printf "%s\n" "$@"
+	}
+else
+	gettext() {
+		/usr/bin/gettext "$@"
 	}
 fi
 
@@ -598,21 +600,21 @@ if [[ $cmd == "repo-elephant" ]]; then
 fi
 
 if [[ $cmd != "repo-add" && $cmd != "repo-remove" ]]; then
-	error "$(/usr/bin/gettext "Invalid command name '%s' specified.")" "$cmd"
+	error "$(gettext "Invalid command name '%s' specified.")" "$cmd"
 	exit 1
 fi
 
 tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/repo-tools.XXXXXXXXXX") || (\
-	error "$(/usr/bin/gettext "Cannot create temp directory for database building.")"; \
+	error "$(gettext "Cannot create temp directory for database building.")"; \
 	exit 1)
 mkdir "$tmpdir/tree"
 
 trap 'clean_up' EXIT
 for signal in TERM HUP QUIT; do
-	trap "trap_exit \"$(/usr/bin/gettext "%s signal caught. Exiting...")\" \"$signal\"" "$signal"
+	trap "trap_exit \"$(gettext "%s signal caught. Exiting...")\" \"$signal\"" "$signal"
 done
-trap 'trap_exit "$(/usr/bin/gettext "Aborted by user! Exiting...")"' INT
-trap 'trap_exit "$(/usr/bin/gettext "An unknown error has occurred. Exiting...")"' ERR
+trap 'trap_exit "$(gettext "Aborted by user! Exiting...")"' INT
+trap 'trap_exit "$(gettext "An unknown error has occurred. Exiting...")"' ERR
 
 declare -a args
 success=0
@@ -630,9 +632,9 @@ while (( $# )); do
 			SIGN=1
 			if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
 				if [[ ! -z $GPGKEY ]]; then
-					error "$(/usr/bin/gettext "The key ${GPGKEY} does not exist in your keyring.")"
+					error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
 				else
-					error "$(/usr/bin/gettext "There is no key in your keyring.")"
+					error "$(gettext "There is no key in your keyring.")"
 				fi
 				exit 1
 			fi
@@ -642,7 +644,7 @@ while (( $# )); do
 			shift
 			GPGKEY=$1
 			if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
-				error "$(/usr/bin/gettext "The key ${GPGKEY} does not exist in your keyring.")"
+				error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
 				exit 1
 			fi
 			;;
@@ -683,7 +685,7 @@ done
 
 # if at least one operation was a success, re-zip database
 if (( success )); then
-	msg "$(/usr/bin/gettext "Creating updated database file '%s'")" "$REPO_DB_FILE"
+	msg "$(gettext "Creating updated database file '%s'")" "$REPO_DB_FILE"
 
 	TAR_OPT=$(verify_repo_extension "$REPO_DB_FILE")
 	# $LOCKFILE is already guaranteed to be absolute so this is safe
@@ -697,7 +699,7 @@ if (( success )); then
 		/usr/bin/bsdtar -c${TAR_OPT}f "$tempname" *
 	else
 		# we have no packages remaining? zip up some emptyness
-		warning "$(/usr/bin/gettext "No packages remain, creating empty database.")"
+		warning "$(gettext "No packages remain, creating empty database.")"
 		/usr/bin/bsdtar -c${TAR_OPT}f "$tempname" -T /dev/null
 	fi
 	popd >/dev/null
@@ -734,7 +736,7 @@ if (( success )); then
 			cp "$REPO_DB_FILE.sig" "$dblink.sig"
 	fi
 else
-	msg "$(/usr/bin/gettext "No packages modified, nothing to do.")"
+	msg "$(gettext "No packages modified, nothing to do.")"
 	exit 1
 fi
 
