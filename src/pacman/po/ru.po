@@ -106,7 +106,7 @@ msgstr "Получение пакетов ...\n"
 
 #, c-format
 msgid "checking available disk space...\n"
-msgstr "проверяется доступное место...\n"
+msgstr "проверяется доступное дисковое пространство...\n"
 
 #, c-format
 msgid "%s optionally requires %s\n"
