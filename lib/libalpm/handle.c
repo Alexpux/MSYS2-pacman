@@ -37,6 +37,7 @@
 #include "delta.h"
 #include "trans.h"
 #include "alpm.h"
+#include "deps.h"
 
 alpm_handle_t *_alpm_handle_new(void)
 {
@@ -70,6 +71,10 @@ void _alpm_handle_free(alpm_handle_t *handle)
 	curl_easy_cleanup(handle->curl);
 #endif
 
+#ifdef HAVE_LIBGPGME
+	FREELIST(handle->known_keys);
+#endif
+
 	regfree(&handle->delta_regex);
 
 	/* free memory */
@@ -85,6 +90,10 @@ void _alpm_handle_free(alpm_handle_t *handle)
 	FREELIST(handle->noextract);
 	FREELIST(handle->ignorepkg);
 	FREELIST(handle->ignoregroup);
+
+	alpm_list_free_inner(handle->assumeinstalled, (alpm_list_fn_free)alpm_dep_free);
+	alpm_list_free(handle->assumeinstalled);
+
 	FREE(handle);
 }
 
@@ -142,6 +151,12 @@ int _alpm_handle_unlock(alpm_handle_t *handle)
 	return 0;
 }
 
+
+alpm_cb_log SYMEXPORT alpm_option_get_logcb(alpm_handle_t *handle)
+{
+	CHECK_HANDLE(handle, return NULL);
+	return handle->logcb;
+}
 
 alpm_cb_download SYMEXPORT alpm_option_get_dlcb(alpm_handle_t *handle)
 {
@@ -245,6 +260,12 @@ alpm_list_t SYMEXPORT *alpm_option_get_ignoregroups(alpm_handle_t *handle)
 	return handle->ignoregroup;
 }
 
+alpm_list_t SYMEXPORT *alpm_option_get_assumeinstalled(alpm_handle_t *handle)
+{
+	CHECK_HANDLE(handle, return NULL);
+	return handle->assumeinstalled;
+}
+
 const char SYMEXPORT *alpm_option_get_arch(alpm_handle_t *handle)
 {
 	CHECK_HANDLE(handle, return NULL);
@@ -261,6 +282,13 @@ int SYMEXPORT alpm_option_get_checkspace(alpm_handle_t *handle)
 {
 	CHECK_HANDLE(handle, return -1);
 	return handle->checkspace;
+}
+
+int SYMEXPORT alpm_option_set_logcb(alpm_handle_t *handle, alpm_cb_log cb)
+{
+	CHECK_HANDLE(handle, return -1);
+	handle->logcb = cb;
+	return 0;
 }
 
 int SYMEXPORT alpm_option_set_dlcb(alpm_handle_t *handle, alpm_cb_download cb)
@@ -542,6 +570,51 @@ int SYMEXPORT alpm_option_set_ignoregroups(alpm_handle_t *handle, alpm_list_t *i
 int SYMEXPORT alpm_option_remove_ignoregroup(alpm_handle_t *handle, const char *grp)
 {
 	return _alpm_option_strlist_rem(handle, &(handle->ignoregroup), grp);
+}
+
+int SYMEXPORT alpm_option_add_assumeinstalled(alpm_handle_t *handle, const alpm_depend_t *dep)
+{
+	CHECK_HANDLE(handle, return -1);
+
+	handle->assumeinstalled = alpm_list_add(handle->assumeinstalled, (void *)dep);
+	return 0;
+}
+
+int SYMEXPORT alpm_option_set_assumeinstalled(alpm_handle_t *handle, alpm_list_t *deps)
+{
+	CHECK_HANDLE(handle, return -1);
+	if(handle->assumeinstalled) {
+		alpm_list_free_inner(handle->assumeinstalled, (alpm_list_fn_free)alpm_dep_free);
+		alpm_list_free(handle->assumeinstalled);
+	}
+	handle->assumeinstalled = deps;
+	return 0;
+}
+
+static int assumeinstalled_cmp(const void *d1, const void *d2)
+{
+	const alpm_depend_t *dep1 = d1;
+	const alpm_depend_t *dep2 = d2;
+
+	if(strcmp(dep1->name, dep2->name) == 0 && strcmp(dep1->version, dep2->version) == 0) {
+		return 0;
+	}
+
+	return -1;
+}
+
+int SYMEXPORT alpm_option_remove_assumeinstalled(alpm_handle_t *handle, const alpm_depend_t *dep)
+{
+	alpm_depend_t *vdata = NULL;
+	CHECK_HANDLE(handle, return -1);
+
+	handle->assumeinstalled = alpm_list_remove(handle->assumeinstalled, dep, &assumeinstalled_cmp, (void **)&vdata);
+	if(vdata != NULL) {
+		alpm_dep_free(vdata);
+		return 1;
+	}
+
+	return 0;
 }
 
 int SYMEXPORT alpm_option_set_arch(alpm_handle_t *handle, const char *arch)

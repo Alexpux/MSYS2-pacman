@@ -46,7 +46,7 @@
 #include "conf.h"
 #include "callback.h"
 
-static int cached_columns = 0;
+static int cached_columns = -1;
 
 struct table_cell_t {
 	char *label;
@@ -158,12 +158,16 @@ static int flush_term_input(int fd)
 
 void columns_cache_reset(void)
 {
-	cached_columns = 0;
+	cached_columns = -1;
 }
 
 static int getcols_fd(int fd)
 {
 	int width = -1;
+
+	if(!isatty(fd)) {
+		return 0;
+	}
 
 #if defined(TIOCGSIZE)
 	struct ttysize win;
@@ -187,22 +191,26 @@ static int getcols_fd(int fd)
 unsigned short getcols(void)
 {
 	const char *e;
-	int c = 0;
+	int c = -1;
 
-	if(cached_columns > 0) {
+	if(cached_columns >= 0) {
 		return cached_columns;
 	}
 
 	e = getenv("COLUMNS");
-	if(e) {
-		c = strtol(e, NULL, 10);
+	if(e && *e) {
+		char *p = NULL;
+		c = strtol(e, &p, 10);
+		if(*p != '\0') {
+			c= -1;
+		}
 	}
 
-	if(c <= 0) {
+	if(c < 0) {
 		c = getcols_fd(STDOUT_FILENO);
 	}
 
-	if(c <= 0) {
+	if(c < 0) {
 		c = 80;
 	}
 
@@ -632,7 +640,7 @@ static int table_display(const alpm_list_t *header,
 	totalwidth = table_calc_widths(first, rows, padding, totalcols,
 			&widths, &has_data);
 	/* return -1 if terminal is not wide enough */
-	if(totalwidth > cols) {
+	if(cols && totalwidth > cols) {
 		pm_printf(ALPM_LOG_WARNING,
 				_("insufficient columns available for table display\n"));
 		ret = -1;

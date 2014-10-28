@@ -35,7 +35,7 @@
 #include "handle.h"
 #include "trans.h"
 
-void _alpm_dep_free(alpm_depend_t *dep)
+void SYMEXPORT alpm_dep_free(alpm_depend_t *dep)
 {
 	FREE(dep->name);
 	FREE(dep->version);
@@ -59,7 +59,7 @@ static alpm_depmissing_t *depmiss_new(const char *target, alpm_depend_t *dep,
 
 void SYMEXPORT alpm_depmissing_free(alpm_depmissing_t *miss)
 {
-	_alpm_dep_free(miss->depend);
+	alpm_dep_free(miss->depend);
 	FREE(miss->target);
 	FREE(miss->causingpkg);
 	FREE(miss);
@@ -279,12 +279,12 @@ static int no_dep_version(alpm_handle_t *handle)
  */
 alpm_pkg_t SYMEXPORT *alpm_find_satisfier(alpm_list_t *pkgs, const char *depstring)
 {
-	alpm_depend_t *dep = _alpm_splitdep(depstring);
+	alpm_depend_t *dep = alpm_dep_from_string(depstring);
 	if(!dep) {
 		return NULL;
 	}
 	alpm_pkg_t *pkg = find_dep_satisfier(pkgs, dep);
-	_alpm_dep_free(dep);
+	alpm_dep_free(dep);
 	return pkg;
 }
 
@@ -333,8 +333,10 @@ alpm_list_t SYMEXPORT *alpm_checkdeps(alpm_handle_t *handle,
 			}
 			/* 1. we check the upgrade list */
 			/* 2. we check database for untouched satisfying packages */
+			/* 3. we check the dependency ignore list */
 			if(!find_dep_satisfier(upgrade, depend) &&
-					!find_dep_satisfier(dblist, depend)) {
+					!find_dep_satisfier(dblist, depend) &&
+					!_alpm_depcmp_provides(depend, handle->assumeinstalled)) {
 				/* Unsatisfied dependency in the upgrade list */
 				alpm_depmissing_t *miss;
 				char *missdepstring = alpm_dep_compute_string(depend);
@@ -363,9 +365,11 @@ alpm_list_t SYMEXPORT *alpm_checkdeps(alpm_handle_t *handle,
 				/* we won't break this depend, if it is already broken, we ignore it */
 				/* 1. check upgrade list for satisfiers */
 				/* 2. check dblist for satisfiers */
+				/* 3. we check the dependency ignore list */
 				if(causingpkg &&
 						!find_dep_satisfier(upgrade, depend) &&
-						!find_dep_satisfier(dblist, depend)) {
+						!find_dep_satisfier(dblist, depend) &&
+						!_alpm_depcmp_provides(depend, handle->assumeinstalled)) {
 					alpm_depmissing_t *miss;
 					char *missdepstring = alpm_dep_compute_string(depend);
 					_alpm_log(handle, ALPM_LOG_DEBUG, "checkdeps: transaction would break '%s' dependency of '%s'\n",
@@ -416,17 +420,18 @@ int _alpm_depcmp_literal(alpm_pkg_t *pkg, alpm_depend_t *dep)
 	return dep_vercmp(pkg->version, dep->mod, dep->version);
 }
 
-int _alpm_depcmp(alpm_pkg_t *pkg, alpm_depend_t *dep)
+/**
+ * @param dep dependency to check agains the provision list
+ * @param provisions provision list
+ * @return 1 if provider is found, 0 otherwise
+ */
+int _alpm_depcmp_provides(alpm_depend_t *dep, alpm_list_t *provisions)
 {
+	int satisfy = 0;
 	alpm_list_t *i;
-	int satisfy = _alpm_depcmp_literal(pkg, dep);
-
-	if(satisfy) {
-		return satisfy;
-	}
 
 	/* check provisions, name and version if available */
-	for(i = alpm_pkg_get_provides(pkg); i && !satisfy; i = i->next) {
+	for(i = provisions; i && !satisfy; i = i->next) {
 		alpm_depend_t *provision = i->data;
 
 		if(dep->mod == ALPM_DEP_MOD_ANY) {
@@ -444,7 +449,13 @@ int _alpm_depcmp(alpm_pkg_t *pkg, alpm_depend_t *dep)
 	return satisfy;
 }
 
-alpm_depend_t *_alpm_splitdep(const char *depstring)
+int _alpm_depcmp(alpm_pkg_t *pkg, alpm_depend_t *dep)
+{
+	return _alpm_depcmp_literal(pkg, dep)
+		|| _alpm_depcmp_provides(dep, alpm_pkg_get_provides(pkg));
+}
+
+alpm_depend_t SYMEXPORT *alpm_dep_from_string(const char *depstring)
 {
 	alpm_depend_t *depend;
 	const char *ptr, *version, *desc;
@@ -748,10 +759,10 @@ alpm_pkg_t SYMEXPORT *alpm_find_dbs_satisfier(alpm_handle_t *handle,
 	CHECK_HANDLE(handle, return NULL);
 	ASSERT(dbs, RET_ERR(handle, ALPM_ERR_WRONG_ARGS, NULL));
 
-	dep = _alpm_splitdep(depstring);
+	dep = alpm_dep_from_string(depstring);
 	ASSERT(dep, return NULL);
 	pkg = resolvedep(handle, dep, dbs, NULL, 1);
-	_alpm_dep_free(dep);
+	alpm_dep_free(dep);
 	return pkg;
 }
 

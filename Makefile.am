@@ -28,6 +28,7 @@ $(top_srcdir)/test/pacman/tests/TESTS: $(wildcard test/pacman/tests/*.py*)
 
 TESTS =  test/scripts/parseopts_test.sh \
 				 test/scripts/human_to_size_test.sh \
+				 test/scripts/pacman-db-upgrade-v9.py \
 				 test/util/pacsorttest.sh \
 				 test/util/vercmptest.sh
 include $(top_srcdir)/test/pacman/tests/TESTS
@@ -44,7 +45,8 @@ PY_LOG_DRIVER = env AM_TAP_AWK='$(AWK)' $(SHELL) \
 PY_LOG_COMPILER = $(PYTHON) $(top_srcdir)/test/pacman/pactest.py
 AM_PY_LOG_FLAGS = \
 		--scriptlet-shell $(SCRIPTLET_SHELL) \
-		-p $(top_builddir)/src/pacman/pacman
+		--bindir $(top_builddir)/src/pacman \
+		--bindir $(top_builddir)/scripts
 
 # create the pacman DB and cache directories upon install
 install-data-local:

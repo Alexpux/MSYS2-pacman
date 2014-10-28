@@ -62,7 +62,12 @@ struct __alpm_handle_t {
 	CURL *curl;             /* reusable curl_easy handle */
 #endif
 
+#ifdef HAVE_LIBGPGME
+	alpm_list_t *known_keys;  /* keys verified to be in our keychain */
+#endif
+
 	/* callback functions */
+	alpm_cb_log logcb;          /* Log callback function */
 	alpm_cb_download dlcb;      /* Download callback function */
 	alpm_cb_totaldl totaldlcb;  /* Total download callback function */
 	alpm_cb_fetch fetchcb;      /* Download file callback function */
@@ -83,6 +88,7 @@ struct __alpm_handle_t {
 	alpm_list_t *noextract;   /* List of files NOT to extract */
 	alpm_list_t *ignorepkg;   /* List of packages to ignore */
 	alpm_list_t *ignoregroup; /* List of groups to ignore */
+	alpm_list_t *assumeinstalled;   /* List of virtual packages used to satisfy dependencies */
 
 	/* options */
 	char *arch;              /* Architecture of packages we should allow */

@@ -205,6 +205,7 @@ static void usage(int op, const char * const myname)
 		addlist(_("      --gpgdir <path>  set an alternate home directory for GnuPG\n"));
 		addlist(_("      --logfile <path> set an alternate log file\n"));
 		addlist(_("      --noconfirm      do not ask for any confirmation\n"));
+		addlist(_("      --confirm        always ask for confirmation\n"));
 	}
 	list = alpm_list_msort(list, alpm_list_count(list), options_cmp);
 	for(i = list; i; i = alpm_list_next(i)) {
@@ -456,6 +457,9 @@ static int parsearg_global(int opt)
 		case OP_NOCONFIRM:
 			config->noconfirm = 1;
 			break;
+		case OP_CONFIRM:
+			config->noconfirm = 0;
+			break;
 		case OP_DBPATH:
 		case 'b':
 			free(config->dbpath);
@@ -633,6 +637,9 @@ static int parsearg_trans(int opt)
 			config->print = 1;
 			free(config->print_format);
 			config->print_format = strdup(optarg);
+			break;
+		case OP_ASSUMEINSTALLED:
+			parsearg_util_addlist(&(config->assumeinstalled));
 			break;
 		default:
 			return 1;
@@ -855,8 +862,10 @@ static int parseargs(int argc, char *argv[])
 		{"downloadonly", no_argument,     0, OP_DOWNLOADONLY},
 		{"refresh",    no_argument,       0, OP_REFRESH},
 		{"noconfirm",  no_argument,       0, OP_NOCONFIRM},
+		{"confirm",    no_argument,       0, OP_CONFIRM},
 		{"config",     required_argument, 0, OP_CONFIG},
 		{"ignore",     required_argument, 0, OP_IGNORE},
+		{"assume-installed",     required_argument, 0, OP_ASSUMEINSTALLED},
 		{"debug",      optional_argument, 0, OP_DEBUG},
 		{"force",      no_argument,       0, OP_FORCE},
 		{"noprogressbar", no_argument,    0, OP_NOPROGRESSBAR},

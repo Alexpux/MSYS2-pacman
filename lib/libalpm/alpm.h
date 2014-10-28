@@ -343,6 +343,16 @@ typedef struct _alpm_siglist_t {
  * Logging facilities
  */
 
+/** Logging Levels */
+typedef enum _alpm_loglevel_t {
+	ALPM_LOG_ERROR    = 1,
+	ALPM_LOG_WARNING  = (1 << 1),
+	ALPM_LOG_DEBUG    = (1 << 2),
+	ALPM_LOG_FUNCTION = (1 << 3)
+} alpm_loglevel_t;
+
+typedef void (*alpm_cb_log)(alpm_loglevel_t, const char *, va_list);
+
 int alpm_logaction(alpm_handle_t *handle, const char *prefix,
 		const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 
@@ -431,8 +441,6 @@ typedef enum _alpm_event_type_t {
 	ALPM_EVENT_KEY_DOWNLOAD_START,
 	/** Key downloading is finished. */
 	ALPM_EVENT_KEY_DOWNLOAD_DONE,
-	/** A log message was emitted; See alpm_event_log_t for arguments. */
-	ALPM_EVENT_LOG,
 	/** A .pacnew file was created; See alpm_event_pacnew_created_t for arguments. */
 	ALPM_EVENT_PACNEW_CREATED,
 	/** A .pacsave file was created; See alpm_event_pacsave_created_t for
@@ -502,24 +510,6 @@ typedef struct _alpm_event_database_missing_t {
 	const char *dbname;
 } alpm_event_database_missing_t;
 
-/** Log levels. */
-typedef enum _alpm_loglevel_t {
-	ALPM_LOG_ERROR    = 1,
-	ALPM_LOG_WARNING  = (1 << 1),
-	ALPM_LOG_DEBUG    = (1 << 2),
-	ALPM_LOG_FUNCTION = (1 << 3)
-} alpm_loglevel_t;
-
-typedef struct _alpm_event_log_t {
-	/** Type of event. */
-	alpm_event_type_t type;
-	/** Log level. */
-	alpm_loglevel_t level;
-	/** Message. */
-	const char *fmt;
-	va_list args;
-} alpm_event_log_t;
-
 typedef struct _alpm_event_pkgdownload_t {
 	/** Type of event. */
 	alpm_event_type_t type;
@@ -571,7 +561,6 @@ typedef union _alpm_event_t {
 	alpm_event_delta_patch_t delta_patch;
 	alpm_event_scriptlet_info_t scriptlet_info;
 	alpm_event_database_missing_t database_missing;
-	alpm_event_log_t log;
 	alpm_event_pkgdownload_t pkgdownload;
 	alpm_event_pacnew_created_t pacnew_created;
 	alpm_event_pacsave_created_t pacsave_created;
@@ -749,6 +738,11 @@ char *alpm_fetch_pkgurl(alpm_handle_t *handle, const char *url);
  * @{
  */
 
+/** Returns the callback used for logging. */
+alpm_cb_log alpm_option_get_logcb(alpm_handle_t *handle);
+/** Sets the callback used for logging. */
+int alpm_option_set_logcb(alpm_handle_t *handle, alpm_cb_log cb);
+
 /** Returns the callback used to report download progress. */
 alpm_cb_download alpm_option_get_dlcb(alpm_handle_t *handle);
 /** Sets the callback used to report download progress. */
@@ -855,6 +849,17 @@ alpm_list_t *alpm_option_get_ignoregroups(alpm_handle_t *handle);
 int alpm_option_add_ignoregroup(alpm_handle_t *handle, const char *grp);
 int alpm_option_set_ignoregroups(alpm_handle_t *handle, alpm_list_t *ignoregrps);
 int alpm_option_remove_ignoregroup(alpm_handle_t *handle, const char *grp);
+/** @} */
+
+/** @name Accessors to the list of ignored dependencies.
+ * These functions modify the list of dependencies that
+ * should be ignored by a sysupgrade.
+ * @{
+ */
+alpm_list_t *alpm_option_get_assumeinstalled(alpm_handle_t *handle);
+int alpm_option_add_assumeinstalled(alpm_handle_t *handle, const alpm_depend_t *dep);
+int alpm_option_set_assumeinstalled(alpm_handle_t *handle, alpm_list_t *deps);
+int alpm_option_remove_assumeinstalled(alpm_handle_t *handle, const alpm_depend_t *dep);
 /** @} */
 
 /** Returns the targeted architecture. */
@@ -1522,6 +1527,17 @@ alpm_list_t *alpm_checkconflicts(alpm_handle_t *handle, alpm_list_t *pkglist);
  * @return a formatted string, e.g. "glibc>=2.12"
  */
 char *alpm_dep_compute_string(const alpm_depend_t *dep);
+
+/** Return a newly allocated dependency information parsed from a string
+ * @param depstring a formatted string, e.g. "glibc=2.12"
+ * @return a dependency info structure
+ */
+alpm_depend_t *alpm_dep_from_string(const char *depstring);
+
+/** Free a dependency info structure
+ * @param dep struct to free
+ */
+void alpm_dep_free(alpm_depend_t *dep);
 
 /** @} */
 

@@ -524,8 +524,8 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 					conflict->package1, conflict->package2);
 
 			/* if sync1 provides sync2, we remove sync2 from the targets, and vice versa */
-			alpm_depend_t *dep1 = _alpm_splitdep(conflict->package1);
-			alpm_depend_t *dep2 = _alpm_splitdep(conflict->package2);
+			alpm_depend_t *dep1 = alpm_dep_from_string(conflict->package1);
+			alpm_depend_t *dep2 = alpm_dep_from_string(conflict->package2);
 			if(_alpm_depcmp(sync1, dep2)) {
 				rsync = sync2;
 				sync = sync1;
@@ -544,12 +544,12 @@ int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data)
 				}
 				alpm_list_free_inner(deps, (alpm_list_fn_free)alpm_conflict_free);
 				alpm_list_free(deps);
-				_alpm_dep_free(dep1);
-				_alpm_dep_free(dep2);
+				alpm_dep_free(dep1);
+				alpm_dep_free(dep2);
 				goto cleanup;
 			}
-			_alpm_dep_free(dep1);
-			_alpm_dep_free(dep2);
+			alpm_dep_free(dep1);
+			alpm_dep_free(dep2);
 
 			/* Prints warning */
 			_alpm_log(handle, ALPM_LOG_WARNING,
@@ -1074,10 +1074,9 @@ static int check_keyring(alpm_handle_t *handle)
 					alpm_list_t *k;
 					for(k = keys; k; k = k->next) {
 						char *key = k->data;
-						if(_alpm_key_in_keychain(handle, key) == 0) {
-							if(!alpm_list_find_str(errors, key)) {
-								errors = alpm_list_add(errors, strdup(key));
-							}
+						if(!alpm_list_find_str(errors, key) &&
+								_alpm_key_in_keychain(handle, key) == 0) {
+							errors = alpm_list_add(errors, strdup(key));
 						}
 					}
 					FREELIST(keys);
@@ -1264,13 +1263,12 @@ static int load_packages(alpm_handle_t *handle, alpm_list_t **data,
 	return 0;
 }
 
-int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
+int _alpm_sync_load(alpm_handle_t *handle, alpm_list_t **data)
 {
 	alpm_list_t *i, *deltas = NULL;
 	size_t total = 0;
 	uint64_t total_bytes = 0;
 	alpm_trans_t *trans = handle->trans;
-	alpm_event_t event;
 
 	if(download_files(handle, &deltas)) {
 		alpm_list_free(deltas);
@@ -1307,14 +1305,8 @@ int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
 	/* this can only happen maliciously */
 	total_bytes = total_bytes ? total_bytes : 1;
 
-	/* this one is special: -1 is failure, 1 is retry, 0 is success */
-	while(1) {
-		int ret = check_validity(handle, total, total_bytes);
-		if(ret == 0) {
-			break;
-		} else if(ret < 0) {
-			return -1;
-		}
+	if(check_validity(handle, total, total_bytes) != 0) {
+		return -1;
 	}
 
 	if(trans->flags & ALPM_TRANS_FLAG_DOWNLOADONLY) {
@@ -1325,7 +1317,13 @@ int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
 		return -1;
 	}
 
-	trans->state = STATE_COMMITING;
+	return 0;
+}
+
+int _alpm_sync_commit(alpm_handle_t *handle, alpm_list_t **data)
+{
+	alpm_trans_t *trans = handle->trans;
+	alpm_event_t event;
 
 	/* fileconflict check */
 	if(!(trans->flags & ALPM_TRANS_FLAG_DBONLY)) {

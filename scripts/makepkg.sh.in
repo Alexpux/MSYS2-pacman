@@ -495,7 +495,7 @@ extract_bzr() {
 	local dir=$(get_filepath "$netfile")
 	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
 
-	msg2 "$(/bin/gettext "Creating working copy of %s %s repo...")" "${repo}" "bzr"
+	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "bzr"
 	pushd "$srcdir" &>/dev/null
 	rm -rf "${dir##*/}"
 
@@ -559,7 +559,7 @@ extract_git() {
 	local dir=$(get_filepath "$netfile")
 	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
 
-	msg2 "$(/bin/gettext "Creating working copy of %s %s repo...")" "${repo}" "git"
+	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "git"
 	pushd "$srcdir" &>/dev/null
 	rm -rf "${dir##*/}"
 
@@ -748,16 +748,59 @@ extract_svn() {
 	popd &>/dev/null
 }
 
-download_sources() {
-	msg "$(gettext "Retrieving sources...")"
+get_all_sources() {
+	local aggregate l a
 
-	local GET_VCS=1
-	if [[ $1 == "fast" ]]; then
-		GET_VCS=0
+	if array_build l 'source'; then
+		aggregate+=("${l[@]}")
 	fi
 
-	local netfile
-	for netfile in "${source[@]}"; do
+	for a in "${arch[@]}"; do
+		if array_build l "source_$a"; then
+			aggregate+=("${l[@]}")
+		fi
+	done
+
+	array_build "$1" "aggregate"
+}
+
+get_all_sources_for_arch() {
+	local aggregate l
+
+	if array_build l 'source'; then
+		aggregate+=("${l[@]}")
+	fi
+
+	if array_build l "source_$CARCH"; then
+		aggregate+=("${l[@]}")
+	fi
+
+	array_build "$1" "aggregate"
+}
+
+download_sources() {
+	local netfile all_sources
+	local get_source_fn=get_all_sources_for_arch get_vcs=1
+
+	msg "$(gettext "Retrieving sources...")"
+
+	while true; do
+		case $1 in
+			allarch)
+				get_source_fn=get_all_sources
+				;;
+			novcs)
+				get_vcs=0
+				;;
+			*)
+				break 2
+				;;
+		esac
+		shift
+	done
+
+	"$get_source_fn" 'all_sources'
+	for netfile in "${all_sources[@]}"; do
 		pushd "$SRCDEST" &>/dev/null
 
 		local proto=$(get_protocol "$netfile")
@@ -766,16 +809,16 @@ download_sources() {
 				download_local "$netfile"
 				;;
 			bzr*)
-				(( GET_VCS )) && download_bzr "$netfile"
+				(( get_vcs )) && download_bzr "$netfile"
 				;;
 			git*)
-				(( GET_VCS )) && download_git "$netfile"
+				(( get_vcs )) && download_git "$netfile"
 				;;
 			hg*)
-				(( GET_VCS )) && download_hg "$netfile"
+				(( get_vcs )) && download_hg "$netfile"
 				;;
 			svn*)
-				(( GET_VCS )) && download_svn "$netfile"
+				(( get_vcs )) && download_svn "$netfile"
 				;;
 			*)
 				download_file "$netfile"
@@ -846,7 +889,7 @@ get_pkg_arch() {
 		fi
 	else
 		local arch_override
-		pkgbuild_get_attribute "$1" arch arch_override 0
+		pkgbuild_get_attribute "$1" arch 0 arch_override
 		(( ${#arch_override[@]} == 0 )) && arch_override=("${arch[@]}")
 		if [[ $arch_override = "any" ]]; then
 			printf "%s\n" "any"
@@ -957,8 +1000,10 @@ in_array() {
 }
 
 source_has_signatures() {
-	local file
-	for file in "${source[@]}"; do
+	local file all_sources
+
+	get_all_sources_for_arch 'all_sources'
+	for file in "${all_sources[@]}"; do
 		if [[ ${file%%::*} = *.@(sig?(n)|asc) ]]; then
 			return 0
 		fi
@@ -968,7 +1013,7 @@ source_has_signatures() {
 
 run_pacman() {
 	local cmd
-	if [[ ! $1 = -@(T|Qq) ]]; then
+	if [[ $1 != -@(T|Qq) ]]; then
 		cmd=("$PACMAN_PATH" $PACMAN_OPTS "$@")
 	else
 		cmd=("$PACMAN_PATH" "$@")
@@ -1094,11 +1139,62 @@ get_integlist() {
 	fi
 }
 
+generate_one_checksum() {
+	local integ=$1 arch=$2 sources numsrc indentsz idx
+
+	if [[ $arch ]]; then
+		array_build sources "source_$arch"
+	else
+		array_build sources 'source'
+	fi
+
+	numsrc=${#sources[*]}
+	if (( numsrc == 0 )); then
+		return
+	fi
+
+	if [[ $arch ]]; then
+		printf "%ssums_%s=(%n" "$integ" "$arch" indentsz
+	else
+		printf "%ssums=(%n" "$integ" indentsz
+	fi
+
+	for (( idx = 0; idx < numsrc; ++idx )); do
+		local netfile=${sources[idx]}
+		local proto sum
+		proto="$(get_protocol "$netfile")"
+
+		case $proto in
+			bzr*|git*|hg*|svn*)
+				sum="SKIP"
+				;;
+			*)
+				if [[ $netfile != *.@(sig?(n)|asc) ]]; then
+					local file
+					file="$(get_filepath "$netfile")" || missing_source_file "$netfile"
+					sum="$(/usr/bin/openssl dgst -${integ} "$file")"
+					sum=${sum##* }
+				else
+					sum="SKIP"
+				fi
+				;;
+		esac
+
+		# indent checksum on lines after the first
+		printf "%*s%s" $(( idx ? indentsz : 0 )) '' "'$sum'"
+
+		# print a newline on lines before the last
+		(( idx < (numsrc - 1) )) && echo
+	done
+
+	echo ")"
+}
+
 generate_checksums() {
 	msg "$(gettext "Generating checksums for source files...")"
 
-	if ! type -p /usr/bin/openssl >/dev/null; then
-		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "openssl"
+	if ! type -p openssl >/dev/null; then
+		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "/usr/bin/openssl"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
 
@@ -1116,88 +1212,113 @@ generate_checksums() {
 			exit 1 # $E_CONFIG_ERROR
 		fi
 
-		local indentsz idx numsrc=${#source[@]}
-		printf "%s%n" "${integ}sums=(" indentsz
+		generate_one_checksum "$integ"
+		for a in "${arch[@]}"; do
+			generate_one_checksum "$integ" "$a"
+		done
+	done
+}
 
-		for (( idx = 0; idx < numsrc; i++ )); do
-			local netfile=${source[idx]}
-			local proto sum
-			proto="$(get_protocol "$netfile")"
+verify_integrity_one() {
+	local source_name=$1 integ=$2 expectedsum=$3
 
-			case $proto in
-				bzr*|git*|hg*|svn*)
-					sum="SKIP"
-					;;
-				*)
-					if [[ ! $netfile = *.@(sig?(n)|asc) ]]; then
-						local file
-						file="$(get_filepath "$netfile")" || missing_source_file "$netfile"
-						sum="$(/usr/bin/openssl dgst -${integ} "$file")"
-						sum=${sum##* }
-					else
-						sum="SKIP"
-					fi
-					;;
-			esac
+	local file="$(get_filename "$source_name")"
+	printf '    %s ... ' "$file" >&2
 
-			# indent checksum on lines after the first
-			printf "%*s%s" $(( idx ? indentsz : 0 )) '' "'$sum'"
+	if [[ $expectedsum = 'SKIP' ]]; then
+		printf '%s\n' "$(gettext "Skipped")" >&2
+		return
+	fi
 
-			# print a newline on lines before the last
-			(( ++idx < numsrc )) && echo
+	if ! file="$(get_filepath "$file")"; then
+		printf '%s\n' "$(gettext "NOT FOUND")" >&2
+		return 1
+	fi
+
+	local realsum="$(/usr/bin/openssl dgst -${integ} "$file")"
+	realsum="${realsum##* }"
+	if [[ ${expectedsum,,} = "$realsum" ]]; then
+		printf '%s\n' "$(gettext "Passed")" >&2
+	else
+		printf '%s\n' "$(gettext "FAILED")" >&2
+		return 1
+	fi
+
+	return 0
+}
+
+verify_integrity_sums() {
+	local integ=$1 arch=$2 integrity_sums=() sources=()
+
+	if [[ $arch ]]; then
+		array_build integrity_sums "${integ}sums_$arch"
+		array_build sources "source_$arch"
+	else
+		array_build integrity_sums "${integ}sums"
+		array_build sources source
+	fi
+
+	if (( ${#integrity_sums[@]} == 0 && ${#sources[@]} == 0 )); then
+		return 1
+	fi
+
+	if (( ${#integrity_sums[@]} == ${#sources[@]} )); then
+		msg "$(gettext "Validating source files with %s...")" "${integ}sums"
+		local idx errors=0
+		for (( idx = 0; idx < ${#sources[*]}; idx++ )); do
+			verify_integrity_one "${sources[idx]}" "$integ" "${integrity_sums[idx]}" || errors=1
 		done
 
-		echo ")"
-	done
+		if (( errors )); then
+			error "$(gettext "One or more files did not pass the validity check!")"
+			exit 1 # TODO: error code
+		fi
+	elif (( ${#integrity_sums[@]} )); then
+		error "$(gettext "Integrity checks (%s) differ in size from the source array.")" "$integ"
+		exit 1 # TODO: error code
+	else
+		return 1
+	fi
+}
+
+have_sources() {
+	local a
+
+	case $1 in
+		all)
+			for a in "${arch[@]}"; do
+				array_build _ source_"$a" && return 0
+			done
+			;;
+		*)
+			if (( ${#source[*]} )) || array_build _ source_"$CARCH"; then
+				return 0
+			fi
+			;;
+	esac
+
+	return 1
 }
 
 check_checksums() {
 	(( SKIPCHECKSUMS )) && return 0
-	(( ! ${#source[@]} )) && return 0
+	have_sources "$1" || return 0
 
 	local correlation=0
-	local integ required
+	local integ a
 	for integ in "${known_hash_algos[@]}"; do
-		local sumname="${integ}sums[@]"
-		local integrity_sums=("${!sumname}")
-		if (( ${#integrity_sums[@]} == ${#source[@]} )); then
-			msg "$(gettext "Validating source files with %s...")" "${integ}sums"
-			correlation=1
-			local idx errors=0
-			for (( idx = 0; idx < ${#source[*]}; idx++ )); do
-				local file="$(get_filename "${source[idx]}")"
-				printf '    %s ... ' "$file" >&2
+		verify_integrity_sums "$integ" && correlation=1
 
-				if [[ ${integrity_sums[idx]} = 'SKIP' ]]; then
-					printf '%s\n' "$(gettext "Skipped")" >&2
-					continue
-				fi
-
-				if ! file="$(get_filepath "$file")"; then
-					printf '%s\n' "$(gettext "NOT FOUND")" >&2
-					errors=1
-					continue
-				fi
-
-				local expectedsum="${integrity_sums[idx],,}"
-				local realsum="$(/usr/bin/openssl dgst -${integ} "$file")"
-				realsum="${realsum##* }"
-				if [[ $expectedsum = "$realsum" ]]; then
-					printf '%s\n' "$(gettext "Passed")" >&2
-				else
-					printf '%s\n' "$(gettext "FAILED")" >&2
-					errors=1
-				fi
-			done
-
-			if (( errors )); then
-				error "$(gettext "One or more files did not pass the validity check!")"
-				exit 1 # TODO: error code
-			fi
-		elif (( ${#integrity_sums[@]} )); then
-			error "$(gettext "Integrity checks (%s) differ in size from the source array.")" "$integ"
-			exit 1 # TODO: error code
-		fi
+		case $1 in
+			all)
+				for a in "${arch[@]}"; do
+					verify_integrity_sums "$integ" "$a" && correlation=1
+				done
+				;;
+			*)
+				verify_integrity_sums "$integ" "$CARCH" && correlation=1
+				;;
+		esac
 	done
 
 	if (( ! correlation )); then
@@ -1274,10 +1395,19 @@ check_pgpsigs() {
 	local warning=0
 	local errors=0
 	local statusfile=$(mktemp)
+	local all_sources
 
-	for file in "${source[@]}"; do
+	case $1 in
+		all)
+			get_all_sources 'all_sources'
+			;;
+		*)
+			get_all_sources_for_arch 'all_sources'
+			;;
+	esac
+	for file in "${all_sources[@]}"; do
 		file="$(get_filename "$file")"
-		if [[ ! $file = *.@(sig?(n)|asc) ]]; then
+		if [[ $file != *.@(sig?(n)|asc) ]]; then
 			continue
 		fi
 
@@ -1309,7 +1439,7 @@ check_pgpsigs() {
 			lrz) decompress="/usr/bin/lrzip -q -d" ;;
 			lzo) decompress="/usr/bin/lzop -c -d -q" ;;
 			Z)   decompress="/usr/bin/uncompress -c -f" ;;
-			"")  decompress="cat" ;;
+			"")  decompress="/usr/bin/cat" ;;
 		esac
 
 		$decompress < "$sourcefile" | /usr/bin/gpg --quiet --batch --status-file "$statusfile" --verify "$file" - 2> /dev/null
@@ -1339,10 +1469,10 @@ check_pgpsigs() {
 			errors=1
 		else
 			if (( ${#validpgpkeys[@]} == 0 && ! $trusted )); then
-				printf "%s ($(gettext "the public key %s is not trusted"))" $(gettext "FAILED") "$pubkey" >&2
+				printf "%s ($(gettext "the public key %s is not trusted"))" $(gettext "FAILED") "$fingerprint" >&2
 				errors=1
 			elif (( ${#validpgpkeys[@]} > 0 )) && ! in_array "$fingerprint" "${validpgpkeys[@]}"; then
-				printf "%s (%s $pubkey)" "$(gettext "FAILED")" "$(gettext "invalid public key")"
+				printf "%s (%s %s)" "$(gettext "FAILED")" "$(gettext "invalid public key")" "$fingerprint"
 				errors=1
 			else
 				printf '%s' "$(gettext "Passed")" >&2
@@ -1379,20 +1509,22 @@ check_source_integrity() {
 		warning "$(gettext "Skipping all source file integrity checks.")"
 	elif (( SKIPCHECKSUMS )); then
 		warning "$(gettext "Skipping verification of source file checksums.")"
-		check_pgpsigs
+		check_pgpsigs "$@"
 	elif (( SKIPPGPCHECK )); then
 		warning "$(gettext "Skipping verification of source file PGP signatures.")"
-		check_checksums
+		check_checksums "$@"
 	else
-		check_checksums
-		check_pgpsigs
+		check_checksums "$@"
+		check_pgpsigs "$@"
 	fi
 }
 
 extract_sources() {
 	msg "$(gettext "Extracting sources...")"
-	local netfile
-	for netfile in "${source[@]}"; do
+	local netfile all_sources
+
+	get_all_sources_for_arch 'all_sources'
+	for netfile in "${all_sources[@]}"; do
 		local file=$(get_filename "$netfile")
 		if in_array "$file" "${noextract[@]}"; then
 			# skip source files in the noextract=() array
@@ -2018,7 +2150,10 @@ create_package() {
 
 		if [[ -n ${!orig} ]]; then
 			msg2 "$(gettext "Adding %s file...")" "$orig"
-			cp "$startdir/${!orig}" "$dest"
+			if ! cp "$startdir/${!orig}" "$dest"; then
+				error "$(gettext "Failed to add %s file to package.")" "$orig"
+				exit 1
+			fi
 			chmod 644 "$dest"
 			comp_files+=("$dest")
 		fi
@@ -2139,8 +2274,10 @@ create_srcpackage() {
 	msg2 "$(gettext "Adding %s...")" "$BUILDSCRIPT"
 	ln -s "${BUILDFILE}" "${srclinks}/${pkgbase}/${BUILDSCRIPT}"
 
-	local file
-	for file in "${source[@]}"; do
+	local file all_sources
+
+	get_all_sources 'all_sources'
+	for file in "${all_sources[@]}"; do
 		if [[ "$file" = "$(get_filename "$file")" ]] || (( SOURCEONLY == 2 )); then
 			local absfile
 			absfile=$(get_filepath "$file") || missing_source_file "$file"
@@ -2292,14 +2429,14 @@ extract_function_var() {
 	local funcname=$1 attr=$2 isarray=$3 outputvar=$4 attr_regex= decl= r=1
 
 	if (( isarray )); then
-		printf -v attr_regex '^[[:space:]]*(declare( -[[:alpha:]])*)? %q\+?=\(' "$2"
+		printf -v attr_regex '^[[:space:]]* %s\+?=\(' "$2"
 	else
-		printf -v attr_regex '^[[:space:]]*(declare( -[[:alpha:]])*)? %q\+?=[^(]' "$2"
+		printf -v attr_regex '^[[:space:]]* %s\+?=[^(]' "$2"
 	fi
 
 	while read -r; do
 		# strip leading whitespace and any usage of declare
-		decl=${REPLY##*([[:space:]])?(declare +(-+([[:alpha:]]) ))}
+		decl=${REPLY##*([[:space:]])}
 		eval "${decl/#$attr/$outputvar}"
 
 		# entering this loop at all means we found a match, so notify the caller.
@@ -2312,10 +2449,10 @@ extract_function_var() {
 pkgbuild_get_attribute() {
 	# $1: package name
 	# $2: attribute name
-	# $3: name of output var
-	# $4: multivalued
+	# $3: multivalued
+	# $4: name of output var
 
-	local pkgname=$1 attrname=$2 outputvar=$3 isarray=$4
+	local pkgname=$1 attrname=$2 isarray=$3 outputvar=$4
 
 	printf -v "$outputvar" %s ''
 
@@ -2412,7 +2549,7 @@ lint_arch() {
 	fi
 
 	for name in "${pkgname[@]}"; do
-		pkgbuild_get_attribute "$name" 'arch' list 1
+		pkgbuild_get_attribute "$name" 'arch' 1 list
 		if [[ $list && $list != 'any' ]] && ! in_array $CARCH "${list[@]}"; then
 			if (( ! IGNOREARCH )); then
 				error "$(gettext "%s is not available for the '%s' architecture.")" "$name" "$CARCH"
@@ -2653,7 +2790,7 @@ validate_pkgver() {
 check_pkgver() {
 	if [[ -z ${pkgver} ]]; then
 		error "$(gettext "%s is not allowed to be empty.")" "pkgver"
-		ret=1
+		return 1
 	fi
 
 	validate_pkgver "$pkgver"
@@ -2739,7 +2876,7 @@ check_software() {
 	# gpg - package signing
 	if [[ $SIGNPKG == 'y' ]] || { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; }; then
 		if ! type -p gpg >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for signing packages.")" "gpg"
+			error "$(gettext "Cannot find the %s binary required for signing packages.")" "/usr/bin/gpg"
 			ret=1
 		fi
 	fi
@@ -2747,7 +2884,7 @@ check_software() {
 	# gpg - source verification
 	if (( ! SKIPPGPCHECK )) && source_has_signatures; then
 		if ! type -p gpg >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for verifying source files.")" "gpg"
+			error "$(gettext "Cannot find the %s binary required for verifying source files.")" "/usr/bin/gpg"
 			ret=1
 		fi
 	fi
@@ -2755,7 +2892,7 @@ check_software() {
 	# openssl - checksum operations
 	if (( ! SKIPCHECKSUMS )); then
 		if ! type -p openssl >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "openssl"
+			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "/usr/bin/openssl"
 			ret=1
 		fi
 	fi
@@ -2763,7 +2900,7 @@ check_software() {
 	# upx - binary compression
 	if check_option "upx" "y"; then
 		if ! type -p upx >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compressing binaries.")" "upx"
+			error "$(gettext "Cannot find the %s binary required for compressing binaries.")" "/usr/bin/upx"
 			ret=1
 		fi
 	fi
@@ -2771,7 +2908,7 @@ check_software() {
 	# distcc - compilation with distcc
 	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
 		if ! type -p distcc >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
+			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "/usr/bin/distcc"
 			ret=1
 		fi
 	fi
@@ -2779,7 +2916,7 @@ check_software() {
 	# ccache - compilation with ccache
 	if check_buildenv "ccache" "y" && ! check_option "ccache" "n"; then
 		if ! type -p ccache >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "ccache"
+			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "/usr/bin/ccache"
 			ret=1
 		fi
 	fi
@@ -2795,7 +2932,7 @@ check_software() {
 	# gzip - compressig man and info pages
 	if check_option "zipman" "y"; then
 		if ! type -p gzip >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compressing man and info pages.")" "gzip"
+			error "$(gettext "Cannot find the %s binary required for compressing man and info pages.")" "/usr/bin/gzip"
 			ret=1
 		fi
 	fi
@@ -3120,7 +3257,7 @@ PACMAN_PATH=$(type -P $PACMAN)
 
 # check if messages are to be printed using color
 unset ALL_OFF BOLD BLUE GREEN RED YELLOW
-if [[ -t 2 && ! $USE_COLOR = "n" ]] && check_buildenv "color" "y"; then
+if [[ -t 2 && $USE_COLOR != "n" ]] && check_buildenv "color" "y"; then
 	# prefer terminal safe colored and bold text when tput is supported
 	if /bin/tput setaf 0 &>/dev/null; then
 		ALL_OFF="$(/usr/bin/tput sgr0)"
@@ -3252,7 +3389,7 @@ if (( GENINTEG )); then
 	mkdir -p "$srcdir"
 	chmod a-s "$srcdir"
 	cd_safe "$srcdir"
-	download_sources fast
+	download_sources novcs allarch
 	generate_checksums
 	exit 0 # $E_OK
 fi
@@ -3330,12 +3467,12 @@ if (( SOURCEONLY )); then
 	chmod a-s "$srcdir"
 	cd_safe "$srcdir"
 	if (( SOURCEONLY == 2 )); then
-		download_sources
+		download_sources allarch
 	elif ( (( ! SKIPCHECKSUMS )) || \
 			( (( ! SKIPPGPCHECK )) && source_has_signatures ) ); then
-		download_sources fast
+		download_sources novcs
 	fi
-	check_source_integrity
+	check_source_integrity all
 	cd_safe "$startdir"
 
 	create_srcpackage

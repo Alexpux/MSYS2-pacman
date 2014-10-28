@@ -116,6 +116,10 @@ below).
 	Compressed files will be extracted automatically unless found in the
 	noextract array described below.
 +
+Additional architecture-specific sources can be added by appending an
+underscore and the architecture name e.g., 'source_x86_64=()'. There must be a
+corresponding integrity array with checksums, e.g. 'md5sums_x86_64=()'.
++
 It is also possible to change the name of the downloaded file, which is helpful
 with weird URLs and for handling multiple source files with the same
 name. The syntax is: `source=('filename::url')`.
@@ -134,7 +138,8 @@ the integrity of the corresponding source file.
 	trust values from the keyring. If the source file was signed with a
 	subkey, makepkg will still use the primary key for comparison.
 +
-Fingerprints must be uppercase and must not contain whitespace characters.
+Only full fingerprints are accepted. They must be uppercase and must not
+contain whitespace characters.
 
 *noextract (array)*::
 	An array of file names corresponding to those from the source array. Files
