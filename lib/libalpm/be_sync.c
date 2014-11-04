@@ -209,7 +209,7 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 	}
 
 	for(i = db->servers; i; i = i->next) {
-		const char *server = i->data;
+		const char *server = i->data, *final_db_url = NULL;
 		struct dload_payload payload;
 		size_t len;
 		int sig_ret = 0;
@@ -228,7 +228,7 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 		payload.force = force;
 		payload.unlink_on_fail = 1;
 
-		ret = _alpm_download(&payload, syncpath, NULL, NULL);
+		ret = _alpm_download(&payload, syncpath, NULL, &final_db_url);
 		_alpm_dload_payload_reset(&payload);
 
 		if(ret == 0 && (level & ALPM_SIG_DATABASE)) {
@@ -242,11 +242,11 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 			free(sigpath);
 
 			/* if we downloaded a DB, we want the .sig from the same server */
-			/* print server + filename into a buffer (leave space for .sig) */
-			len = strlen(server) + strlen(db->treename) + 9;
+			/* print final_db_url into a buffer (leave space for .sig) */
+			len = strlen(final_db_url) + 5;
 			/* TODO fix leak syncpath and umask unset */
 			MALLOC(payload.fileurl, len, RET_ERR(handle, ALPM_ERR_MEMORY, -1));
-			snprintf(payload.fileurl, len, "%s/%s.db.sig", server, db->treename);
+			snprintf(payload.fileurl, len, "%s.sig", final_db_url);
 			payload.handle = handle;
 			payload.force = 1;
 			payload.errors_ok = (level & ALPM_SIG_DATABASE_OPTIONAL);

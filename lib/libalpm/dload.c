@@ -388,7 +388,7 @@ static FILE *create_tempfile(struct dload_payload *payload, const char *localpat
 #define HOSTNAME_SIZE 256
 
 static int curl_download_internal(struct dload_payload *payload,
-		const char *localpath, char **final_file, char **final_url)
+		const char *localpath, char **final_file, const char **final_url)
 {
 	int ret = -1;
 	FILE *localf = NULL;
@@ -494,12 +494,11 @@ static int curl_download_internal(struct dload_payload *payload,
 			/* handle the interrupt accordingly */
 			if(dload_interrupted == ABORT_OVER_MAXFILESIZE) {
 				payload->curlerr = CURLE_FILESIZE_EXCEEDED;
+				payload->unlink_on_fail = 1;
 				handle->pm_errno = ALPM_ERR_LIBCURL;
-				/* use the 'size exceeded' message from libcurl */
 				_alpm_log(handle, ALPM_LOG_ERROR,
-						_("failed retrieving file '%s' from %s : %s\n"),
-						payload->remote_name, hostname,
-						curl_easy_strerror(CURLE_FILESIZE_EXCEEDED));
+						_("failed retrieving file '%s' from %s : expected download size exceeded\n"),
+						payload->remote_name, hostname);
 			}
 			goto cleanup;
 		default:
@@ -623,7 +622,7 @@ cleanup:
  * @return 0 on success, -1 on error (pm_errno is set accordingly if errors_ok == 0)
  */
 int _alpm_download(struct dload_payload *payload, const char *localpath,
-		char **final_file, char **final_url)
+		char **final_file, const char **final_url)
 {
 	alpm_handle_t *handle = payload->handle;
 
@@ -665,8 +664,8 @@ static char *filecache_find_url(alpm_handle_t *handle, const char *url)
 char SYMEXPORT *alpm_fetch_pkgurl(alpm_handle_t *handle, const char *url)
 {
 	char *filepath;
-	const char *cachedir;
-	char *final_file = NULL, *final_pkg_url = NULL;
+	const char *cachedir, *final_pkg_url = NULL;
+	char *final_file = NULL;
 	struct dload_payload payload;
 	int ret = 0;
 
