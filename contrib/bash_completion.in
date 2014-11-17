@@ -76,7 +76,7 @@ _makepkg() {
   _get_comp_words_by_ref cur prev
   if [[ $cur = -* && ! $prev =~ ^-(-(config|help)$|\w*[Chp]) ]]; then
     opts=('allsource asdeps asroot check clean config force geninteg help holdver ignorearch
-           install key log needed nobuild nocheck nocolor noconfirm nodeps noextract
+           install key log needed noarchive nobuild nocheck nocolor noconfirm nodeps noextract
            noprepare noprogressbar nosign pkg repackage rmdeps sign skipchecksums skipinteg
            skippgpcheck source syncdeps verifysource version'
           'A L R S c d e f g h i m o p r s')
@@ -102,11 +102,11 @@ _pacman() {
   database=('asdeps asexplicit')
   query=('changelog check deps explicit file foreign groups info list owns
           search unrequired upgrades' 'c e g i k l m o p s t u')
-  remove=('cascade dbonly nodeps nosave print recursive unneeded' 'c n p s u')
+  remove=('cascade dbonly nodeps assume-installed nosave print recursive unneeded' 'c n p s u')
   sync=('asdeps asexplicit clean dbonly downloadonly force groups ignore ignoregroup
-         info list needed nodeps print refresh recursive search sysupgrade'
+         info list needed nodeps assume-installed print refresh recursive search sysupgrade'
         'c g i l p s u w y')
-  upgrade=('asdeps asexplicit force needed nodeps print recursive' 'p')
+  upgrade=('asdeps asexplicit force needed nodeps assume-installed print recursive' 'p')
   common=('arch cachedir color config dbpath debug help logfile noconfirm
            noprogressbar noscriptlet quiet root verbose' 'b d h q r v')
   core=('database help query remove sync upgrade version' 'D Q R S U V h')

@@ -427,7 +427,9 @@ download_bzr() {
 	local netfile=$1
 
 	local url=$(get_url "$netfile")
-	url=${url##*bzr+}
+	if [[ $url != bzr+ssh* ]]; then
+		url=${url#bzr+}
+	fi
 	url=${url%%#*}
 
 	local repo=$(get_filename "$netfile")
@@ -463,7 +465,7 @@ download_bzr() {
 		fi
 		msg2 "$(gettext "Pulling %s ...")" "${displaylocation}"
 		cd_safe "$dir"
-		if ! bzr pull "$url" --overwrite; then
+		if ! bzr pull "$url"; then
 			# only warn on failure to allow offline builds
 			warning "$(gettext "Failure while pulling %s")" "${displaylocation}"
 		fi
@@ -479,10 +481,11 @@ extract_bzr() {
 		unset fragment
 	fi
 
+	rev="last:1"
 	if [[ -n $fragment ]]; then
 		case ${fragment%%=*} in
 			revision)
-				revision=("-r" "${fragment#*=}")
+				rev="${fragment#*=}"
 				displaylocation="$url -r ${fragment#*=}"
 				;;
 			*)
@@ -497,10 +500,15 @@ extract_bzr() {
 
 	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "bzr"
 	pushd "$srcdir" &>/dev/null
-	rm -rf "${dir##*/}"
 
-	if ! { bzr checkout "$dir" "${revision[@]}" --lightweight &&
-		( cd "$repo" && bzr pull "$dir" -q --overwrite "${revision[@]}" ); }; then
+	if [[ -d "${dir##*/}" ]]; then
+		cd_safe "${dir##*/}"
+		if ! (/usr/bin/bzr pull "$dir" -q --overwrite -r "$rev" && /usr/bin/bzr clean-tree -q --detritus --force); then
+			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "bzr"
+			plain "$(gettext "Aborting...")"
+			exit 1
+		fi
+	elif ! /usr/bin/bzr checkout "$dir" -r "$rev"; then
 		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "bzr"
 		plain "$(gettext "Aborting...")"
 		exit 1
@@ -518,7 +526,7 @@ download_git() {
 	local repo=$(get_filename "$netfile")
 
 	local url=$(get_url "$netfile")
-	url=${url##*git+}
+	url=${url#git+}
 	url=${url%%#*}
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
@@ -561,9 +569,18 @@ extract_git() {
 
 	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "git"
 	pushd "$srcdir" &>/dev/null
-	rm -rf "${dir##*/}"
 
-	if ! git clone "$dir"; then
+	local updating=0
+	if [[ -d "${dir##*/}" ]]; then
+		updating=1
+		cd_safe "${dir##*/}"
+		if ! /usr/bin/git fetch; then
+			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "git"
+			plain "$(gettext "Aborting...")"
+			exit 1
+		fi
+		cd_safe "$srcdir"
+	elif ! /usr/bin/git clone "$dir"; then
 		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
 		plain "$(gettext "Aborting...")"
 		exit 1
@@ -571,7 +588,7 @@ extract_git() {
 
 	cd_safe "${dir##*/}"
 
-	local ref
+	local ref=origin/HEAD
 	if [[ -n $fragment ]]; then
 		case ${fragment%%=*} in
 			commit|tag)
@@ -587,8 +604,8 @@ extract_git() {
 		esac
 	fi
 
-	if [[ -n $ref ]]; then
-		if ! /usr/bin/git checkout -b makepkg $ref; then
+	if [[ $ref != "origin/HEAD" ]] || (( updating )) ; then
+		if ! /usr/bin/git checkout --force --no-track -B makepkg $ref; then
 			error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "git"
 			plain "$(gettext "Aborting...")"
 			exit 1
@@ -607,7 +624,7 @@ download_hg() {
 	local repo=$(get_filename "$netfile")
 
 	local url=$(get_url "$netfile")
-	url=${url##*hg+}
+	url=${url#hg+}
 	url=${url%%#*}
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
@@ -643,13 +660,12 @@ extract_hg() {
 
 	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "hg"
 	pushd "$srcdir" &>/dev/null
-	rm -rf "${dir##*/}"
 
-	local ref
+	local ref=tip
 	if [[ -n $fragment ]]; then
 		case ${fragment%%=*} in
 			branch|revision|tag)
-				ref=('-u' "${fragment##*=}")
+				ref="${fragment##*=}"
 				;;
 			*)
 				error "$(gettext "Unrecognized reference: %s")" "${fragment}"
@@ -658,7 +674,14 @@ extract_hg() {
 		esac
 	fi
 
-	if ! /usr/bin/hg clone "${ref[@]}" "$dir" "${dir##*/}"; then
+	if [[ -d "${dir##*/}" ]]; then
+		cd_safe "${dir##*/}"
+		if ! (/usr/bin/hg pull && /usr/bin/hg update -C -r "$ref"); then
+			error "$(gettext "Failure while updating working copy of %s %s repo")" "${repo}" "hg"
+			plain "$(gettext "Aborting...")"
+			exit 1
+		fi
+	elif ! /usr/bin/hg clone -u "$ref" "$dir" "${dir##*/}"; then
 		error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "hg"
 		plain "$(gettext "Aborting...")"
 		exit 1
@@ -682,47 +705,11 @@ download_svn() {
 
 	local url=$(get_url "$netfile")
 	if [[ $url != svn+ssh* ]]; then
-		url=${url##*svn+}
+		url=${url#svn+}
 	fi
 	url=${url%%#*}
 
-	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
-		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "svn"
-		mkdir -p "$dir/.makepkg"
-		if ! /usr/bin/svn checkout --config-dir "$dir/.makepkg" "$url" "$dir"; then
-			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "svn"
-			plain "$(gettext "Aborting...")"
-			exit 1
-		fi
-	elif (( ! HOLDVER )); then
-		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "svn"
-		cd_safe "$dir"
-		if ! svn update; then
-			# only warn on failure to allow offline builds
-			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "svn"
-		fi
-	fi
-}
-
-extract_svn() {
-	local netfile=$1
-
-	local fragment=${netfile#*#}
-	if [[ $fragment = "$netfile" ]]; then
-		unset fragment
-	fi
-
-	local dir=$(get_filepath "$netfile")
-	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
-
-	local repo=${netfile##*/}
-	repo=${repo%%#*}
-
-	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "svn"
-	pushd "$srcdir" &>/dev/null
-	rm -rf "${dir##*/}"
-
-	local ref
+	local ref=HEAD
 	if [[ -n $fragment ]]; then
 		case ${fragment%%=*} in
 			revision)
@@ -735,15 +722,38 @@ extract_svn() {
 		esac
 	fi
 
-	cp -a "$dir" .
-
-	if [[ -n ${ref} ]]; then
-		cd_safe "$(get_filename "$netfile")"
-		if ! /usr/bin/svn update -r ${ref}; then
-			error "$(gettext "Failure while creating working copy of %s %s repo")" "${repo}" "svn"
+	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
+		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "svn"
+		mkdir -p "$dir/.makepkg"
+		if ! /usr/bin/svn checkout -r ${ref} --config-dir "$dir/.makepkg" "$url" "$dir"; then
+			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "svn"
 			plain "$(gettext "Aborting...")"
+			exit 1
+		fi
+	elif (( ! HOLDVER )); then
+		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "svn"
+		cd_safe "$dir"
+		if ! /usr/bin/svn update -r ${ref}; then
+			# only warn on failure to allow offline builds
+			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "svn"
 		fi
 	fi
+}
+
+extract_svn() {
+	local netfile=$1
+
+	local dir=$(get_filepath "$netfile")
+	[[ -z "$dir" ]] && dir="$SRCDEST/$(get_filename "$netfile")"
+
+	local repo=${netfile##*/}
+	repo=${repo%%#*}
+
+	msg2 "$(gettext "Creating working copy of %s %s repo...")" "${repo}" "svn"
+	pushd "$srcdir" &>/dev/null
+	rm -rf "${dir##*/}"
+
+	cp -a "$dir" .
 
 	popd &>/dev/null
 }
@@ -847,7 +857,6 @@ update_pkgver() {
 			fi
 			@SEDINPLACE@ "s:^pkgrel=[^ ]*:pkgrel=1:" "$BUILDFILE"
 			source_safe "$BUILDFILE"
-			epoch=${epoch:-0}
 			local fullver=$(get_full_version)
 			msg "$(gettext "Updated version: %s")" "$pkgbase $fullver"
 		else
@@ -869,7 +878,7 @@ missing_source_file() {
 # return : full version spec, including epoch (if necessary), pkgver, pkgrel
 ##
 get_full_version() {
-	if [[ $epoch ]] && (( epoch > 0 )); then
+	if (( epoch > 0 )); then
 		printf "%s\n" "$epoch:$pkgver-$pkgrel"
 	else
 		printf "%s\n" "$pkgver-$pkgrel"
@@ -2064,6 +2073,100 @@ find_libprovides() {
 	printf '%s\n' "${libprovides[@]}"
 }
 
+srcinfo_open_section() {
+	printf '%s = %s\n' "$1" "$2"
+}
+
+srcinfo_close_section() {
+	echo
+}
+
+srcinfo_write_attr() {
+	# $1: attr name
+	# $2: attr values
+
+	local attrname=$1 attrvalues=("${@:2}")
+
+	# normalize whitespace, strip leading and trailing
+	attrvalues=("${attrvalues[@]//+([[:space:]])/ }")
+	attrvalues=("${attrvalues[@]#[[:space:]]}")
+	attrvalues=("${attrvalues[@]%[[:space:]]}")
+
+	printf "\t$attrname = %s\n" "${attrvalues[@]}"
+}
+
+pkgbuild_extract_to_srcinfo() {
+	# $1: pkgname
+	# $2: attr name
+	# $3: multivalued
+
+	local pkgname=$1 attrname=$2 isarray=$3 outvalue=
+
+	if pkgbuild_get_attribute "$pkgname" "$attrname" "$isarray" 'outvalue'; then
+		srcinfo_write_attr "$attrname" "${outvalue[@]}"
+	fi
+}
+
+srcinfo_write_section_details() {
+	local attr package_arch a
+	local multivalued_arch_attrs=(source provides conflicts depends replaces
+	                              optdepends makedepends checkdepends
+	                              {md5,sha{1,224,256,384,512}}sums)
+
+	for attr in "${singlevalued[@]}"; do
+		pkgbuild_extract_to_srcinfo "$1" "$attr" 0
+	done
+
+	for attr in "${multivalued[@]}"; do
+		pkgbuild_extract_to_srcinfo "$1" "$attr" 1
+	done
+
+	pkgbuild_get_attribute "$1" 'arch' 1 'package_arch'
+	for a in "${package_arch[@]}"; do
+		# 'any' is special. there's no support for, e.g. depends_any.
+		[[ $a = any ]] && continue
+
+		for attr in "${multivalued_arch_attrs[@]}"; do
+			pkgbuild_extract_to_srcinfo "$1" "${attr}_$a" 1
+		done
+	done
+}
+
+srcinfo_write_global() {
+	local singlevalued=(pkgdesc pkgver pkgrel epoch url install changelog)
+	local multivalued=(arch groups license checkdepends makedepends
+	                   depends optdepends provides conflicts replaces
+	                   noextract options backup
+	                   source {md5,sha{1,224,256,384,512}}sums)
+
+	srcinfo_open_section 'pkgbase' "${pkgbase:-$pkgname}"
+	srcinfo_write_section_details ''
+	srcinfo_close_section
+}
+
+srcinfo_write_package() {
+	local singlevalued=(pkgdesc url install changelog)
+	local multivalued=(arch groups license checkdepends depends optdepends
+	                   provides conflicts replaces options backup)
+
+	srcinfo_open_section 'pkgname' "$1"
+	srcinfo_write_section_details "$1"
+	srcinfo_close_section
+}
+
+write_srcinfo() {
+	local pkg
+
+	printf "# Generated by makepkg %s\n" "$makepkg_version"
+	printf "# %s\n" "$(LC_ALL=C date -u)"
+
+	srcinfo_write_global
+
+	for pkg in "${pkgname[@]}"; do
+		srcinfo_write_package "$pkg"
+	done
+}
+
 write_pkginfo() {
 	local builddate=$(date -u "+%s")
 	if [[ -n $PACKAGER ]]; then
@@ -2092,7 +2195,12 @@ write_pkginfo() {
 		printf "basever = %s\n" "$basever"
 	fi
 
-	printf "pkgdesc = %s\n" "${pkgdesc//+([[:space:]])/ }"
+	# TODO: all fields should have this treatment
+	local spd="${pkgdesc//+([[:space:]])/ }"
+	spd=("${spd[@]#[[:space:]]}")
+	spd=("${spd[@]%[[:space:]]}")
+
+	printf "pkgdesc = %s\n" "$spd"
 	printf "url = %s\n" "$url"
 	printf "builddate = %s\n" "$builddate"
 	printf "packager = %s\n" "$packager"
@@ -2274,6 +2382,9 @@ create_srcpackage() {
 	msg2 "$(gettext "Adding %s...")" "$BUILDSCRIPT"
 	ln -s "${BUILDFILE}" "${srclinks}/${pkgbase}/${BUILDSCRIPT}"
 
+	msg2 "$(gettext "Generating %s file...")" .SRCINFO
+	write_srcinfo > "$srclinks/$pkgbase"/.SRCINFO
+
 	local file all_sources
 
 	get_all_sources 'all_sources'
@@ -2410,13 +2521,13 @@ extract_global_var() {
 	# $2: multivalued
 	# $3: name of output var
 
-	local attr=$1 isarray=$2 outputvar=$3
+	local attr=$1 isarray=$2 outputvar=$3 ref
 
 	if (( isarray )); then
 		array_build ref "$attr"
 		[[ ${ref[@]} ]] && array_build "$outputvar" "$attr"
 	else
-		[[ -v $attr ]] && printf -v "$outputvar" %s "${!attr}"
+		[[ ${!attr} ]] && printf -v "$outputvar" %s "${!attr}"
 	fi
 }
 
@@ -3370,7 +3481,6 @@ fi
 
 # set defaults if they weren't specified in buildfile
 pkgbase=${pkgbase:-${pkgname[0]}}
-epoch=${epoch:-0}
 basever=$(get_full_version)
 
 if [[ $BUILDDIR = "$startdir" ]]; then
