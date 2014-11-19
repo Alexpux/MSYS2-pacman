@@ -194,8 +194,6 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 		_alpm_log(handle, ALPM_LOG_DEBUG, "%s is in NoExtract,"
 				" skipping extraction of %s\n",
 				entryname, filename);
-		alpm_logaction(handle, ALPM_CALLER_PREFIX,
-				"note: %s is in NoExtract, skipping extraction\n", entryname);
 		archive_read_data_skip(archive);
 		return 0;
 	}
@@ -319,7 +317,7 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 			if(!backup->name || strcmp(backup->name, entryname_orig) != 0) {
 				continue;
 			}
-			STRDUP(newhash, hash_pkg, RET_ERR(handle, ALPM_ERR_MEMORY, -1));
+			STRDUP(newhash, hash_pkg, errors++; handle->pm_errno = ALPM_ERR_MEMORY; goto needbackup_cleanup);
 			FREE(backup->hash);
 			backup->hash = newhash;
 		}

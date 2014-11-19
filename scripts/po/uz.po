@@ -3,26 +3,26 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
+# Umid Almasov <u.almasov@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
 "POT-Creation-Date: 2013-06-06 13:07+1000\n"
-"PO-Revision-Date: 2013-06-06 03:19+0000\n"
-"Last-Translator: allanmcrae <allan@archlinux.org>\n"
-"Language-Team: Persian (http://www.transifex.com/projects/p/archlinux-pacman/"
-"language/fa/)\n"
-"Language: fa\n"
+"PO-Revision-Date: 2013-11-19 16:14+0000\n"
+"Last-Translator: Umid Almasov <u.almasov@gmail.com>\n"
+"Language-Team: Uzbek (http://www.transifex.com/projects/p/archlinux-pacman/language/uz/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: uz\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 msgid "WARNING:"
-msgstr ""
+msgstr "OGOHNOMA:"
 
 msgid "ERROR:"
-msgstr ""
+msgstr "XATO:"
 
 msgid "Cleaning up..."
 msgstr ""
@@ -34,19 +34,19 @@ msgid "Unknown download protocol: %s"
 msgstr ""
 
 msgid "Aborting..."
-msgstr ""
+msgstr "To'xtatilmoqda..."
 
 msgid "The download program %s is not installed."
 msgstr ""
 
 msgid "Found %s"
-msgstr ""
+msgstr "%s topildi"
 
 msgid "%s was not found in the build directory and is not a URL."
 msgstr ""
 
 msgid "Downloading %s..."
-msgstr ""
+msgstr "%s yuklab olinmoqda..."
 
 msgid "Failure while downloading %s"
 msgstr ""
@@ -129,7 +129,8 @@ msgstr ""
 msgid "Generating checksums for source files..."
 msgstr ""
 
-msgid "Cannot find the %s binary required for generating sourcefile checksums."
+msgid ""
+"Cannot find the %s binary required for generating sourcefile checksums."
 msgstr ""
 
 msgid "Invalid integrity algorithm '%s' specified."
@@ -142,13 +143,13 @@ msgid "Skipped"
 msgstr ""
 
 msgid "NOT FOUND"
-msgstr ""
+msgstr "TOPILMADI"
 
 msgid "Passed"
 msgstr ""
 
 msgid "FAILED"
-msgstr ""
+msgstr "MUVAFFAQIYATSIZ"
 
 msgid "One or more files did not pass the validity check!"
 msgstr ""
@@ -163,10 +164,10 @@ msgid "Verifying source file signatures with %s..."
 msgstr ""
 
 msgid "SIGNATURE NOT FOUND"
-msgstr ""
+msgstr "IMZO TOPILMADI"
 
 msgid "SOURCE FILE NOT FOUND"
-msgstr ""
+msgstr "MANBA FAYLI TOPILMADI"
 
 msgid "unknown public key"
 msgstr ""
@@ -301,7 +302,7 @@ msgid "Failed to sign package file."
 msgstr ""
 
 msgid "Creating source package..."
-msgstr ""
+msgstr "Manba paketi yaratilmoqda..."
 
 msgid "Adding %s..."
 msgstr ""
@@ -393,7 +394,8 @@ msgstr ""
 msgid "Cannot find the %s binary required for verifying source files."
 msgstr ""
 
-msgid "Cannot find the %s binary required for validating sourcefile checksums."
+msgid ""
+"Cannot find the %s binary required for validating sourcefile checksums."
 msgstr ""
 
 msgid "Cannot find the %s binary required for compressing binaries."
@@ -424,14 +426,15 @@ msgstr ""
 msgid "The package group has already been built. (use %s to overwrite)"
 msgstr ""
 
-msgid "Part of the package group has already been built. (use %s to overwrite)"
+msgid ""
+"Part of the package group has already been built. (use %s to overwrite)"
 msgstr ""
 
 msgid "Usage: %s [options]"
 msgstr ""
 
 msgid "Options:"
-msgstr ""
+msgstr "Parametrlar:"
 
 msgid "  -A, --ignorearch Ignore incomplete %s field in %s"
 msgstr ""
@@ -452,7 +455,7 @@ msgid "  -g, --geninteg   Generate integrity checks for source files"
 msgstr ""
 
 msgid "  -h, --help       Show this help message and exit"
-msgstr ""
+msgstr "  -h, --help       Ushbu yordam xabarini ko'rsatish va chiqish"
 
 msgid "  -i, --install    Install package after successful build"
 msgstr ""
@@ -473,7 +476,8 @@ msgid ""
 "  -r, --rmdeps     Remove installed dependencies after a successful build"
 msgstr ""
 
-msgid "  -R, --repackage  Repackage contents of the package without rebuilding"
+msgid ""
+"  -R, --repackage  Repackage contents of the package without rebuilding"
 msgstr ""
 
 msgid "  -s, --syncdeps   Install missing dependencies with %s"
@@ -509,7 +513,8 @@ msgid "  --holdver        Do not update VCS sources"
 msgstr ""
 
 msgid ""
-"  --key <key>      Specify a key to use for %s signing instead of the default"
+"  --key <key>      Specify a key to use for %s signing instead of the "
+"default"
 msgstr ""
 
 msgid "  --nocheck        Do not run the %s function in the %s"
@@ -555,10 +560,11 @@ msgid "If %s is not specified, %s will look for '%s'"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>."
-"\\nCopyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\\n\\nThis is "
-"free software; see the source for copying conditions.\\nThere is NO "
-"WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2006-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>.\\nCopyright (C) 2002-2006 Judd Vinet "
+"<jvinet@zeroflux.org>.\\n\\nThis is free software; see the source for "
+"copying conditions.\\nThere is NO WARRANTY, to the extent permitted by "
+"law.\\n"
 msgstr ""
 
 msgid "%s signal caught. Exiting..."
@@ -595,8 +601,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The %s option is meant for the root user only. Please\\nrerun %s without the "
-"%s flag."
+"The %s option is meant for the root user only. Please\\nrerun %s without the"
+" %s flag."
 msgstr ""
 
 msgid ""
@@ -609,7 +615,7 @@ msgid "Do not use the %s option. This option is only for use by %s."
 msgstr ""
 
 msgid "%s does not exist."
-msgstr ""
+msgstr "%s mavjud emas."
 
 msgid "%s contains %s characters and cannot be sourced."
 msgstr ""
@@ -672,9 +678,9 @@ msgid "Usage: %s [--nocolor] [pacman_db_root]"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2010-2013 Pacman Development Team <pacman-dev@archlinux.org>."
-"\\nThis is free software; see the source for copying conditions.\\nThere is "
-"NO WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2010-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>.\\nThis is free software; see the source for copying "
+"conditions.\\nThere is NO WARRANTY, to the extent permitted by law.\\n"
 msgstr ""
 
 msgid "%s does not exist or is not a directory."
@@ -752,8 +758,8 @@ msgid "  --lsign-key               Locally sign the specified keyid"
 msgstr ""
 
 msgid ""
-"  --populate                Reload the default keys from the (given) keyrings"
-"\\n                            in '%s'"
+"  --populate                Reload the default keys from the (given) "
+"keyrings\\n                            in '%s'"
 msgstr ""
 
 msgid ""
@@ -761,13 +767,13 @@ msgid ""
 msgstr ""
 
 msgid ""
-"  --config <file>           Use an alternate config file (instead of"
-"\\n                            '%s')"
+"  --config <file>           Use an alternate config file (instead of\\n"
+"                            '%s')"
 msgstr ""
 
 msgid ""
-"  --gpgdir <dir>            Set an alternate directory for GnuPG (instead"
-"\\n                            of '%s')"
+"  --gpgdir <dir>            Set an alternate directory for GnuPG (instead\\n"
+"                            of '%s')"
 msgstr ""
 
 msgid "  --keyserver <server-url>  Specify a keyserver to use if necessary"
@@ -777,7 +783,7 @@ msgid "  -h, --help                Show this help message and exit"
 msgstr ""
 
 msgid "  -V, --version             Show program version"
-msgstr ""
+msgstr "  -V, --version             Dastur versiyasini ko'rsatish"
 
 msgid "Failed to lookup key by name:"
 msgstr ""
@@ -899,8 +905,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Because pacman uses many small files to keep track of packages,\\nthere is a "
-"tendency for these files to become fragmented over time.\\nThis script "
+"Because pacman uses many small files to keep track of packages,\\nthere is a"
+" tendency for these files to become fragmented over time.\\nThis script "
 "attempts to relocate these small files into one\\ncontinuous location on "
 "your hard drive. The result is that the hard\\ndrive should be able to read "
 "them faster, since the hard drive head\\ndoes not have to move around the "
@@ -935,7 +941,7 @@ msgid "Syncing database to disk..."
 msgstr ""
 
 msgid "Checking integrity..."
-msgstr ""
+msgstr "Butunligi tekshirilmoqda..."
 
 msgid "Integrity check FAILED, reverting to old database."
 msgstr ""
@@ -943,7 +949,8 @@ msgstr ""
 msgid "Rotating database into place..."
 msgstr ""
 
-msgid "New database substitution failed. Check for %s, %s, and %s directories."
+msgid ""
+"New database substitution failed. Check for %s, %s, and %s directories."
 msgstr ""
 
 msgid "Finished. Your pacman database has been optimized."
@@ -1011,7 +1018,7 @@ msgid "Generated delta : '%s'"
 msgstr ""
 
 msgid "File '%s' does not exist"
-msgstr ""
+msgstr "'%s' fayli mavjud emas"
 
 msgid "Cannot find the xdelta3 binary! Is xdelta3 installed?"
 msgstr ""
@@ -1020,15 +1027,16 @@ msgid "Usage: repo-add [options] <path-to-db> <package|delta> ...\\n"
 msgstr ""
 
 msgid ""
-"repo-add will update a package database by reading a package file."
-"\\nMultiple packages to add can be specified on the command line.\\n"
+"repo-add will update a package database by reading a package "
+"file.\\nMultiple packages to add can be specified on the command line.\\n"
 msgstr ""
 
 msgid "  -d, --delta       generate and add delta for package update\\n"
 msgstr ""
 
 msgid ""
-"  -n, --new         only add packages that are not already in the database\\n"
+"  -n, --new         only add packages that are not already in the "
+"database\\n"
 msgstr ""
 
 msgid "  -f, --files       update database's file list\\n"
@@ -1038,9 +1046,9 @@ msgid "Usage: repo-remove [options] <path-to-db> <packagename|delta> ...\\n"
 msgstr ""
 
 msgid ""
-"repo-remove will update a package database by removing the package name"
-"\\nspecified on the command line from the given repo database. Multiple"
-"\\npackages to remove can be specified on the command line.\\n"
+"repo-remove will update a package database by removing the package "
+"name\\nspecified on the command line from the given repo database. "
+"Multiple\\npackages to remove can be specified on the command line.\\n"
 msgstr ""
 
 msgid "Please move along, there is nothing to see here.\\n"
@@ -1070,9 +1078,9 @@ msgid "Example:  repo-remove /path/to/repo.db.tar.gz kernel26\\n"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>\\n"
-"\\nThis is free software; see the source for copying conditions.\\nThere is "
-"NO WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2006-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>\\n\\nThis is free software; see the source for copying "
+"conditions.\\nThere is NO WARRANTY, to the extent permitted by law.\\n"
 msgstr ""
 
 msgid "No database entry for package '%s'."
@@ -1151,7 +1159,7 @@ msgid "Repository file '%s' could not be created."
 msgstr ""
 
 msgid "File '%s' not found."
-msgstr ""
+msgstr "'%s' fayli topilmadi."
 
 msgid "Adding delta '%s'"
 msgstr ""

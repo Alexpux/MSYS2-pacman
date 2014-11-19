@@ -8,216 +8,216 @@ msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
 "POT-Creation-Date: 2013-06-06 13:07+1000\n"
-"PO-Revision-Date: 2013-06-06 03:19+0000\n"
-"Last-Translator: allanmcrae <allan@archlinux.org>\n"
-"Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/"
-"archlinux-pacman/language/zh_TW/)\n"
-"Language: zh_TW\n"
+"PO-Revision-Date: 2013-11-19 16:14+0000\n"
+"Last-Translator: Allan McRae <allan@archlinux.org>\n"
+"Language-Team: Bulgarian (http://www.transifex.com/projects/p/archlinux-pacman/language/bg/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: bg\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "WARNING:"
-msgstr ""
+msgstr "ВНИМАНИЕ:"
 
 msgid "ERROR:"
-msgstr ""
+msgstr "ГРЕШКА:"
 
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Почистване…"
 
 msgid "Entering %s environment..."
-msgstr ""
+msgstr "Entering %s environment..."
 
 msgid "Unknown download protocol: %s"
-msgstr ""
+msgstr "Непознат download протокол: %s"
 
 msgid "Aborting..."
-msgstr ""
+msgstr "Отмяна..."
 
 msgid "The download program %s is not installed."
-msgstr ""
+msgstr "Програмата за сваляне %s не е инсталирана."
 
 msgid "Found %s"
-msgstr ""
+msgstr "Открит %s"
 
 msgid "%s was not found in the build directory and is not a URL."
-msgstr ""
+msgstr "%s не е открит в  build directory и не е URL."
 
 msgid "Downloading %s..."
-msgstr ""
+msgstr "Сваляне на %s..."
 
 msgid "Failure while downloading %s"
-msgstr ""
+msgstr "Неуспех при сваляне на %s"
 
 msgid "Extracting %s with %s"
-msgstr ""
+msgstr "Извличане %s със %s"
 
 msgid "Failed to extract %s"
-msgstr ""
+msgstr "Неуспех при извличане %s"
 
 msgid "Branching %s ..."
-msgstr ""
+msgstr "Branching %s ..."
 
 msgid "Failure while branching %s"
-msgstr ""
+msgstr "Failure while branching %s"
 
 msgid "%s is not a branch of %s"
-msgstr ""
+msgstr "%s is not a branch of %s"
 
 msgid "The local URL is %s"
-msgstr ""
+msgstr "Текущият URL е %s"
 
 msgid "Pulling %s ..."
-msgstr ""
+msgstr "Теглене %s ..."
 
 msgid "Failure while pulling %s"
-msgstr ""
+msgstr "Неуспех при теглене %s"
 
 msgid "Unrecognized reference: %s"
-msgstr ""
+msgstr "Непознат препратка: %s"
 
 msgid "Creating working copy of %s %s repo..."
-msgstr ""
+msgstr "Създаване на работещо копие %s %s repo..."
 
 msgid "Failure while creating working copy of %s %s repo"
-msgstr ""
+msgstr "Неуспех при създава не работещо копие %s %s repo"
 
 msgid "Cloning %s %s repo..."
-msgstr ""
+msgstr "Клониране %s %s repo..."
 
 msgid "Failure while downloading %s %s repo"
-msgstr ""
+msgstr "Неуспех при сваляне %s %s repo"
 
 msgid "%s is not a clone of %s"
-msgstr ""
+msgstr "%s не е клонинг на  %s"
 
 msgid "Updating %s %s repo..."
-msgstr ""
+msgstr "Обновяване %s %s repo..."
 
 msgid "Failure while updating %s %s repo"
-msgstr ""
+msgstr "Неуспех при обновяване %s %s repo"
 
 msgid "Retrieving sources..."
-msgstr ""
+msgstr "Извличане на източници..."
 
 msgid "Updated version: %s"
-msgstr ""
+msgstr "Обновена версия: %s"
 
 msgid "%s is not writeable -- pkgver will not be updated"
-msgstr ""
+msgstr "%s не е достъпна за запис -- pkgver не е подновен"
 
 msgid "Unable to find source file %s."
-msgstr ""
+msgstr "Не се открива source file %s."
 
 msgid "'%s' returned a fatal error (%i): %s"
-msgstr ""
+msgstr "'%s' връща fatal error (%i): %s"
 
 msgid "Installing missing dependencies..."
-msgstr ""
+msgstr "Инсталиране на липсващи зависимости..."
 
 msgid "'%s' failed to install missing dependencies."
-msgstr ""
+msgstr "'%s' неуспех инсталиране на липсващи зависимости."
 
 msgid "Missing dependencies:"
-msgstr ""
+msgstr "Липсващи зависимости:"
 
 msgid "Failed to remove installed dependencies."
-msgstr ""
+msgstr "Неуспех премахване инсталирани зависимости."
 
 msgid "Generating checksums for source files..."
-msgstr ""
+msgstr "Генерация checksums за source files..."
 
-msgid "Cannot find the %s binary required for generating sourcefile checksums."
-msgstr ""
+msgid ""
+"Cannot find the %s binary required for generating sourcefile checksums."
+msgstr "Не се открива %s binary необходим за генериране sourcefile checksums."
 
 msgid "Invalid integrity algorithm '%s' specified."
-msgstr ""
+msgstr "Invalid integrity algorithm '%s' specified."
 
 msgid "Validating source files with %s..."
-msgstr ""
+msgstr "Валериране source files с %s..."
 
 msgid "Skipped"
-msgstr ""
+msgstr "Пропуснат"
 
 msgid "NOT FOUND"
-msgstr ""
+msgstr "НЕ Е ОТКРИТ"
 
 msgid "Passed"
 msgstr ""
 
 msgid "FAILED"
-msgstr ""
+msgstr "НЕУСПЕХ"
 
 msgid "One or more files did not pass the validity check!"
-msgstr ""
+msgstr "Един или повече файлове не минават проверка за валидност!"
 
 msgid "Integrity checks (%s) differ in size from the source array."
-msgstr ""
+msgstr "Проверка за цялостност (%s) разлика в размера от източника."
 
 msgid "Integrity checks are missing."
-msgstr ""
+msgstr "Липсва проверка за цялостност."
 
 msgid "Verifying source file signatures with %s..."
 msgstr ""
 
 msgid "SIGNATURE NOT FOUND"
-msgstr ""
+msgstr "ПОДПИСА НЕ Е ОТКРИТ"
 
 msgid "SOURCE FILE NOT FOUND"
-msgstr ""
+msgstr "СОРС ФАЙЛА НЕ Е ОТКРИТ"
 
 msgid "unknown public key"
-msgstr ""
+msgstr "непознат публичен ключ"
 
 msgid "the key has been revoked."
-msgstr ""
+msgstr "подписът е анулиран."
 
 msgid "the signature has expired."
-msgstr ""
+msgstr "подписа е изтекъл."
 
 msgid "the key has expired."
-msgstr ""
+msgstr "ключа е изтекъл."
 
 msgid "One or more PGP signatures could not be verified!"
-msgstr ""
+msgstr "Един или повече от PGP подписи не са потвърдени!"
 
 msgid "Warnings have occurred while verifying the signatures."
-msgstr ""
+msgstr "Поява не предупреждение при потвърждаване на подпис."
 
 msgid "Please make sure you really trust them."
-msgstr ""
+msgstr "Моля, убедете се, че наистина се доверявате."
 
 msgid "Skipping all source file integrity checks."
-msgstr ""
+msgstr "Пропускане на проверка за цялост на всички. "
 
 msgid "Skipping verification of source file checksums."
-msgstr ""
+msgstr "Пропускане проверка на чексумата на сорс файла."
 
 msgid "Skipping verification of source file PGP signatures."
-msgstr ""
+msgstr "Пропускане порверката на "
 
 msgid "Extracting sources..."
-msgstr ""
+msgstr "Извличане на сорс..."
 
 msgid "A failure occurred in %s()."
-msgstr ""
+msgstr "Неуспех в %s()."
 
 msgid "Failed to change to directory %s"
-msgstr ""
+msgstr "Неуспешна промяна на директория в %s"
 
 msgid "Failed to source %s"
-msgstr ""
+msgstr "Грешка при източника %s"
 
 msgid "Starting %s()..."
-msgstr ""
+msgstr "Стартиране %s()..."
 
 msgid "Tidying install..."
-msgstr ""
+msgstr "Tidying install..."
 
 msgid "Removing doc files..."
-msgstr ""
+msgstr "Премахване doc files..."
 
 msgid "Purging unwanted files..."
 msgstr ""
@@ -393,7 +393,8 @@ msgstr ""
 msgid "Cannot find the %s binary required for verifying source files."
 msgstr ""
 
-msgid "Cannot find the %s binary required for validating sourcefile checksums."
+msgid ""
+"Cannot find the %s binary required for validating sourcefile checksums."
 msgstr ""
 
 msgid "Cannot find the %s binary required for compressing binaries."
@@ -424,7 +425,8 @@ msgstr ""
 msgid "The package group has already been built. (use %s to overwrite)"
 msgstr ""
 
-msgid "Part of the package group has already been built. (use %s to overwrite)"
+msgid ""
+"Part of the package group has already been built. (use %s to overwrite)"
 msgstr ""
 
 msgid "Usage: %s [options]"
@@ -473,7 +475,8 @@ msgid ""
 "  -r, --rmdeps     Remove installed dependencies after a successful build"
 msgstr ""
 
-msgid "  -R, --repackage  Repackage contents of the package without rebuilding"
+msgid ""
+"  -R, --repackage  Repackage contents of the package without rebuilding"
 msgstr ""
 
 msgid "  -s, --syncdeps   Install missing dependencies with %s"
@@ -509,7 +512,8 @@ msgid "  --holdver        Do not update VCS sources"
 msgstr ""
 
 msgid ""
-"  --key <key>      Specify a key to use for %s signing instead of the default"
+"  --key <key>      Specify a key to use for %s signing instead of the "
+"default"
 msgstr ""
 
 msgid "  --nocheck        Do not run the %s function in the %s"
@@ -555,10 +559,11 @@ msgid "If %s is not specified, %s will look for '%s'"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>."
-"\\nCopyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\\n\\nThis is "
-"free software; see the source for copying conditions.\\nThere is NO "
-"WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2006-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>.\\nCopyright (C) 2002-2006 Judd Vinet "
+"<jvinet@zeroflux.org>.\\n\\nThis is free software; see the source for "
+"copying conditions.\\nThere is NO WARRANTY, to the extent permitted by "
+"law.\\n"
 msgstr ""
 
 msgid "%s signal caught. Exiting..."
@@ -595,8 +600,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"The %s option is meant for the root user only. Please\\nrerun %s without the "
-"%s flag."
+"The %s option is meant for the root user only. Please\\nrerun %s without the"
+" %s flag."
 msgstr ""
 
 msgid ""
@@ -672,9 +677,9 @@ msgid "Usage: %s [--nocolor] [pacman_db_root]"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2010-2013 Pacman Development Team <pacman-dev@archlinux.org>."
-"\\nThis is free software; see the source for copying conditions.\\nThere is "
-"NO WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2010-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>.\\nThis is free software; see the source for copying "
+"conditions.\\nThere is NO WARRANTY, to the extent permitted by law.\\n"
 msgstr ""
 
 msgid "%s does not exist or is not a directory."
@@ -752,8 +757,8 @@ msgid "  --lsign-key               Locally sign the specified keyid"
 msgstr ""
 
 msgid ""
-"  --populate                Reload the default keys from the (given) keyrings"
-"\\n                            in '%s'"
+"  --populate                Reload the default keys from the (given) "
+"keyrings\\n                            in '%s'"
 msgstr ""
 
 msgid ""
@@ -761,13 +766,13 @@ msgid ""
 msgstr ""
 
 msgid ""
-"  --config <file>           Use an alternate config file (instead of"
-"\\n                            '%s')"
+"  --config <file>           Use an alternate config file (instead of\\n"
+"                            '%s')"
 msgstr ""
 
 msgid ""
-"  --gpgdir <dir>            Set an alternate directory for GnuPG (instead"
-"\\n                            of '%s')"
+"  --gpgdir <dir>            Set an alternate directory for GnuPG (instead\\n"
+"                            of '%s')"
 msgstr ""
 
 msgid "  --keyserver <server-url>  Specify a keyserver to use if necessary"
@@ -899,8 +904,8 @@ msgid ""
 msgstr ""
 
 msgid ""
-"Because pacman uses many small files to keep track of packages,\\nthere is a "
-"tendency for these files to become fragmented over time.\\nThis script "
+"Because pacman uses many small files to keep track of packages,\\nthere is a"
+" tendency for these files to become fragmented over time.\\nThis script "
 "attempts to relocate these small files into one\\ncontinuous location on "
 "your hard drive. The result is that the hard\\ndrive should be able to read "
 "them faster, since the hard drive head\\ndoes not have to move around the "
@@ -943,7 +948,8 @@ msgstr ""
 msgid "Rotating database into place..."
 msgstr ""
 
-msgid "New database substitution failed. Check for %s, %s, and %s directories."
+msgid ""
+"New database substitution failed. Check for %s, %s, and %s directories."
 msgstr ""
 
 msgid "Finished. Your pacman database has been optimized."
@@ -1020,15 +1026,16 @@ msgid "Usage: repo-add [options] <path-to-db> <package|delta> ...\\n"
 msgstr ""
 
 msgid ""
-"repo-add will update a package database by reading a package file."
-"\\nMultiple packages to add can be specified on the command line.\\n"
+"repo-add will update a package database by reading a package "
+"file.\\nMultiple packages to add can be specified on the command line.\\n"
 msgstr ""
 
 msgid "  -d, --delta       generate and add delta for package update\\n"
 msgstr ""
 
 msgid ""
-"  -n, --new         only add packages that are not already in the database\\n"
+"  -n, --new         only add packages that are not already in the "
+"database\\n"
 msgstr ""
 
 msgid "  -f, --files       update database's file list\\n"
@@ -1038,9 +1045,9 @@ msgid "Usage: repo-remove [options] <path-to-db> <packagename|delta> ...\\n"
 msgstr ""
 
 msgid ""
-"repo-remove will update a package database by removing the package name"
-"\\nspecified on the command line from the given repo database. Multiple"
-"\\npackages to remove can be specified on the command line.\\n"
+"repo-remove will update a package database by removing the package "
+"name\\nspecified on the command line from the given repo database. "
+"Multiple\\npackages to remove can be specified on the command line.\\n"
 msgstr ""
 
 msgid "Please move along, there is nothing to see here.\\n"
@@ -1070,9 +1077,9 @@ msgid "Example:  repo-remove /path/to/repo.db.tar.gz kernel26\\n"
 msgstr ""
 
 msgid ""
-"Copyright (c) 2006-2013 Pacman Development Team <pacman-dev@archlinux.org>\\n"
-"\\nThis is free software; see the source for copying conditions.\\nThere is "
-"NO WARRANTY, to the extent permitted by law.\\n"
+"Copyright (c) 2006-2013 Pacman Development Team <pacman-"
+"dev@archlinux.org>\\n\\nThis is free software; see the source for copying "
+"conditions.\\nThere is NO WARRANTY, to the extent permitted by law.\\n"
 msgstr ""
 
 msgid "No database entry for package '%s'."
