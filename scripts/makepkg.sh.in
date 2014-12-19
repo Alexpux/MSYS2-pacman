@@ -392,17 +392,17 @@ extract_file() {
 			cmd="/usr/bin/bsdtar" ;;
 		*application/x-gzip*)
 			case "$ext" in
-				gz|z|Z) cmd="/bin/gzip" ;;
+				gz|z|Z) cmd="/usr/bin/gzip" ;;
 				*) return;;
 			esac ;;
 		*application/x-bzip*)
 			case "$ext" in
-				bz2|bz) cmd="/bin/bzip2" ;;
+				bz2|bz) cmd="/usr/bin/bzip2" ;;
 				*) return;;
 			esac ;;
 		*application/x-xz*)
 			case "$ext" in
-				xz) cmd="/bin/xz" ;;
+				xz) cmd="/usr/bin/xz" ;;
 				*) return;;
 			esac ;;
 		*)
@@ -3367,7 +3367,7 @@ PACMAN_PATH=$(type -P $PACMAN)
 unset ALL_OFF BOLD BLUE GREEN RED YELLOW
 if [[ -t 2 && $USE_COLOR != "n" ]] && check_buildenv "color" "y"; then
 	# prefer terminal safe colored and bold text when tput is supported
-	if /bin/tput setaf 0 &>/dev/null; then
+	if /usr/bin/tput setaf 0 &>/dev/null; then
 		ALL_OFF="$(/usr/bin/tput sgr0)"
 		BOLD="$(/usr/bin/tput bold)"
 		BLUE="${BOLD}$(/usr/bin/tput setaf 4)"
