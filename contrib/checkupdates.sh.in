@@ -21,6 +21,9 @@
 declare -r myname='checkupdates'
 declare -r myver='@PACKAGE_VERSION@'
 
+m4_include(../scripts/library/output_format.sh)
+m4_include(../scripts/library/term_colors.sh)
+
 if (( $# > 0 )); then
 	echo "${myname} (pacman) v${myver}"
 	echo
@@ -44,7 +47,7 @@ eval $(awk -F' *= *' '$1 ~ /DBPath/ { print $1 "=" $2 }' @sysconfdir@/pacman.con
 mkdir -p "$CHECKUPDATES_DB"
 ln -s "${DBPath}/local" "$CHECKUPDATES_DB" &> /dev/null
 pacman -Sy --dbpath "$CHECKUPDATES_DB" --logfile /dev/null &> /dev/null
-pacman -Qqu --dbpath "$CHECKUPDATES_DB" 2> /dev/null | grep -v '\[.*\]'
+pacman -Qu --dbpath "$CHECKUPDATES_DB" 2> /dev/null | grep -v '\[.*\]'
 
 exit 0
 

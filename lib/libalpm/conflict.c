@@ -52,11 +52,15 @@ static alpm_conflict_t *conflict_new(alpm_pkg_t *pkg1, alpm_pkg_t *pkg2,
 
 	conflict->package1_hash = pkg1->name_hash;
 	conflict->package2_hash = pkg2->name_hash;
-	STRDUP(conflict->package1, pkg1->name, return NULL);
-	STRDUP(conflict->package2, pkg2->name, return NULL);
+	STRDUP(conflict->package1, pkg1->name, goto error);
+	STRDUP(conflict->package2, pkg2->name, goto error);
 	conflict->reason = reason;
 
 	return conflict;
+
+error:
+	alpm_conflict_free(conflict);
+	return NULL;
 }
 
 /**
@@ -79,11 +83,15 @@ alpm_conflict_t *_alpm_conflict_dup(const alpm_conflict_t *conflict)
 
 	newconflict->package1_hash = conflict->package1_hash;
 	newconflict->package2_hash = conflict->package2_hash;
-	STRDUP(newconflict->package1, conflict->package1, return NULL);
-	STRDUP(newconflict->package2, conflict->package2, return NULL);
+	STRDUP(newconflict->package1, conflict->package1, goto error);
+	STRDUP(newconflict->package2, conflict->package2, goto error);
 	newconflict->reason = conflict->reason;
 
 	return newconflict;
+
+error:
+	alpm_conflict_free(newconflict);
+	return NULL;
 }
 
 /**
@@ -284,6 +292,7 @@ static alpm_list_t *add_fileconflict(alpm_handle_t *handle,
 	return conflicts;
 
 error:
+	alpm_fileconflict_free(conflict);
 	RET_ERR(handle, ALPM_ERR_MEMORY, conflicts);
 }
 

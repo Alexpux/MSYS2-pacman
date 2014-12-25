@@ -83,6 +83,7 @@ int SYMEXPORT alpm_pkg_checkmd5sum(alpm_pkg_t *pkg)
  * backend logic that needs lazy access, such as the local database through
  * a lazy-load cache. However, the defaults will work just fine for fully-
  * populated package structures. */
+static const char *_pkg_get_base(alpm_pkg_t *pkg)        { return pkg->base; }
 static const char *_pkg_get_desc(alpm_pkg_t *pkg)        { return pkg->desc; }
 static const char *_pkg_get_url(alpm_pkg_t *pkg)         { return pkg->url; }
 static alpm_time_t _pkg_get_builddate(alpm_pkg_t *pkg)   { return pkg->builddate; }
@@ -144,6 +145,7 @@ static int _pkg_force_load(alpm_pkg_t UNUSED *pkg) { return 0; }
  * struct itself with no abstraction layer or any type of lazy loading.
  */
 struct pkg_operations default_pkg_ops = {
+	.get_base        = _pkg_get_base,
 	.get_desc        = _pkg_get_desc,
 	.get_url         = _pkg_get_url,
 	.get_builddate   = _pkg_get_builddate,
@@ -184,6 +186,13 @@ const char SYMEXPORT *alpm_pkg_get_filename(alpm_pkg_t *pkg)
 	ASSERT(pkg != NULL, return NULL);
 	pkg->handle->pm_errno = 0;
 	return pkg->filename;
+}
+
+const char SYMEXPORT *alpm_pkg_get_base(alpm_pkg_t *pkg)
+{
+	ASSERT(pkg != NULL, return NULL);
+	pkg->handle->pm_errno = 0;
+	return pkg->ops->get_base(pkg);
 }
 
 const char SYMEXPORT *alpm_pkg_get_name(alpm_pkg_t *pkg)
@@ -566,6 +575,7 @@ int _alpm_pkg_dup(alpm_pkg_t *pkg, alpm_pkg_t **new_ptr)
 
 	newpkg->name_hash = pkg->name_hash;
 	STRDUP(newpkg->filename, pkg->filename, goto cleanup);
+	STRDUP(newpkg->base, pkg->base, goto cleanup);
 	STRDUP(newpkg->name, pkg->name, goto cleanup);
 	STRDUP(newpkg->version, pkg->version, goto cleanup);
 	STRDUP(newpkg->desc, pkg->desc, goto cleanup);
@@ -641,6 +651,7 @@ void _alpm_pkg_free(alpm_pkg_t *pkg)
 	}
 
 	FREE(pkg->filename);
+	FREE(pkg->base);
 	FREE(pkg->name);
 	FREE(pkg->version);
 	FREE(pkg->desc);

@@ -63,6 +63,12 @@ static int local_db_read(alpm_pkg_t *info, alpm_dbinfrq_t inforeq);
  * initialized.
  */
 
+static const char *_cache_get_base(alpm_pkg_t *pkg)
+{
+	LAZY_LOAD(INFRQ_DESC, NULL);
+	return pkg->base;
+}
+
 static const char *_cache_get_desc(alpm_pkg_t *pkg)
 {
 	LAZY_LOAD(INFRQ_DESC, NULL);
@@ -297,6 +303,7 @@ static int _cache_force_load(alpm_pkg_t *pkg)
  * logic.
  */
 static struct pkg_operations local_pkg_ops = {
+	.get_base        = _cache_get_base,
 	.get_desc        = _cache_get_desc,
 	.get_url         = _cache_get_url,
 	.get_builddate   = _cache_get_builddate,
@@ -701,6 +708,8 @@ static int local_db_read(alpm_pkg_t *info, alpm_dbinfrq_t inforeq)
 					_alpm_log(db->handle, ALPM_LOG_ERROR, _("%s database is inconsistent: version "
 								"mismatch on package %s\n"), db->treename, info->name);
 				}
+			} else if(strcmp(line, "%BASE%") == 0) {
+				READ_AND_STORE(info->base);
 			} else if(strcmp(line, "%DESC%") == 0) {
 				READ_AND_STORE(info->desc);
 			} else if(strcmp(line, "%GROUPS%") == 0) {
@@ -801,6 +810,7 @@ static int local_db_read(alpm_pkg_t *info, alpm_dbinfrq_t inforeq)
 					alpm_backup_t *backup;
 					CALLOC(backup, 1, sizeof(alpm_backup_t), goto error);
 					if(_alpm_split_backup(line, &backup)) {
+						FREE(backup);
 						goto error;
 					}
 					info->backup = alpm_list_add(info->backup, backup);
@@ -904,6 +914,10 @@ int _alpm_local_db_write(alpm_db_t *db, alpm_pkg_t *info, alpm_dbinfrq_t inforeq
 		free(path);
 		fprintf(fp, "%%NAME%%\n%s\n\n"
 						"%%VERSION%%\n%s\n\n", info->name, info->version);
+		if(info->base) {
+			fprintf(fp, "%%BASE%%\n"
+							"%s\n\n", info->base);
+		}
 		if(info->desc) {
 			fprintf(fp, "%%DESC%%\n"
 							"%s\n\n", info->desc);

@@ -331,7 +331,7 @@ alpm_db_t *_alpm_db_new(const char *treename, int is_local)
 	alpm_db_t *db;
 
 	CALLOC(db, 1, sizeof(alpm_db_t), return NULL);
-	STRDUP(db->treename, treename, return NULL);
+	STRDUP(db->treename, treename, FREE(db); return NULL);
 	if(is_local) {
 		db->status |= DB_STATUS_LOCAL;
 	} else {
@@ -542,7 +542,10 @@ alpm_pkghash_t *_alpm_db_get_pkgcache_hash(alpm_db_t *db)
 	}
 
 	if(!(db->status & DB_STATUS_PKGCACHE)) {
-		load_pkgcache(db);
+		if(load_pkgcache(db)) {
+			/* handle->error set in local/sync-db-populate */
+			return NULL;
+		}
 	}
 
 	return db->pkgcache;

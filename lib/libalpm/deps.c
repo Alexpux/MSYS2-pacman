@@ -50,11 +50,15 @@ static alpm_depmissing_t *depmiss_new(const char *target, alpm_depend_t *dep,
 
 	MALLOC(miss, sizeof(alpm_depmissing_t), return NULL);
 
-	STRDUP(miss->target, target, return NULL);
+	STRDUP(miss->target, target, goto error);
 	miss->depend = _alpm_dep_dup(dep);
-	STRDUP(miss->causingpkg, causingpkg, return NULL);
+	STRDUP(miss->causingpkg, causingpkg, goto error);
 
 	return miss;
+
+error:
+	alpm_depmissing_free(miss);
+	return NULL;
 }
 
 void SYMEXPORT alpm_depmissing_free(alpm_depmissing_t *miss)
@@ -469,7 +473,7 @@ alpm_depend_t SYMEXPORT *alpm_dep_from_string(const char *depstring)
 
 	/* Note the extra space in ": " to avoid matching the epoch */
 	if((desc = strstr(depstring, ": ")) != NULL) {
-		STRDUP(depend->desc, desc + 2, return NULL);
+		STRDUP(depend->desc, desc + 2, goto error);
 		deplen = desc - depstring;
 	} else {
 		/* no description- point desc at NULL at end of string for later use */
@@ -509,13 +513,17 @@ alpm_depend_t SYMEXPORT *alpm_dep_from_string(const char *depstring)
 	}
 
 	/* copy the right parts to the right places */
-	STRNDUP(depend->name, depstring, ptr - depstring, return NULL);
+	STRNDUP(depend->name, depstring, ptr - depstring, goto error);
 	depend->name_hash = _alpm_hash_sdbm(depend->name);
 	if(version) {
-		STRNDUP(depend->version, version, desc - version, return NULL);
+		STRNDUP(depend->version, version, desc - version, goto error);
 	}
 
 	return depend;
+
+error:
+	alpm_dep_free(depend);
+	return NULL;
 }
 
 alpm_depend_t *_alpm_dep_dup(const alpm_depend_t *dep)
@@ -523,13 +531,17 @@ alpm_depend_t *_alpm_dep_dup(const alpm_depend_t *dep)
 	alpm_depend_t *newdep;
 	CALLOC(newdep, 1, sizeof(alpm_depend_t), return NULL);
 
-	STRDUP(newdep->name, dep->name, return NULL);
-	STRDUP(newdep->version, dep->version, return NULL);
-	STRDUP(newdep->desc, dep->desc, return NULL);
+	STRDUP(newdep->name, dep->name, goto error);
+	STRDUP(newdep->version, dep->version, goto error);
+	STRDUP(newdep->desc, dep->desc, goto error);
 	newdep->name_hash = dep->name_hash;
 	newdep->mod = dep->mod;
 
 	return newdep;
+
+error:
+	alpm_dep_free(newdep);
+	return NULL;
 }
 
 /* These parameters are messy. We check if this package, given a list of

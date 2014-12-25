@@ -19,6 +19,9 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Avoid creating world-unreadable files
+umask 022
+
 # gettext initialization
 export TEXTDOMAIN='pacman-scripts'
 export TEXTDOMAINDIR='@localedir@'
@@ -169,6 +172,8 @@ if [[ -z "$db_version" ]]; then
 	fi
 
 	# pacman 4.1 to 4.2 upgrade - remove directory symlink support
+	msg "$(gettext "Pre-4.2 database format detected - upgrading...")"
+
 	dirlist=()
 
 	unset GREP_OPTIONS
@@ -182,8 +187,6 @@ if [[ -z "$db_version" ]]; then
 		done)
 
 	if [[ ${#dirlist[@]} != 0 ]]; then
-		msg "$(gettext "Pre-4.2 database format detected - upgrading...")"
-
 		pacroot="$(resolve_dir "$pacroot")"
 
 		for dir in "${dirlist[@]}"; do
