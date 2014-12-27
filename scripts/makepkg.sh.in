@@ -2287,7 +2287,7 @@ create_package() {
 	case "$PKGEXT" in
 		*tar.gz)  ${COMPRESSGZ[@]:-gzip -c -f -n} ;;
 		*tar.bz2) ${COMPRESSBZ2[@]:-bzip2 -c -f} ;;
-		*tar.xz)  ${COMPRESSXZ[@]:-xz -c -z -} ;;
+		*tar.xz)  ${COMPRESSXZ[@]:-xz -c -z -T0 -} ;;
 		*tar.lrz) ${COMPRESSLRZ[@]:-lrzip -q} ;;
 		*tar.lzo) ${COMPRESSLZO[@]:-lzop -q} ;;
 		*tar.Z)   ${COMPRESSZ[@]:-compress -c -f} ;;
