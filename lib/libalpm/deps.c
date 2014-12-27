@@ -48,7 +48,7 @@ static alpm_depmissing_t *depmiss_new(const char *target, alpm_depend_t *dep,
 {
 	alpm_depmissing_t *miss;
 
-	MALLOC(miss, sizeof(alpm_depmissing_t), return NULL);
+	CALLOC(miss, 1, sizeof(alpm_depmissing_t), return NULL);
 
 	STRDUP(miss->target, target, goto error);
 	miss->depend = _alpm_dep_dup(dep);
@@ -469,7 +469,7 @@ alpm_depend_t SYMEXPORT *alpm_dep_from_string(const char *depstring)
 		return NULL;
 	}
 
-	MALLOC(depend, sizeof(alpm_depend_t), return NULL);
+	CALLOC(depend, 1, sizeof(alpm_depend_t), return NULL);
 
 	/* Note the extra space in ": " to avoid matching the epoch */
 	if((desc = strstr(depstring, ": ")) != NULL) {
@@ -614,6 +614,8 @@ int _alpm_recursedeps(alpm_db_t *db, alpm_list_t **targs, int include_explicit)
 						deppkg->name);
 				/* add it to the target list */
 				if(_alpm_pkg_dup(deppkg, &copy)) {
+					/* we return memory on "non-fatal" error in _alpm_pkg_dup */
+					_alpm_pkg_free(copy);
 					return -1;
 				}
 				*targs = alpm_list_add(*targs, copy);
