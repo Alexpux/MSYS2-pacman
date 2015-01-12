@@ -446,15 +446,15 @@ download_bzr() {
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
 		msg2 "$(gettext "Branching %s ...")" "${displaylocation}"
-		if ! bzr branch "$url" "$dir" --no-tree --use-existing-dir; then
+		if ! /usr/bin/bzr branch "$url" "$dir" --no-tree --use-existing-dir; then
 			error "$(gettext "Failure while branching %s")" "${displaylocation}"
 			plain "$(gettext "Aborting...")"
 			exit 1
 		fi
 	elif (( ! HOLDVER )); then
 		# Make sure we are fetching the right repo
-		local distant_url="$(bzr info $url 2> /dev/null | sed -n '/branch root/{s/  branch root: //p;q;}')"
-		local local_url="$(bzr config parent_location -d $dir)"
+		local distant_url="$(/usr/bin/bzr info $url 2> /dev/null | sed -n '/branch root/{s/  branch root: //p;q;}')"
+		local local_url="$(/usr/bin/bzr config parent_location -d $dir)"
 		if [[ -n $distant_url ]]; then
 			if [[ $distant_url != "$local_url" ]]; then
 				error "$(gettext "%s is not a branch of %s")" "$dir" "$url"
@@ -471,7 +471,7 @@ download_bzr() {
 		fi
 		msg2 "$(gettext "Pulling %s ...")" "${displaylocation}"
 		cd_safe "$dir"
-		if ! bzr pull "$url"; then
+		if ! /usr/bin/bzr pull "$url"; then
 			# only warn on failure to allow offline builds
 			warning "$(gettext "Failure while pulling %s")" "${displaylocation}"
 		fi
@@ -537,7 +537,7 @@ download_git() {
 
 	if [[ ! -d "$dir" ]] || dir_is_empty "$dir" ; then
 		msg2 "$(gettext "Cloning %s %s repo...")" "${repo}" "git"
-		if ! git clone --mirror "$url" "$dir"; then
+		if ! /usr/bin/git clone --mirror "$url" "$dir"; then
 			error "$(gettext "Failure while downloading %s %s repo")" "${repo}" "git"
 			plain "$(gettext "Aborting...")"
 			exit 1
@@ -551,7 +551,7 @@ download_git() {
 			exit 1
 		fi
 		msg2 "$(gettext "Updating %s %s repo...")" "${repo}" "git"
-		if ! git fetch --all -p; then
+		if ! /usr/bin/git fetch --all -p; then
 			# only warn on failure to allow offline builds
 			warning "$(gettext "Failure while updating %s %s repo")" "${repo}" "git"
 		fi
@@ -1204,7 +1204,7 @@ generate_one_checksum() {
 generate_checksums() {
 	msg "$(gettext "Generating checksums for source files...")"
 
-	if ! type -p openssl >/dev/null; then
+	if ! type -p /usr/bin/openssl >/dev/null; then
 		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "/usr/bin/openssl"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
