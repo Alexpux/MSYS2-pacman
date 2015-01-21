@@ -202,9 +202,6 @@ typedef enum _alpm_siglevel_t {
 	ALPM_SIG_DATABASE_MARGINAL_OK = (1 << 12),
 	ALPM_SIG_DATABASE_UNKNOWN_OK = (1 << 13),
 
-	ALPM_SIG_PACKAGE_SET = (1 << 27),
-	ALPM_SIG_PACKAGE_TRUST_SET = (1 << 28),
-
 	ALPM_SIG_USE_DEFAULT = (1 << 31)
 } alpm_siglevel_t;
 
@@ -445,10 +442,7 @@ typedef enum _alpm_event_type_t {
 	ALPM_EVENT_PACNEW_CREATED,
 	/** A .pacsave file was created; See alpm_event_pacsave_created_t for
 	 * arguments */
-	ALPM_EVENT_PACSAVE_CREATED,
-	/** A .pacorig file was created; See alpm_event_pacorig_created_t for
-	 * arguments */
-	ALPM_EVENT_PACORIG_CREATED
+	ALPM_EVENT_PACSAVE_CREATED
 } alpm_event_type_t;
 
 typedef struct _alpm_event_any_t {
@@ -539,15 +533,6 @@ typedef struct _alpm_event_pacsave_created_t {
 	const char *file;
 } alpm_event_pacsave_created_t;
 
-typedef struct _alpm_event_pacorig_created_t {
-	/** Type of event. */
-	alpm_event_type_t type;
-	/** New package. */
-	alpm_pkg_t *newpkg;
-	/** Filename of the file without the .pacorig suffix. */
-	const char *file;
-} alpm_event_pacorig_created_t;
-
 /** Events.
  * This is an union passed to the callback, that allows the frontend to know
  * which type of event was triggered (via type). It is then possible to
@@ -564,7 +549,6 @@ typedef union _alpm_event_t {
 	alpm_event_pkgdownload_t pkgdownload;
 	alpm_event_pacnew_created_t pacnew_created;
 	alpm_event_pacsave_created_t pacsave_created;
-	alpm_event_pacorig_created_t pacorig_created;
 } alpm_event_t;
 
 /** Event callback. */

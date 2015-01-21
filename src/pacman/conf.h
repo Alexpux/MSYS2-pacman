@@ -34,6 +34,14 @@ typedef struct __colstr_t {
 	const char *nocolor;
 } colstr_t;
 
+typedef struct __config_repo_t {
+	char *name;
+	alpm_list_t *servers;
+	alpm_db_usage_t usage;
+	alpm_siglevel_t siglevel;
+	alpm_siglevel_t siglevel_mask;
+} config_repo_t;
+
 typedef struct __config_t {
 	unsigned short op;
 	unsigned short quiet;
@@ -88,6 +96,10 @@ typedef struct __config_t {
 	alpm_siglevel_t localfilesiglevel;
 	alpm_siglevel_t remotefilesiglevel;
 
+	alpm_siglevel_t siglevel_mask;
+	alpm_siglevel_t localfilesiglevel_mask;
+	alpm_siglevel_t remotefilesiglevel_mask;
+
 	/* conf file options */
 	/* I Love Candy! */
 	unsigned short chomp;
@@ -114,6 +126,8 @@ typedef struct __config_t {
 
 	/* Color strings for output */
 	colstr_t colstr;
+
+	alpm_list_t *repos;
 } config_t;
 
 /* Operations */
@@ -207,6 +221,8 @@ extern config_t *config;
 void enable_colors(int colors);
 config_t *config_new(void);
 int config_free(config_t *oldconfig);
+
+void config_repo_free(config_repo_t *repo);
 
 int config_set_arch(const char *arch);
 int parseconfig(const char *file);

@@ -565,6 +565,13 @@ API CHANGES BETWEEN 4.1 AND 4.2
 API CHANGES BETWEEN 4.2 AND 5.0
 ===============================
 
+[REMOVED]
+- alpm_siglevel_t - removed members ALPM_SIG_PACKAGE_SET, ALPM_SIG_PACKAGE_TRUST_SET
+
+- ALPM_EVENT_PACORIG_CREATED
+- alpm_event_pacorig_created_t
+- alpm_event_t.pacorig_created
+
 [ADDED]
 - pkgbase accessor
   - alpm_pkg_get_base()
