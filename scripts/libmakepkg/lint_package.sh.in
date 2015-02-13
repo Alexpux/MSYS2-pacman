@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-#   tidy.sh - functions for modifying/removing installed files before
-#   package creation
+#   lint_package.sh - functions for checking for packaging errors
 #
 #   Copyright (c) 2015 Pacman Development Team <pacman-dev@archlinux.org>
 #
@@ -19,34 +18,28 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-[ -n "$LIBMAKEPKG_TIDY_SH" ] && return
-LIBMAKEPKG_TIDY_SH=1
+[ -n "$LIBMAKEPKG_LINT_PACKAGE_SH" ] && return
+LIBMAKEPKG_LINT_PACKAGE_SH=1
 
 LIBRARY=${LIBRARY:-'@libmakepkgdir@'}
 
 source "$LIBRARY/util/message.sh"
 
 
-declare -a packaging_options tidy_remove tidy_modify
+declare -a lint_package_functions
 
-for lib in "$LIBRARY/tidy/"*.sh; do
+for lib in "$LIBRARY/lint_package/"*.sh; do
 	source "$lib"
 done
 
-readonly -a packaging_options tidy_remove tidy_modify
+readonly -a lint_package_functions
 
 
-tidy_install() {
+lint_package() {
 	cd_safe "$pkgdir"
-	msg "$(gettext "Tidying install...")"
+	msg "$(gettext "Checking for packaging issue...")"
 
-	# options that remove unwanted files
-	for func in ${tidy_remove[@]}; do
-		$func
-	done
-
-	# options that modify files
-	for func in ${tidy_modify[@]}; do
+	for func in ${lint_package_functions[@]}; do
 		$func
 	done
 }

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   missing_backup.sh - Warn about missing files in the backup array
+#   build_references.sh - Warn about files containing references to build directories
 #
 #   Copyright (c) 2013-2015 Pacman Development Team <pacman-dev@archlinux.org>
 #
@@ -18,19 +18,21 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-[ -n "$LIBMAKEPKG_TIDY_MISSING_BACKUP_SH" ] && return
-LIBMAKEPKG_TIDY_MISSING_BACKUP_SH=1
+[ -n "$LIBMAKEPKG_LINT_PACKAGE_BUILD_REFERENCES_SH" ] && return
+LIBMAKEPKG_LINT_PACKAGE_BUILD_REFERENCES_SH=1
 
 LIBRARY=${LIBRARY:-'@libmakepkgdir@'}
 
 source "$LIBRARY/util/message.sh"
 
 
-warn_missing_backup() {
-	local file
-	for file in "${backup[@]}"; do
-		if [[ ! -f $file ]]; then
-			warning "$(gettext "%s entry file not in package : %s")" "backup" "$file"
-		fi
-	done
+lint_package_functions+=('warn_build_references')
+
+warn_build_references() {
+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${srcdir}" ; then
+		warning "$(gettext "Package contains reference to %s")" "\$srcdir"
+	fi
+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${pkgdirbase}" ; then
+		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
+	fi
 }

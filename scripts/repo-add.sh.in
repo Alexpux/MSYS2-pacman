@@ -34,6 +34,7 @@ ONLYADDNEW=0
 RMEXISTING=0
 WITHFILES=0
 SIGN=0
+KEY=0
 VERIFY=0
 REPO_DB_FILE=
 LOCKFILE=
@@ -59,7 +60,7 @@ Multiple packages to add can be specified on the command line.\n")"
 		printf -- "$(gettext "Options:\n")"
 		printf -- "$(gettext "  -d, --delta       generate and add delta for package update\n")"
 		printf -- "$(gettext "  -n, --new         only add packages that are not already in the database\n")"
-		printf -- "$(gettext "  -R, --remove      remove package file from disk when updating database entry\n")"
+		printf -- "$(gettext "  -R, --remove      remove old package file from disk after updating database\n")"
 		printf -- "$(gettext "  -f, --files       update database's file list\n")"
 	elif [[ $cmd == "repo-remove" ]] ; then
 		printf -- "$(gettext "Usage: repo-remove [options] <path-to-db> <packagename|delta> ...\n")"
@@ -198,6 +199,17 @@ check_gpg() {
 		error "$(gettext "Cannot find the gpg binary! Is GnuPG installed?")"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
+
+	if (( ! VERIFY )); then
+		if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
+			if [[ ! -z $GPGKEY ]]; then
+				error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
+			elif (( ! KEY )); then
+				error "$(gettext "There is no key in your keyring.")"
+			fi
+			exit 1
+		fi
+	fi
 }
 
 # sign the package database once repackaged
@@ -249,7 +261,7 @@ verify_repo_extension() {
 		*.@(db|files).tar.xz)  TAR_OPT="J" ;;
 		*.@(db|files).tar.Z)   TAR_OPT="Z" ;;
 		*.@(db|files).tar)     TAR_OPT="" ;;
-		*) error "$(gettext "'%s' does not have a valid archive extension.")" \
+		*) error "$(gettext "'%s' does not have a valid database archive extension.")" \
 				"$repofile"
 			exit 1 ;;
 	esac
@@ -306,14 +318,13 @@ db_write_entry() {
 				local oldfilename=$(grep -A1 FILENAME "$pkgentry/desc" | tail -n1)
 				local oldfile="$(dirname "$1")/$oldfilename"
 			fi
-		elif (( RMEXISTING )); then
-			# only remove existing package if we're not doing deltas
+		fi
+		if (( RMEXISTING )); then
+			# gather information needed to remove old file
 			pkgentry=$(find_pkgentry "$pkgname")
 			if [[ -n $pkgentry ]]; then
 				local oldfilename="$(sed -n '/^%FILENAME%$/ {n;p;q;}' "$pkgentry/desc")"
 				local oldfile="$(dirname "$1")/$oldfilename"
-				msg2 "$(gettext "Removing existing package '%s'")" "$oldfilename"
-				rm -f ${oldfile} ${oldfile}.sig
 			fi
 		fi
 	fi
@@ -410,6 +421,11 @@ db_write_entry() {
 				warning "$(gettext "Old package file not found: %s")" "$oldfilename"
 			fi
 		fi
+	fi
+
+	if (( RMEXISTING )); then
+		msg2 "$(gettext "Removing old package file '%s'")" "$oldfilename"
+		rm -f ${oldfile} ${oldfile}.sig
 	fi
 
 	return 0
@@ -532,7 +548,7 @@ add() {
 }
 
 remove() {
-	if [[ ${1##*.} == "delta" ]]; then
+	if [[ $1 = *-*-*_to_*-*-*.delta ]]; then
 		deltafile=$1
 		msg "$(gettext "Searching for delta '%s'...")" "$deltafile"
 		if db_remove_delta "$deltafile"; then
@@ -575,6 +591,8 @@ clean_up() {
 
 	exit $exit_code
 }
+
+# PROGRAM START
 
 # determine whether we have gettext; make it a no-op if we do not
 if ! type -p gettext >/dev/null; then
@@ -628,28 +646,14 @@ while (( $# )); do
 		-f|--files) WITHFILES=1;;
 		--nocolor) USE_COLOR='n';;
 		-s|--sign)
-			check_gpg
 			SIGN=1
-			if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
-				if [[ ! -z $GPGKEY ]]; then
-					error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
-				else
-					error "$(gettext "There is no key in your keyring.")"
-				fi
-				exit 1
-			fi
 			;;
 		-k|--key)
-			check_gpg
+			KEY=1
 			shift
 			GPGKEY=$1
-			if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
-				error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
-				exit 1
-			fi
 			;;
 		-v|--verify)
-			check_gpg
 			VERIFY=1
 			;;
 		*)
@@ -675,6 +679,10 @@ fi
 
 verify_repo_extension "$REPO_DB_FILE" >/dev/null
 check_repo_db
+
+if (( SIGN || KEY || VERIFY )); then
+	check_gpg
+fi
 
 for arg in "${args[@]:1}"; do
 	case $cmd in
@@ -711,12 +719,13 @@ if (( success )); then
 	if [[ -f $REPO_DB_FILE ]]; then
 		ln -f "$REPO_DB_FILE" "$REPO_DB_FILE.old" 2>/dev/null || \
 			mv -f "$REPO_DB_FILE" "$REPO_DB_FILE.old"
-	fi
-	if [[ -f $REPO_DB_FILE.sig ]]; then
-		ln -f "$REPO_DB_FILE.sig" "$REPO_DB_FILE.old.sig" 2>/dev/null || \
-			mv -f "$REPO_DB_FILE.sig" "$REPO_DB_FILE.old.sig"
-	else
-		rm -f "$REPO_DB_FILE.old.sig"
+
+		if [[ -f $REPO_DB_FILE.sig ]]; then
+			ln -f "$REPO_DB_FILE.sig" "$REPO_DB_FILE.old.sig" 2>/dev/null || \
+				mv -f "$REPO_DB_FILE.sig" "$REPO_DB_FILE.old.sig"
+		else
+			rm -f "$REPO_DB_FILE.old.sig"
+		fi
 	fi
 
 	# rotate the newly-created database and signature into place
