@@ -3355,6 +3355,20 @@ if (( NOBUILD )); then
 	msg "$(gettext "Sources are ready.")"
 	exit 0 #E_OK
 else
+	cd_safe "$startdir"
+
+	if (( ! REPKG )); then
+		(( BUILDFUNC )) && run_build
+		(( CHECKFUNC )) && run_check
+		cd_safe "$startdir"
+	fi
+
+	# if inhibiting archive creation, go no further
+	if (( NOARCHIVE )); then
+		msg "$(gettext "Package directory is ready.")"
+		exit 0
+	fi
+	
 	# clean existing pkg directory
 	# .. changed for MSYS2 to allow pkg itself to be kept
 	# and only have its contents removed (so a symlink to
@@ -3366,23 +3380,7 @@ else
 		mkdir -p "$pkgdirbase"
 		chmod a-srwx "$pkgdirbase"
 	fi
-	cd_safe "$startdir"
-
-	if (( ! REPKG )); then
-		if (( ! ( SPLITPKG || PKGFUNC ) )); then
-			chmod 755 "$pkgdirbase"
-			mkdir -p "$pkgdir"
-		fi
-		(( BUILDFUNC )) && run_build
-		(( CHECKFUNC )) && run_check
-		cd_safe "$startdir"
-	fi
-
-	# if inhibiting archive creation, go no further
-	if (( NOARCHIVE )); then
-		msg "$(gettext "Package directory is ready.")"
-		exit 0
-	fi
+	
 	chmod 755 "$pkgdirbase"
 	if (( ! SPLITPKG )); then
 		pkgdir="$pkgdirbase/$pkgname"
