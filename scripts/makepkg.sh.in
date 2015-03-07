@@ -2825,6 +2825,11 @@ run_split_packaging() {
 	local pkgname_backup=${pkgname[@]}
 	for pkgname in ${pkgname_backup[@]}; do
 		pkgdir="$pkgdirbase/$pkgname"
+		# clean existing pkg directory
+		if [[ -d $pkgdir ]]; then
+			msg "$(gettext "Removing existing %s directory...")" "\$pkgdir/"
+			rm -rf "$pkgdir"
+		fi
 		mkdir "$pkgdir"
 		backup_package_variables
 		run_package $pkgname
@@ -3368,22 +3373,16 @@ else
 		msg "$(gettext "Package directory is ready.")"
 		exit 0
 	fi
-	
-	# clean existing pkg directory
-	# .. changed for MSYS2 to allow pkg itself to be kept
-	# and only have its contents removed (so a symlink to
-	# a spacious drive can be used).
-	if [[ -d $pkgdirbase ]]; then
-		msg "$(gettext "Removing existing %s directory...")" "\$pkgdir/"
-		rm -rf "$pkgdirbase"/*
-	else
-		mkdir -p "$pkgdirbase"
-		chmod a-srwx "$pkgdirbase"
-	fi
-	
+	mkdir -p "$pkgdirbase"
+	chmod a-srwx "$pkgdirbase"
 	chmod 755 "$pkgdirbase"
 	if (( ! SPLITPKG )); then
 		pkgdir="$pkgdirbase/$pkgname"
+		# clean existing pkg directory
+		if [[ -d $pkgdir ]]; then
+			msg "$(gettext "Removing existing %s directory...")" "\$pkgdir/"
+			rm -rf "$pkgdir"
+		fi
 		mkdir "$pkgdir"
 		if (( PKGFUNC )); then
 			run_package
