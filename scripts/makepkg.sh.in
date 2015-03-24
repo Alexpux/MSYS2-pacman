@@ -3196,6 +3196,9 @@ else
 
 fi
 
+# set pkgdir to something "sensible" for (not recommended) use during build()
+pkgdir="$pkgdirbase/$pkgbase"
+
 if (( GENINTEG )); then
 	mkdir -p "$srcdir"
 	chmod a-s "$srcdir"
