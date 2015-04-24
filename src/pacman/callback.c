@@ -98,8 +98,11 @@ static int64_t get_update_timediff(int first_call)
 static void fill_progress(const int bar_percent, const int disp_percent,
 		const int proglen)
 {
-	/* 8 = 1 space + 1 [ + 1 ] + 5 for percent */
-	const int hashlen = proglen - 8;
+	/* 9 = 1 space + 1 [ + 1 ] + 5 for percent + 1 blank
+	 * Without the single blank at the end, carriage return wouldn't
+	 * work properly on most windows terminals.
+	 */
+	const int hashlen = proglen - 9;
 	const int hash = bar_percent * hashlen / 100;
 	static int lasthash = 0, mouth = 0;
 	int i;
