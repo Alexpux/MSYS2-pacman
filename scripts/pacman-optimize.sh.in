@@ -33,6 +33,8 @@ dbroot="${DBPath:-@localstatedir@/lib/pacman/}"
 
 m4_include(library/output_format.sh)
 
+m4_include(library/utils_fixed_path.sh)
+
 usage() {
 	printf "pacman-optimize (pacman) %s\n\n" "$myver"
 	printf -- "$(gettext "Usage: %s [--nocolor] [pacman_db_root]")\n\n" "$0"
@@ -99,7 +101,7 @@ if [[ -n $1 ]]; then
 	dbroot="$1"
 fi
 
-if ! type -p /usr/bin/openssl >/dev/null; then
+if ! type -p openssl >/dev/null; then
 	die "$(gettext "Cannot find the %s binary required for verifying integrity.")" "openssl"
 fi
 
@@ -129,7 +131,7 @@ workdir=$(mktemp -d "${TMPDIR:-/tmp}/pacman-optimize.XXXXXXXXXX") ||
 # step 1: sum the old db
 msg "$(gettext "MD5sum'ing the old database...")"
 (cd "$localdb" && find . -type f -print0 | \
-	xargs -0 /usr/bin/openssl dgst -md5 | sort > "$workdir/pacsums.old")
+	xargs -0 openssl dgst -md5 | sort > "$workdir/pacsums.old")
 
 # step 2: tar it up
 msg "$(gettext "Tar'ing up %s...")" "$localdb"
@@ -151,12 +153,12 @@ fi
 msg "$(gettext "Syncing database to disk...")"
 sync
 (cd "$localdb.new" && find . -type f -print0 | \
-	xargs -0 /usr/bin/openssl dgst -md5 | sort > "$workdir/pacsums.new")
+	xargs -0 openssl dgst -md5 | sort > "$workdir/pacsums.new")
 
 # step 4: compare the sums
 msg "$(gettext "Checking integrity...")"
-read -ra old_dgst < <(/usr/bin/openssl dgst -md5 < "$workdir/pacsums.old")
-read -ra new_dgst < <(/usr/bin/openssl dgst -md5 < "$workdir/pacsums.new")
+read -ra old_dgst < <(openssl dgst -md5 < "$workdir/pacsums.old")
+read -ra new_dgst < <(openssl dgst -md5 < "$workdir/pacsums.new")
 if [[ ${old_dgst[@]:(-1)} != ${new_dgst[@]:(-1)} ]]; then
 	# failed
 	# leave our pacman-optimize tmpdir for checking to see what doesn't match up

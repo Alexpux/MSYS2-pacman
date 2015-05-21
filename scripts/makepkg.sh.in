@@ -95,6 +95,8 @@ PACMAN_OPTS=
 
 shopt -s extglob
 
+m4_include(library/utils_fixed_path.sh)
+
 ### SUBROUTINES ###
 
 # Import libmakepkg
@@ -375,7 +377,7 @@ generate_one_checksum() {
 				if [[ $netfile != *.@(sig?(n)|asc) ]]; then
 					local file
 					file="$(get_filepath "$netfile")" || missing_source_file "$netfile"
-					sum="$(/usr/bin/openssl dgst -${integ} "$file")"
+					sum="$(openssl dgst -${integ} "$file")"
 					sum=${sum##* }
 				else
 					sum="SKIP"
@@ -396,8 +398,8 @@ generate_one_checksum() {
 generate_checksums() {
 	msg "$(gettext "Generating checksums for source files...")"
 
-	if ! type -p /usr/bin/openssl >/dev/null; then
-		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "/usr/bin/openssl"
+	if ! type -p openssl >/dev/null; then
+		error "$(gettext "Cannot find the %s binary required for generating sourcefile checksums.")" "openssl"
 		exit 1 # $E_MISSING_PROGRAM
 	fi
 
@@ -438,7 +440,7 @@ verify_integrity_one() {
 		return 1
 	fi
 
-	local realsum="$(/usr/bin/openssl dgst -${integ} "$file")"
+	local realsum="$(openssl dgst -${integ} "$file")"
 	realsum="${realsum##* }"
 	if [[ ${expectedsum,,} = "$realsum" ]]; then
 		printf '%s\n' "$(gettext "Passed")" >&2
@@ -631,16 +633,16 @@ check_pgpsigs() {
 		fi
 
 		case "$ext" in
-			gz)  decompress="/usr/bin/gzip -c -d -f" ;;
-			bz2) decompress="/usr/bin/bzip2 -c -d -f" ;;
-			xz)  decompress="/usr/bin/xz -c -d" ;;
-			lrz) decompress="/usr/bin/lrzip -q -d" ;;
-			lzo) decompress="/usr/bin/lzop -c -d -q" ;;
-			Z)   decompress="/usr/bin/uncompress -c -f" ;;
-			"")  decompress="/usr/bin/cat" ;;
+			gz)  decompress="gzip -c -d -f" ;;
+			bz2) decompress="bzip2 -c -d -f" ;;
+			xz)  decompress="xz -c -d" ;;
+			lrz) decompress="lrzip -q -d" ;;
+			lzo) decompress="lzop -c -d -q" ;;
+			Z)   decompress="uncompress -c -f" ;;
+			"")  decompress="cat" ;;
 		esac
 
-		$decompress < "$sourcefile" | /usr/bin/gpg --quiet --batch --status-file "$statusfile" --verify "$file" - 2> /dev/null
+		$decompress < "$sourcefile" | gpg --quiet --batch --status-file "$statusfile" --verify "$file" - 2> /dev/null
 		# these variables are assigned values in parse_gpg_statusfile
 		success=0
 		status=
@@ -1192,7 +1194,7 @@ create_package() {
 	shopt -s nullglob
 
 	msg2 "$(gettext "Generating .MTREE file...")"
-	LANG=C /usr/bin/bsdtar -czf .MTREE --format=mtree \
+	LANG=C bsdtar -czf .MTREE --format=mtree \
 		--options='!all,use-set,type,uid,gid,mode,time,size,md5,sha256,link' \
 		"${comp_files[@]}" *
 	comp_files+=(".MTREE")
@@ -1203,7 +1205,7 @@ create_package() {
 	# bsdtar's gzip compression always saves the time stamp, making one
 	# archive created using the same command line distinct from another.
 	# Disable bsdtar compression and use gzip -n for now.
-	LANG=C /usr/bin/bsdtar -cf - "${comp_files[@]}" * |
+	LANG=C bsdtar -cf - "${comp_files[@]}" * |
 	case "$PKGEXT" in
 		*tar.gz)  ${COMPRESSGZ[@]:-gzip -c -f -n} ;;
 		*tar.bz2) ${COMPRESSBZ2[@]:-bzip2 -c -f} ;;
@@ -1275,7 +1277,7 @@ create_signature() {
 		SIGNWITHKEY="-u ${GPGKEY}"
 	fi
 
-	/usr/bin/gpg --detach-sign --use-agent ${SIGNWITHKEY} --no-armor "$filename" &>/dev/null || ret=$?
+	gpg --detach-sign --use-agent ${SIGNWITHKEY} --no-armor "$filename" &>/dev/null || ret=$?
 
 
 	if (( ! ret )); then
@@ -1347,7 +1349,7 @@ create_srcpackage() {
 	# tar it up
 	msg2 "$(gettext "Compressing source package...")"
 	cd_safe "${srclinks}"
-	if ! LANG=C /usr/bin/bsdtar -cL ${TAR_OPT} -f "$pkg_file" ${pkgbase}; then
+	if ! LANG=C bsdtar -cL ${TAR_OPT} -f "$pkg_file" ${pkgbase}; then
 		error "$(gettext "Failed to create source package file.")"
 		exit 1 # TODO: error code
 	fi
@@ -1492,7 +1494,7 @@ check_software() {
 	# gpg - package signing
 	if [[ $SIGNPKG == 'y' ]] || { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; }; then
 		if ! type -p gpg >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for signing packages.")" "/usr/bin/gpg"
+			error "$(gettext "Cannot find the %s binary required for signing packages.")" "gpg"
 			ret=1
 		fi
 	fi
@@ -1500,7 +1502,7 @@ check_software() {
 	# gpg - source verification
 	if (( ! SKIPPGPCHECK )) && source_has_signatures; then
 		if ! type -p gpg >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for verifying source files.")" "/usr/bin/gpg"
+			error "$(gettext "Cannot find the %s binary required for verifying source files.")" "gpg"
 			ret=1
 		fi
 	fi
@@ -1508,7 +1510,7 @@ check_software() {
 	# openssl - checksum operations
 	if (( ! SKIPCHECKSUMS )); then
 		if ! type -p openssl >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "/usr/bin/openssl"
+			error "$(gettext "Cannot find the %s binary required for validating sourcefile checksums.")" "openssl"
 			ret=1
 		fi
 	fi
@@ -1516,7 +1518,7 @@ check_software() {
 	# upx - binary compression
 	if check_option "upx" "y"; then
 		if ! type -p upx >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compressing binaries.")" "/usr/bin/upx"
+			error "$(gettext "Cannot find the %s binary required for compressing binaries.")" "upx"
 			ret=1
 		fi
 	fi
@@ -1532,7 +1534,7 @@ check_software() {
 	# distcc - compilation with distcc
 	if check_buildenv "distcc" "y" && ! check_option "distcc" "n"; then
 		if ! type -p distcc >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "/usr/bin/distcc"
+			error "$(gettext "Cannot find the %s binary required for distributed compilation.")" "distcc"
 			ret=1
 		fi
 	fi
@@ -1540,7 +1542,7 @@ check_software() {
 	# ccache - compilation with ccache
 	if check_buildenv "ccache" "y" && ! check_option "ccache" "n"; then
 		if ! type -p ccache >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "/usr/bin/ccache"
+			error "$(gettext "Cannot find the %s binary required for compiler cache usage.")" "ccache"
 			ret=1
 		fi
 	fi
@@ -1556,7 +1558,7 @@ check_software() {
 	# gzip - compressig man and info pages
 	if check_option "zipman" "y"; then
 		if ! type -p gzip >/dev/null; then
-			error "$(gettext "Cannot find the %s binary required for compressing man and info pages.")" "/usr/bin/gzip"
+			error "$(gettext "Cannot find the %s binary required for compressing man and info pages.")" "gzip"
 			ret=1
 		fi
 	fi
@@ -1869,13 +1871,13 @@ PACMAN_PATH=$(type -P $PACMAN)
 unset ALL_OFF BOLD BLUE GREEN RED YELLOW
 if [[ -t 2 && $USE_COLOR != "n" ]] && check_buildenv "color" "y"; then
 	# prefer terminal safe colored and bold text when tput is supported
-	if /usr/bin/tput setaf 0 &>/dev/null; then
-		ALL_OFF="$(/usr/bin/tput sgr0)"
-		BOLD="$(/usr/bin/tput bold)"
-		BLUE="${BOLD}$(/usr/bin/tput setaf 4)"
-		GREEN="${BOLD}$(/usr/bin/tput setaf 2)"
-		RED="${BOLD}$(/usr/bin/tput setaf 1)"
-		YELLOW="${BOLD}$(/usr/bin/tput setaf 3)"
+	if tput setaf 0 &>/dev/null; then
+		ALL_OFF="$(tput sgr0)"
+		BOLD="$(tput bold)"
+		BLUE="${BOLD}$(tput setaf 4)"
+		GREEN="${BOLD}$(tput setaf 2)"
+		RED="${BOLD}$(tput setaf 1)"
+		YELLOW="${BOLD}$(tput setaf 3)"
 	else
 		ALL_OFF="\e[0m"
 		BOLD="\e[1m"
@@ -2047,7 +2049,7 @@ fi
 # check if gpg signature is to be created and if signing key is valid
 if { [[ -z $SIGNPKG ]] && check_buildenv "sign" "y"; } || [[ $SIGNPKG == 'y' ]]; then
 	SIGNPKG='y'
-	if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
+	if ! gpg --list-key ${GPGKEY} &>/dev/null; then
 		if [[ ! -z $GPGKEY ]]; then
 			error "$(gettext "The key %s does not exist in your keyring.")" "${GPGKEY}"
 		else

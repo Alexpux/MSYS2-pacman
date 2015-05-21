@@ -36,7 +36,8 @@ LIBRARY = \
 	library/parseopts.sh \
 	library/human_to_size.sh \
 	library/size_to_human.sh \
-	library/term_colors.sh
+	library/term_colors.sh \
+	library/utils_fixed_path.sh
 
 libmakepkgdir = $(datarootdir)/makepkg
 
@@ -157,6 +158,7 @@ makepkg: \
 	$(srcdir)/makepkg.sh.in \
 	$(srcdir)/makepkg-wrapper.sh.in \
 	$(srcdir)/library/parseopts.sh \
+	$(srcdir)/library/utils_fixed_path.sh \
 	$(LIBMAKEPKG_IN)
 
 makepkg-template: \
@@ -169,7 +171,8 @@ makepkg-template: \
 
 pacman-db-upgrade: \
 	$(srcdir)/pacman-db-upgrade.sh.in \
-	$(srcdir)/library/output_format.sh
+	$(srcdir)/library/output_format.sh \
+	$(srcdir)/library/utils_fixed_path.sh
 
 pacman-key: \
 	$(srcdir)/pacman-key.sh.in \
@@ -178,16 +181,19 @@ pacman-key: \
 
 pacman-optimize: \
 	$(srcdir)/pacman-optimize.sh.in \
-	$(srcdir)/library/output_format.sh
+	$(srcdir)/library/output_format.sh \
+	$(srcdir)/library/utils_fixed_path.sh
 
 pkgdelta: \
 	$(srcdir)/pkgdelta.sh.in \
 	$(srcdir)/library/output_format.sh \
-	$(srcdir)/library/parseopts.sh
+	$(srcdir)/library/parseopts.sh \
+	$(srcdir)/library/utils_fixed_path.sh
 
 repo-add: \
 	$(srcdir)/repo-add.sh.in \
-	$(srcdir)/library/output_format.sh
+	$(srcdir)/library/output_format.sh \
+	$(srcdir)/library/utils_fixed_path.sh
 
 repo-remove: $(srcdir)/repo-add.sh.in
 	$(AM_V_at)$(RM) repo-remove
@@ -202,6 +208,7 @@ makepkg-wrapper: \
 	$(srcdir)/makepkg-wrapper.sh.in \
 	$(srcdir)/makepkg.sh.in \
 	$(srcdir)/library/parseopts.sh \
+	$(srcdir)/library/utils_fixed_path.sh \
 	| makepkg
 	$(AM_V_at)$(MKDIR_P) .lib
 	$(AM_V_at)mv -f makepkg .lib

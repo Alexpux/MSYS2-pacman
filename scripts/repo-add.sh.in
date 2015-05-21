@@ -46,6 +46,7 @@ USE_COLOR='y'
 umask 0022
 
 m4_include(library/output_format.sh)
+m4_include(library/utils_fixed_path.sh)
 
 # print usage instructions
 usage() {
@@ -151,7 +152,7 @@ db_write_delta() {
 		echo -e "%DELTAS%" >"$deltas"
 	fi
 	# get md5sum and compressed size of package
-	md5sum=$(/usr/bin/openssl dgst -md5 "$deltafile")
+	md5sum=$(openssl dgst -md5 "$deltafile")
 	md5sum=${md5sum##* }
 	csize=$(@SIZECMD@ -L "$deltafile")
 
@@ -218,7 +219,7 @@ check_gpg() {
 	fi
 
 	if (( ! VERIFY )); then
-		if ! /usr/bin/gpg --list-key ${GPGKEY} &>/dev/null; then
+		if ! gpg --list-key ${GPGKEY} &>/dev/null; then
 			if [[ ! -z $GPGKEY ]]; then
 				error "$(gettext "The key ${GPGKEY} does not exist in your keyring.")"
 			elif (( ! KEY )); then
@@ -264,7 +265,7 @@ create_signature() {
 	if [[ -n $GPGKEY ]]; then
 		SIGNWITHKEY="-u ${GPGKEY}"
 	fi
-	/usr/bin/gpg --detach-sign --use-agent ${SIGNWITHKEY} "$dbfile" &>/dev/null || ret=$?
+	gpg --detach-sign --use-agent ${SIGNWITHKEY} "$dbfile" &>/dev/null || ret=$?
 
 	if (( ! ret )); then
 		msg2 "$(gettext "Created signature file '%s'")" "${dbfile##*/.tmp.}.sig"
@@ -284,7 +285,7 @@ verify_signature() {
 		warning "$(gettext "No existing signature found, skipping verification.")"
 		return
 	fi
-	/usr/bin/gpg --verify "$dbfile.sig" || ret=$?
+	gpg --verify "$dbfile.sig" || ret=$?
 	if (( ! ret )); then
 		msg2 "$(gettext "Database signature file verified.")"
 	else
@@ -339,7 +340,7 @@ db_write_entry() {
 			makedepend) _makedepends+=("$makedepend") ;;
 			checkdepend) _checkdepends+=("$checkdepend") ;;
 		esac
-	done< <(/usr/bin/bsdtar -xOqf "$pkgfile" .PKGINFO)
+	done< <(bsdtar -xOqf "$pkgfile" .PKGINFO)
 
 	# ensure $pkgname and $pkgver variables were found
 	if [[ -z $pkgname || -z $pkgver ]]; then
@@ -370,16 +371,16 @@ db_write_entry() {
 			return 1
 		fi
 		msg2 "$(gettext "Adding package signature...")"
-		pgpsig=$(/usr/bin/openssl base64 -in "$pkgfile.sig" | tr -d '\n')
+		pgpsig=$(openssl base64 -in "$pkgfile.sig" | tr -d '\n')
 	fi
 
 	csize=$(@SIZECMD@ -L "$pkgfile")
 
 	# compute checksums
 	msg2 "$(gettext "Computing checksums...")"
-	md5sum=$(/usr/bin/openssl dgst -md5 "$pkgfile")
+	md5sum=$(openssl dgst -md5 "$pkgfile")
 	md5sum=${md5sum##* }
-	sha256sum=$(/usr/bin/openssl dgst -sha256 "$pkgfile")
+	sha256sum=$(openssl dgst -sha256 "$pkgfile")
 	sha256sum=${sha256sum##* }
 
 	# remove an existing entry if it exists, ignore failures
@@ -451,7 +452,7 @@ db_write_entry() {
 	msg2 "$(gettext "Creating '%s' db entry...")" 'files'
 	local files_path="$tmpdir/files/$pkgname-$pkgver/files"
 	echo "%FILES%" >"$files_path"
-	/usr/bin/bsdtar --exclude='^.*' -tf "$pkgfile" >>"$files_path"
+	bsdtar --exclude='^.*' -tf "$pkgfile" >>"$files_path"
 
 	if (( RMEXISTING )); then
 		msg2 "$(gettext "Removing old package file '%s'")" "$oldfilename"
@@ -497,7 +498,7 @@ elephant() {
 		                 "ZL9JFFZeAa0a2+lKjL2anpYfV+0Zx9LJ+/MC8nRayuDlSNy2rfAPibOzsiWHL0jL" \
 		                 "SsjFAQAA"
 		;;
-	esac | /usr/bin/openssl base64 -d | /usr/bin/gzip -d
+	esac | openssl base64 -d | gzip -d
 }
 
 prepare_repo_db() {
@@ -526,16 +527,16 @@ prepare_repo_db() {
 		if [[ -f $dbfile ]]; then
 			# there are two situations we can have here:
 			# a DB with some entries, or a DB with no contents at all.
-			if ! /usr/bin/bsdtar -tqf "$dbfile" '*/desc' >/dev/null 2>&1; then
+			if ! bsdtar -tqf "$dbfile" '*/desc' >/dev/null 2>&1; then
 				# check empty case
-				if [[ -n $(/usr/bin/bsdtar -tqf "$dbfile" '*' 2>/dev/null) ]]; then
+				if [[ -n $(bsdtar -tqf "$dbfile" '*' 2>/dev/null) ]]; then
 					error "$(gettext "Repository file '%s' is not a proper pacman database.")" "$dbfile"
 					exit 1
 				fi
 			fi
 			verify_signature "$dbfile"
 			msg "$(gettext "Extracting database to a temporary location...")"
-			/usr/bin/bsdtar -xf "$dbfile" -C "$tmpdir/$repo"
+			bsdtar -xf "$dbfile" -C "$tmpdir/$repo"
 		else
 			case $cmd in
 				repo-remove)
@@ -576,7 +577,7 @@ add() {
 	fi
 
 	pkgfile=$1
-	if ! /usr/bin/bsdtar -tqf "$pkgfile" .PKGINFO >/dev/null 2>&1; then
+	if ! bsdtar -tqf "$pkgfile" .PKGINFO >/dev/null 2>&1; then
 		error "$(gettext "'%s' is not a package file, skipping")" "$pkgfile"
 		return 1
 	fi
@@ -666,11 +667,11 @@ create_db() {
 
 		pushd "$tmpdir/$repo" >/dev/null
 		if ( shopt -s nullglob; files=(*); (( ${#files[*]} )) ); then
-			/usr/bin/bsdtar -c${TAR_OPT}f "$tempname" *
+			bsdtar -c${TAR_OPT}f "$tempname" *
 		else
 			# we have no packages remaining? zip up some emptyness
 			warning "$(gettext "No packages remain, creating empty database.")"
-			/usr/bin/bsdtar -c${TAR_OPT}f "$tempname" -T /dev/null
+			bsdtar -c${TAR_OPT}f "$tempname" -T /dev/null
 		fi
 		popd >/dev/null
 

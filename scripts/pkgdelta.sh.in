@@ -43,6 +43,7 @@ umask 0022
 
 m4_include(library/parseopts.sh)
 m4_include(library/output_format.sh)
+m4_include(library/utils_fixed_path.sh)
 
 # print usage instructions
 usage() {
@@ -89,7 +90,7 @@ read_pkginfo() {
 		declare -g "${field% }=${value# }"
 
 		[[ $pkgname && $pkgver && $arch ]] && return 0
-	done < <(/usr/bin/bsdtar -xOqf "$1" .PKGINFO 2>/dev/null)
+	done < <(bsdtar -xOqf "$1" .PKGINFO 2>/dev/null)
 
 	error "$(gettext "Invalid package file '%s'.")" "$1"
 	return 1
