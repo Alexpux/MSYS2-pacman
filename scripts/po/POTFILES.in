@@ -28,6 +28,13 @@ scripts/libmakepkg/lint_pkgbuild/pkgver.sh.in
 scripts/libmakepkg/lint_pkgbuild/provides.sh.in
 scripts/libmakepkg/lint_pkgbuild/source.sh.in
 scripts/libmakepkg/lint_pkgbuild/util.sh.in
+scripts/libmakepkg/source.sh.in
+scripts/libmakepkg/source/bzr.sh.in
+scripts/libmakepkg/source/file.sh.in
+scripts/libmakepkg/source/git.sh.in
+scripts/libmakepkg/source/hg.sh.in
+scripts/libmakepkg/source/local.sh.in
+scripts/libmakepkg/source/svn.sh.in
 scripts/libmakepkg/tidy.sh.in
 scripts/libmakepkg/tidy/docs.sh.in
 scripts/libmakepkg/tidy/emptydirs.sh.in
@@ -39,5 +46,6 @@ scripts/libmakepkg/tidy/strip.sh.in
 scripts/libmakepkg/tidy/upx.sh.in
 scripts/libmakepkg/tidy/zipman.sh.in
 scripts/libmakepkg/util/message.sh
+scripts/libmakepkg/util/source.sh.in
 scripts/library/output_format.sh
 scripts/library/parseopts.sh
