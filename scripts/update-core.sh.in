@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+#
+#   update-core - properly update core packages for MSYS2
+#
+#   Copyright (c) 2006-2015 Pacman Development Team <pacman-dev@archlinux.org>
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+shopt -s extglob
+
+# gettext initialization
+export TEXTDOMAIN='pacman-scripts'
+export TEXTDOMAINDIR='@localedir@'
+
+declare -r myver='@PACKAGE_VERSION@'
+declare -r confdir='@sysconfdir@'
+
+m4_include(library/term_colors.sh)
+m4_include(library/output_format.sh)
+m4_include(library/utils_fixed_path.sh)
+
+# print usage instructions
+usage() {
+	printf "update-core (pacman) %s\n" ${myver}
+	echo
+}
+
+version() {
+	cmd=${0##*/}
+	printf "%s (pacman) %s\n\n" "$cmd" "$myver"
+	printf -- "$(gettext "\
+Copyright (c) 2006-2015 Pacman Development Team <pacman-dev@archlinux.org>\n\n\
+This is free software; see the source for copying conditions.\n\
+There is NO WARRANTY, to the extent permitted by law.\n")"
+}
+
+
+run_pacman() {
+	local cmd
+	cmd=("$PACMAN_PATH" "$@")
+
+	"${cmd[@]}"
+}
+
+
+# PROGRAM START
+
+# determine whether we have gettext; make it a no-op if we do not
+if ! type -p /usr/bin/gettext &>/dev/null; then
+	gettext() {
+		printf "%s\n" "$@"
+	}
+else
+	gettext() {
+		/usr/bin/gettext "$@"
+	}
+fi
+
+case $1 in
+	-h|--help) usage; exit 0;;
+	-V|--version) version; exit 0;;
+esac
+
+# set pacman command if not already defined
+PACMAN=${PACMAN:-pacman}
+# save full path to command as PATH may change when sourcing /etc/profile
+PACMAN_PATH=$(type -P $PACMAN)
+
+msg "Update package databases..."
+if ! run_pacman -Sy; then
+  error "$(gettext "'%s' failed to update package databases.")" "$PACMAN"
+  exit 1 # TODO: error code
+fi
+
+msg "Update core packages..."
+warning "You MUST restart MSYS2 to finish core packages update!!!"
+if ! run_pacman -S --noconfirm --needed pacman bash msys2-runtime msys2-runtime-devel; then
+  error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
+  exit 1 # TODO: error code
+fi
+
+# vim: set noet:
