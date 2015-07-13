@@ -50,7 +50,11 @@ static void parseEVR(char *evr, const char **ep, const char **vp,
 	/* se points to version terminator */
 	se = strrchr(s, '-');
 
+#ifdef __MSYS__
+	if(*s == '~') {
+#else
 	if(*s == ':') {
+#endif
 		epoch = evr;
 		*s++ = '\0';
 		version = s;
@@ -250,7 +254,7 @@ int SYMEXPORT alpm_pkg_vercmp(const char *a, const char *b)
 		return 0;
 	}
 
-	/* Parse both versions into [epoch:]version[-release] triplets. We probably
+	/* Parse both versions into [epoch:|~]version[-release] triplets. We probably
 	 * don't need epoch and release to support all the same magic, but it is
 	 * easier to just run it all through the same code. */
 	full1 = strdup(a);

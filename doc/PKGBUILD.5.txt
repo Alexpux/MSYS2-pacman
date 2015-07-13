@@ -424,7 +424,7 @@ self-explanatory. Note that during an upgrade operation, none of the install
 or remove scripts will be called.
 
 Scripts are passed either one or two ``full version strings'', where a full
-version string is either 'pkgver-pkgrel' or 'epoch:pkgver-pkgrel', if epoch is
+version string is either 'pkgver-pkgrel' or 'epoch~pkgver-pkgrel', if epoch is
 non-zero.
 
 *pre_install*::

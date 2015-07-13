@@ -116,7 +116,11 @@ get_pkgbuild_attribute() {
 ##
 get_full_version() {
 	if (( epoch > 0 )); then
-		printf "%s\n" "$epoch:$pkgver-$pkgrel"
+		if [[ -n $MSYSTEM ]]; then
+			printf "%s\n" "${epoch}~${pkgver}-${pkgrel}"
+		else
+			printf "%s\n" "$epoch:$pkgver-$pkgrel"
+		fi
 	else
 		printf "%s\n" "$pkgver-$pkgrel"
 	fi
