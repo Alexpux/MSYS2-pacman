@@ -99,7 +99,7 @@ static void fill_progress(const int bar_percent, const int disp_percent,
 		const int proglen)
 {
 	/* 9 = 1 space + 1 [ + 1 ] + 5 for percent + 1 blank */
-	 * Without the single blank at the end, carriage return wouldn't
+	/* Without the single blank at the end, carriage return wouldn't
 	 * work properly on most windows terminals.
 	 */
 	const int hashlen = proglen > 9 ? proglen - 9 : 0;
