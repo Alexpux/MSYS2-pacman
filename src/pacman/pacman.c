@@ -110,6 +110,7 @@ static void usage(int op, const char * const myname)
 		printf("    %s {-h --help}\n", myname);
 		printf("    %s {-V --version}\n", myname);
 		printf("    %s {-D --database} <%s> <%s>\n", myname, str_opt, str_pkg);
+		printf("    %s {-F --files}    [%s] [%s]\n", myname, str_opt, str_pkg);
 		printf("    %s {-Q --query}    [%s] [%s]\n", myname, str_opt, str_pkg);
 		printf("    %s {-R --remove}   [%s] <%s>\n", myname, str_opt, str_pkg);
 		printf("    %s {-S --sync}     [%s] [%s]\n", myname, str_opt, str_pkg);
@@ -173,6 +174,13 @@ static void usage(int op, const char * const myname)
 		} else if(op == PM_OP_DEPTEST) {
 			printf("%s:  %s {-T --deptest} [%s] [%s]\n", str_usg, myname, str_opt, str_pkg);
 			printf("%s:\n", str_opt);
+		} else if(op == PM_OP_FILES) {
+			addlist(_("  -l, --list           list the files owned by the queried package\n"));
+			addlist(_("  -o, --owns <file>    query the package that owns <file>\n"));
+			addlist(_("  -s, --search <file>  search package file names for matching strings\n"));
+			addlist(_("  -x, --regex          enable searching using regular expressions\n"));
+			addlist(_("  -y, --refresh        download fresh package databases from the server\n"
+			          "                       (-yy to force a refresh even if up to date)\n"));
 		}
 		switch(op) {
 			case PM_OP_SYNC:
@@ -363,6 +371,9 @@ static int parsearg_op(int opt, int dryrun)
 		case 'D':
 			if(dryrun) break;
 			config->op = (config->op != PM_OP_MAIN ? 0 : PM_OP_DATABASE); break;
+		case 'F':
+			if(dryrun) break;
+			config->op = (config->op != PM_OP_MAIN ? 0 : PM_OP_FILES); break;
 		case 'Q':
 			if(dryrun) break;
 			config->op = (config->op != PM_OP_MAIN ? 0 : PM_OP_QUERY); break;
@@ -724,10 +735,18 @@ static int parsearg_upgrade(int opt)
 		return 0;
 	}
 	switch(opt) {
-		case OP_FORCE: config->flags |= ALPM_TRANS_FLAG_FORCE; break;
-		case OP_ASDEPS: config->flags |= ALPM_TRANS_FLAG_ALLDEPS; break;
-		case OP_ASEXPLICIT: config->flags |= ALPM_TRANS_FLAG_ALLEXPLICIT; break;
-		case OP_NEEDED: config->flags |= ALPM_TRANS_FLAG_NEEDED; break;
+		case OP_FORCE:
+			config->flags |= ALPM_TRANS_FLAG_FORCE;
+			break;
+		case OP_ASDEPS:
+			config->flags |= ALPM_TRANS_FLAG_ALLDEPS;
+			break;
+		case OP_ASEXPLICIT:
+			config->flags |= ALPM_TRANS_FLAG_ALLEXPLICIT;
+			break;
+		case OP_NEEDED:
+			config->flags |= ALPM_TRANS_FLAG_NEEDED;
+			break;
 		case OP_IGNORE:
 			parsearg_util_addlist(&(config->ignorepkg));
 			break;
@@ -745,6 +764,54 @@ static void checkargs_upgrade(void)
 	invalid_opt(config->flags & ALPM_TRANS_FLAG_ALLDEPS
 			&& config->flags & ALPM_TRANS_FLAG_ALLEXPLICIT,
 			"--asdeps", "--asexplicit");
+}
+
+static int parsearg_files(int opt)
+{
+	if(parsearg_trans(opt) == 0) {
+		return 0;
+	}
+	switch(opt) {
+		case OP_OWNS:
+		case 'o':
+			config->op_q_owns = 1;
+			break;
+		case OP_LIST:
+		case 'l':
+			config->op_q_list = 1;
+			break;
+		case OP_SEARCH:
+		case 's':
+			config->op_s_search = 1;
+			break;
+		case OP_REFRESH:
+		case 'y':
+			(config->op_s_sync)++;
+			break;
+		case OP_REGEX:
+		case 'x':
+			config->op_f_regex = 1;
+			break;
+		case OP_QUIET:
+		case 'q':
+			config->quiet = 1;
+			break;
+		default:
+			return 1;
+	}
+	return 0;
+}
+
+static void checkargs_files(void)
+{
+	if(config->op_q_owns) {
+		invalid_opt(config->op_q_list, "--owns", "--list");
+		invalid_opt(config->op_q_search, "--owns", "--search");
+		invalid_opt(config->op_f_regex, "--owns", "--regex");
+	} else if(config->op_q_list) {
+		invalid_opt(config->op_q_search, "--list", "--search");
+		invalid_opt(config->op_f_regex, "--list", "--regex");
+	}
 }
 
 static int parsearg_sync(int opt)
@@ -839,10 +906,11 @@ static int parseargs(int argc, char *argv[])
 	int opt;
 	int option_index = 0;
 	int result;
-	const char *optstring = "DQRSTUVb:cdefghiklmnopqr:stuvwy";
+	const char *optstring = "DFQRSTUVb:cdefghiklmnopqr:stuvwxy";
 	static const struct option opts[] =
 	{
 		{"database",   no_argument,       0, 'D'},
+		{"files",      no_argument,       0, 'F'},
 		{"query",      no_argument,       0, 'Q'},
 		{"remove",     no_argument,       0, 'R'},
 		{"sync",       no_argument,       0, 'S'},
@@ -872,6 +940,7 @@ static int parseargs(int argc, char *argv[])
 		{"root",       required_argument, 0, OP_ROOT},
 		{"recursive",  no_argument,       0, OP_RECURSIVE},
 		{"search",     no_argument,       0, OP_SEARCH},
+		{"regex",      no_argument,       0, OP_REGEX},
 		{"unrequired", no_argument,       0, OP_UNREQUIRED},
 		{"upgrades",   no_argument,       0, OP_UPGRADES},
 		{"sysupgrade", no_argument,       0, OP_SYSUPGRADE},
@@ -956,6 +1025,9 @@ static int parseargs(int argc, char *argv[])
 			case PM_OP_UPGRADE:
 				result = parsearg_upgrade(opt);
 				break;
+			case PM_OP_FILES:
+				result = parsearg_files(opt);
+				break;
 			case PM_OP_DEPTEST:
 			default:
 				result = 1;
@@ -1003,6 +1075,9 @@ static int parseargs(int argc, char *argv[])
 			break;
 		case PM_OP_UPGRADE:
 			checkargs_upgrade();
+			break;
+		case PM_OP_FILES:
+			checkargs_files();
 			break;
 		default:
 			break;
@@ -1232,6 +1307,9 @@ int main(int argc, char *argv[])
 			break;
 		case PM_OP_DEPTEST:
 			ret = pacman_deptest(pm_targets);
+			break;
+		case PM_OP_FILES:
+			ret = pacman_files(pm_targets);
 			break;
 		default:
 			pm_printf(ALPM_LOG_ERROR, _("no operation specified (use -h for help)\n"));

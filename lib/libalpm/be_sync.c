@@ -40,6 +40,7 @@
 #include "delta.h"
 #include "deps.h"
 #include "dload.h"
+#include "filelist.h"
 
 static char *get_sync_dir(alpm_handle_t *handle)
 {
@@ -174,6 +175,7 @@ valid:
 int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 {
 	char *syncpath;
+	const char *dbext;
 	alpm_list_t *i;
 	int ret = -1;
 	mode_t oldmask;
@@ -208,6 +210,8 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 		RET_ERR(handle, ALPM_ERR_HANDLE_LOCK, -1);
 	}
 
+	dbext = db->handle->dbext;
+
 	for(i = db->servers; i; i = i->next) {
 		const char *server = i->data, *final_db_url = NULL;
 		struct dload_payload payload;
@@ -220,10 +224,10 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 		payload.max_size = 25 * 1024 * 1024;
 
 		/* print server + filename into a buffer */
-		len = strlen(server) + strlen(db->treename) + 5;
+		len = strlen(server) + strlen(db->treename) + strlen(dbext) + 2;
 		/* TODO fix leak syncpath and umask unset */
 		MALLOC(payload.fileurl, len, RET_ERR(handle, ALPM_ERR_MEMORY, -1));
-		snprintf(payload.fileurl, len, "%s/%s.db", server, db->treename);
+		snprintf(payload.fileurl, len, "%s/%s%s", server, db->treename, dbext);
 		payload.handle = handle;
 		payload.force = force;
 		payload.unlink_on_fail = 1;
@@ -244,7 +248,9 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 
 			/* check if the final URL from internal downloader looks reasonable */
 			if(final_db_url != NULL) {
-				if(strlen(final_db_url) < 3 || strcmp(final_db_url + strlen(final_db_url) - 3, ".db") != 0) {
+				if(strlen(final_db_url) < 3
+						|| strcmp(final_db_url + strlen(final_db_url) - strlen(dbext),
+								dbext) != 0) {
 					final_db_url = NULL;
 				}
 			}
@@ -254,8 +260,8 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 				/* print final_db_url into a buffer (leave space for .sig) */
 				len = strlen(final_db_url) + 5;
 			} else {
-				/* print server + filename into a buffer (leave space for separator and .db.sig) */
-				len = strlen(server) + strlen(db->treename) + 9;
+				/* print server + filename into a buffer (leave space for separator and .sig) */
+				len = strlen(server) + strlen(db->treename) + strlen(dbext) + 6;
 			}
 
 			/* TODO fix leak syncpath and umask unset */
@@ -264,7 +270,7 @@ int SYMEXPORT alpm_db_update(int force, alpm_db_t *db)
 			if(final_db_url != NULL) {
 				snprintf(payload.fileurl, len, "%s.sig", final_db_url);
 			} else {
-				snprintf(payload.fileurl, len, "%s/%s.db.sig", server, db->treename);
+				snprintf(payload.fileurl, len, "%s/%s%s.sig", server, db->treename, dbext);
 			}
 
 			payload.handle = handle;
@@ -433,6 +439,7 @@ static size_t estimate_package_count(struct stat *st, struct archive *archive)
 			/* assume it is at least somewhat compressed */
 			per_package = 500;
 	}
+
 	return (size_t)((st->st_size / per_package) + 1);
 }
 
@@ -464,6 +471,12 @@ static int sync_db_populate(alpm_db_t *db)
 		return -1;
 	}
 	est_count = estimate_package_count(&buf, archive);
+
+	/* currently only .files dbs contain file lists - make flexible when required*/
+	if(strcmp(db->handle->dbext, ".files") == 0) {
+		/* files databases are about four times larger on average */
+		est_count /= 4;
+	}
 
 	db->pkgcache = _alpm_pkghash_create(est_count);
 	if(db->pkgcache == NULL) {
@@ -595,6 +608,7 @@ static int sync_db_read(alpm_db_t *db, struct archive *archive,
 	}
 
 	if(strcmp(filename, "desc") == 0 || strcmp(filename, "depends") == 0
+			|| strcmp(filename, "files") == 0
 			|| (strcmp(filename, "deltas") == 0 && db->handle->deltaratio > 0.0) ) {
 		int ret;
 		while((ret = _alpm_archive_fgets(archive, &buf)) == ARCHIVE_OK) {
@@ -680,6 +694,33 @@ static int sync_db_read(alpm_db_t *db, struct archive *archive,
 					pkg->deltas = alpm_list_add(pkg->deltas,
 							_alpm_delta_parse(db->handle, line));
 				}
+			} else if(strcmp(line, "%FILES%") == 0) {
+				/* TODO: this could lazy load if there is future demand */
+				size_t files_count = 0, files_size = 0;
+				alpm_file_t *files = NULL;
+
+				while(1) {
+					if(_alpm_archive_fgets(archive, &buf) != ARCHIVE_OK) {
+						goto error;
+					}
+					line = buf.line;
+					if(_alpm_strip_newline(line, buf.real_line_size) == 0) {
+						break;
+					}
+
+					if(!_alpm_greedy_grow((void **)&files, &files_size,
+								(files_count ? (files_count + 1) * sizeof(alpm_file_t) : 8 * sizeof(alpm_file_t)))) {
+						goto error;
+					}
+					STRDUP(files[files_count].name, line, goto error);
+					files_count++;
+				}
+				/* attempt to hand back any memory we don't need */
+				files = realloc(files, sizeof(alpm_file_t) * files_count);
+				/* make sure the list is sorted */
+				qsort(files, files_count, sizeof(alpm_file_t), _alpm_files_cmp);
+				pkg->files.count = files_count;
+				pkg->files.files = files;
 			}
 		}
 		if(ret != ARCHIVE_EOF) {
@@ -688,8 +729,6 @@ static int sync_db_read(alpm_db_t *db, struct archive *archive,
 		*likely_pkg = pkg;
 	} else if(strcmp(filename, "deltas") == 0) {
 		/* skip reading delta files if UseDelta is unset */
-	} else if(strcmp(filename, "files") == 0) {
-		/* currently do nothing with this file */
 	} else {
 		/* unknown database file */
 		_alpm_log(db->handle, ALPM_LOG_DEBUG, "unknown database file: %s\n", filename);

@@ -98,11 +98,11 @@ static int64_t get_update_timediff(int first_call)
 static void fill_progress(const int bar_percent, const int disp_percent,
 		const int proglen)
 {
-	/* 9 = 1 space + 1 [ + 1 ] + 5 for percent + 1 blank
+	/* 9 = 1 space + 1 [ + 1 ] + 5 for percent + 1 blank */
 	 * Without the single blank at the end, carriage return wouldn't
 	 * work properly on most windows terminals.
 	 */
-	const int hashlen = proglen - 9;
+	const int hashlen = proglen > 9 ? proglen - 9 : 0;
 	const int hash = bar_percent * hashlen / 100;
 	static int lasthash = 0, mouth = 0;
 	int i;
@@ -583,7 +583,7 @@ void cb_progress(alpm_progress_t event, const char *pkgname, int percent,
 		int i = textlen - 3;
 		wchar_t *p = wcstr;
 		/* grab the max number of char columns we can fill */
-		while(i > 0 && wcwidth(*p) < i) {
+		while(i - wcwidth(*p) > 0) {
 			i -= wcwidth(*p);
 			p++;
 		}
@@ -753,7 +753,7 @@ void cb_dl_progress(const char *filename, off_t file_xfered, off_t file_total)
 	fname = malloc(len + 1);
 	memcpy(fname, filename, len);
 	/* strip package or DB extension for cleaner look */
-	if((p = strstr(fname, ".pkg")) || (p = strstr(fname, ".db"))) {
+	if((p = strstr(fname, ".pkg")) || (p = strstr(fname, ".db")) || (p = strstr(fname, ".files"))) {
 		/* tack on a .sig suffix for signatures */
 		if(memcmp(&filename[len - 4], ".sig", 4) == 0) {
 			memcpy(p, ".sig", 4);

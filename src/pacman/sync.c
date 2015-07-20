@@ -51,9 +51,7 @@ static int unlink_verbose(const char *pathname, int ignore_missing)
 	return ret;
 }
 
-/* if keep_used != 0, then the db files which match an used syncdb
- * will be kept  */
-static int sync_cleandb(const char *dbpath, int keep_used)
+static int sync_cleandb(const char *dbpath)
 {
 	DIR *dir;
 	struct dirent *ent;
@@ -77,16 +75,9 @@ static int sync_cleandb(const char *dbpath, int keep_used)
 		const char *dname = ent->d_name;
 		char *dbname;
 		size_t len;
+		alpm_list_t *i;
 
 		if(strcmp(dname, ".") == 0 || strcmp(dname, "..") == 0) {
-			continue;
-		}
-		/* skip the local and sync directories */
-		if(strcmp(dname, "sync") == 0 || strcmp(dname, "local") == 0) {
-			continue;
-		}
-		/* skip the db.lck file */
-		if(strcmp(dname, "db.lck") == 0) {
 			continue;
 		}
 
@@ -111,29 +102,25 @@ static int sync_cleandb(const char *dbpath, int keep_used)
 			dbname = strndup(dname, len - 3);
 		} else if(len > 7 && strcmp(dname + len - 7, ".db.sig") == 0) {
 			dbname = strndup(dname, len - 7);
+		} else if(len > 6 && strcmp(dname + len - 6, ".files") == 0) {
+			dbname = strndup(dname, len - 6);
+		} else if(len > 6 && strcmp(dname + len - 6, ".files.sig") == 0) {
+			dbname = strndup(dname, len - 10);
 		} else {
 			ret += unlink_verbose(path, 0);
 			continue;
 		}
 
-		if(keep_used) {
-			alpm_list_t *i;
-			for(i = syncdbs; i && !found; i = alpm_list_next(i)) {
-				alpm_db_t *db = i->data;
-				found = !strcmp(dbname, alpm_db_get_name(db));
-			}
+		for(i = syncdbs; i && !found; i = alpm_list_next(i)) {
+			alpm_db_t *db = i->data;
+			found = !strcmp(dbname, alpm_db_get_name(db));
 		}
 
-		/* We have a database that doesn't match any syncdb. */
+		/* We have a file that doesn't match any syncdb. */
 		if(!found) {
-			/* ENOENT check is because the signature and database could come in any
-			 * order in our readdir() call, so either file may already be gone. */
-			snprintf(path, PATH_MAX, "%s%s.db", dbpath, dbname);
-			ret += unlink_verbose(path, 1);
-			/* unlink a signature file if present too */
-			snprintf(path, PATH_MAX, "%s%s.db.sig", dbpath, dbname);
-			ret += unlink_verbose(path, 1);
+			ret += unlink_verbose(path, 0);
 		}
+
 		free(dbname);
 	}
 	closedir(dir);
@@ -143,7 +130,7 @@ static int sync_cleandb(const char *dbpath, int keep_used)
 static int sync_cleandb_all(void)
 {
 	const char *dbpath;
-	char *newdbpath;
+	char *syncdbpath;
 	int ret = 0;
 
 	dbpath = alpm_option_get_dbpath(config->handle);
@@ -152,17 +139,13 @@ static int sync_cleandb_all(void)
 		return 0;
 	}
 	printf(_("removing unused sync repositories...\n"));
-	/* The sync dbs were previously put in dbpath/ but are now in dbpath/sync/.
-	 * We will clean everything in dbpath/ except local/, sync/ and db.lck, and
-	 * only the unused sync dbs in dbpath/sync/ */
-	ret += sync_cleandb(dbpath, 0);
 
-	if(asprintf(&newdbpath, "%s%s", dbpath, "sync/") < 0) {
+	if(asprintf(&syncdbpath, "%s%s", dbpath, "sync/") < 0) {
 		ret += 1;
 		return ret;
 	}
-	ret += sync_cleandb(newdbpath, 1);
-	free(newdbpath);
+	ret += sync_cleandb(syncdbpath);
+	free(syncdbpath);
 
 	return ret;
 }
@@ -236,8 +219,8 @@ static int sync_cleancache(int level)
 				static const char *const glob_skips[] = {
 					/* skip signature files - they are removed with their package file */
 					"*.sig",
-					/* skip package database within the cache directory */
-					"*.db*",
+					/* skip package databases within the cache directory */
+					"*.db*", "*.files*",
 					/* skip source packages within the cache directory */
 					"*.src.tar.*",
 					/* skip package deltas, we aren't smart enough to clean these yet */
@@ -320,37 +303,6 @@ static int sync_cleancache(int level)
 	}
 
 	return ret;
-}
-
-static int sync_synctree(int level, alpm_list_t *syncs)
-{
-	alpm_list_t *i;
-	unsigned int success = 0;
-
-	for(i = syncs; i; i = alpm_list_next(i)) {
-		alpm_db_t *db = i->data;
-
-		int ret = alpm_db_update((level < 2 ? 0 : 1), db);
-		if(ret < 0) {
-			pm_printf(ALPM_LOG_ERROR, _("failed to update %s (%s)\n"),
-					alpm_db_get_name(db), alpm_strerror(alpm_errno(config->handle)));
-		} else if(ret == 1) {
-			printf(_(" %s is up to date\n"), alpm_db_get_name(db));
-			success++;
-		} else {
-			success++;
-		}
-	}
-
-	/* We should always succeed if at least one DB was upgraded - we may possibly
-	 * fail later with unresolved deps, but that should be rare, and would be
-	 * expected
-	 */
-	if(!success) {
-		pm_printf(ALPM_LOG_ERROR, _("failed to synchronize any databases\n"));
-		trans_init_error();
-	}
-	return (success > 0);
 }
 
 /* search the sync dbs for a matching package */
@@ -920,7 +872,7 @@ int pacman_sync(alpm_list_t *targets)
 		colon_printf(_("Synchronizing package databases...\n"));
 		alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
 				"synchronizing package lists\n");
-		if(!sync_synctree(config->op_s_sync, sync_dbs)) {
+		if(!sync_syncdbs(config->op_s_sync, sync_dbs)) {
 			return 1;
 		}
 	}

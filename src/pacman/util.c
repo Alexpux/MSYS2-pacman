@@ -113,6 +113,8 @@ int needs_root(void)
 			return (config->op_s_clean || config->op_s_sync ||
 					(!config->group && !config->op_s_info && !config->op_q_list &&
 					 !config->op_s_search && !config->print));
+		case PM_OP_FILES:
+			return config->op_s_sync;
 		default:
 			return 0;
 	}
@@ -141,6 +143,37 @@ int check_syncdbs(size_t need_repos, int check_valid)
 		}
 	}
 	return ret;
+}
+
+int sync_syncdbs(int level, alpm_list_t *syncs)
+{
+	alpm_list_t *i;
+	unsigned int success = 0;
+
+	for(i = syncs; i; i = alpm_list_next(i)) {
+		alpm_db_t *db = i->data;
+
+		int ret = alpm_db_update((level < 2 ? 0 : 1), db);
+		if(ret < 0) {
+			pm_printf(ALPM_LOG_ERROR, _("failed to update %s (%s)\n"),
+					alpm_db_get_name(db), alpm_strerror(alpm_errno(config->handle)));
+		} else if(ret == 1) {
+			printf(_(" %s is up to date\n"), alpm_db_get_name(db));
+			success++;
+		} else {
+			success++;
+		}
+	}
+
+	/* We should always succeed if at least one DB was upgraded - we may possibly
+	 * fail later with unresolved deps, but that should be rare, and would be
+	 * expected
+	 */
+	if(!success) {
+		pm_printf(ALPM_LOG_ERROR, _("failed to synchronize any databases\n"));
+		trans_init_error();
+	}
+	return (success > 0);
 }
 
 /* discard unhandled input on the terminal's input buffer */
@@ -612,7 +645,6 @@ static size_t table_calc_widths(const alpm_list_t *header,
 
 /** Displays the list in table format
  *
- * @param title the tables title
  * @param header the column headers. column count is determined by the nr
  *               of headers
  * @param rows the rows to display as a list of lists of strings. the outer
@@ -1205,9 +1237,10 @@ static int depend_cmp(const void *d1, const void *d2)
 
 static char *make_optstring(alpm_depend_t *optdep)
 {
+	alpm_db_t *localdb = alpm_get_localdb(config->handle);
 	char *optstring = alpm_dep_compute_string(optdep);
 	char *status = NULL;
-	if(alpm_db_get_pkg(alpm_get_localdb(config->handle), optdep->name)) {
+	if(alpm_find_satisfier(alpm_db_get_pkgcache(localdb), optdep->name)) {
 		status = _(" [installed]");
 	} else if(alpm_pkg_find(alpm_trans_get_add(config->handle), optdep->name)) {
 		status = _(" [pending]");
@@ -1363,13 +1396,12 @@ static int multiselect_parse(char *array, int count, char *response)
 		if(!ends) {
 			array[start - 1] = include;
 		} else {
-			int d;
 			if(parseindex(ends, &end, start, count) != 0) {
 				return -1;
 			}
-			for(d = start; d <= end; d++) {
-				array[d - 1] = include;
-			}
+			do {
+				array[start - 1] = include;
+			} while(start++ < end);
 		}
 	}
 
