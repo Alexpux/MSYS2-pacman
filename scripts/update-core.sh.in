@@ -25,6 +25,7 @@ export TEXTDOMAINDIR='@localedir@'
 
 declare -r myver='@PACKAGE_VERSION@'
 declare -r confdir='@sysconfdir@'
+declare -r CRITICAL_PACKAGES="bash pacman msys2-runtime msys2-runtime-devel"
 
 m4_include(library/term_colors.sh)
 m4_include(library/output_format.sh)
@@ -83,11 +84,16 @@ if ! run_pacman -Sy; then
   exit 1 # TODO: error code
 fi
 
-msg "Update core packages..."
-warning "You MUST restart MSYS2 to finish core packages update!!!"
-if ! run_pacman -S --noconfirm --needed pacman bash msys2-runtime msys2-runtime-devel; then
-  error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
-  exit 1 # TODO: error code
+msg "Checking if there are critical packages to upgrade."
+if ! run_pacman -Qu ${CRITICAL_PACKAGES}; then
+  msg "No updates for core packages."
+else
+  warning "You MUST restart MSYS2 to finish core packages update!!!"
+  msg "Update core packages..."
+  if ! run_pacman -S --noconfirm --needed ${CRITICAL_PACKAGES}; then
+    error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
+    exit 1 # TODO: error code
+  fi
 fi
 
 # vim: set noet:
