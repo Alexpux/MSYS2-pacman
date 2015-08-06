@@ -2162,10 +2162,9 @@ elif (( !REPKG )); then
 		basever=$(get_full_version)
 		check_build_status
 	fi
-fi
-
-if (( PREPAREFUNC && !REPKG )); then
-	run_prepare
+	if (( PREPAREFUNC )); then
+		run_prepare
+	fi
 fi
 
 if (( NOBUILD )); then
