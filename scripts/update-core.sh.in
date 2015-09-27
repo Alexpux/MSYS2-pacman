@@ -89,8 +89,13 @@ msg "Checking if there are critical packages to upgrade."
 if ! run_pacman -Qu ${CRITICAL_PACKAGES}; then
   msg "No updates for core packages."
 else
-  warning "You MUST restart MSYS2 to finish core packages update!!!"
-  msg "Update core packages..."
+  msg "Core packages require updating."
+  msg "Please close all other MSYS2 derived windows (e.g. terminal"
+  msg "windows, Bash sessions, etc) before proceeding."
+  warning "When the update has completed, you MUST close this MSYS2 window"
+  warning "(use Alt-F4 or red [ X ], etc.), rather than `exit`!!!"
+  read -p "Press [Enter] key when ready to start update..."
+  msg "Updating core packages..."
   if ! run_pacman -S --noconfirm --needed ${CRITICAL_PACKAGES} ${OPTIONAL_PACKAGES}; then
     error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
     exit 1 # TODO: error code
