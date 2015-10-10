@@ -35,4 +35,12 @@ warn_build_references() {
 	if find "${pkgdir}" -type f -print0 | xargs -0 grep -q -I "${pkgdirbase}" ; then
 		warning "$(gettext "Package contains reference to %s")" "\$pkgdir"
 	fi
+
+	# Check for Windows-style MSYS2 root path
+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -iFqI "$(cygpath -m /)" ; then
+		warning "$(gettext "Package contains reference to %s")" "\$(cygpath -m /)"
+	fi
+	if find "${pkgdir}" -type f -print0 | xargs -0 grep -iFqI "$(cygpath -w /)" ; then
+		warning "$(gettext "Package contains reference to %s")" "\$(cygpath -w /)"
+	fi
 }
