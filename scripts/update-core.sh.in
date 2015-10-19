@@ -93,7 +93,7 @@ else
   msg "Please close all other MSYS2 derived windows (e.g. terminal"
   msg "windows, Bash sessions, etc) before proceeding."
   warning "When the update has completed, you MUST close this MSYS2 window"
-  warning "(use Alt-F4 or red [ X ], etc.), rather than `exit`!!!"
+  warning "(use Alt-F4 or red [ X ], etc.), rather than 'exit'!!!"
   read -p "Press [Enter] key when ready to start update..."
   msg "Updating core packages..."
   if ! run_pacman -S --noconfirm --needed ${CRITICAL_PACKAGES} ${OPTIONAL_PACKAGES}; then
