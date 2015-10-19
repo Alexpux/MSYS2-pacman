@@ -87,6 +87,7 @@ typedef enum _alpm_errno_t {
 	ALPM_ERR_TRANS_ABORT,
 	ALPM_ERR_TRANS_TYPE,
 	ALPM_ERR_TRANS_NOT_LOCKED,
+	ALPM_ERR_TRANS_HOOK_FAILED,
 	/* Packages */
 	ALPM_ERR_PKG_NOT_FOUND,
 	ALPM_ERR_PKG_IGNORED,
@@ -773,6 +774,15 @@ alpm_list_t *alpm_option_get_cachedirs(alpm_handle_t *handle);
 int alpm_option_set_cachedirs(alpm_handle_t *handle, alpm_list_t *cachedirs);
 int alpm_option_add_cachedir(alpm_handle_t *handle, const char *cachedir);
 int alpm_option_remove_cachedir(alpm_handle_t *handle, const char *cachedir);
+/** @} */
+
+/** @name Accessors to the list of package hook directories.
+ * @{
+ */
+alpm_list_t *alpm_option_get_hookdirs(alpm_handle_t *handle);
+int alpm_option_set_hookdirs(alpm_handle_t *handle, alpm_list_t *hookdirs);
+int alpm_option_add_hookdir(alpm_handle_t *handle, const char *hookdir);
+int alpm_option_remove_hookdir(alpm_handle_t *handle, const char *hookdir);
 /** @} */
 
 /** Returns the logfile name. */

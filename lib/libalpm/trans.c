@@ -40,6 +40,7 @@
 #include "sync.h"
 #include "alpm.h"
 #include "deps.h"
+#include "hook.h"
 
 /** \addtogroup alpm_trans Transaction Functions
  * @brief Functions to manipulate libalpm transactions
@@ -183,6 +184,14 @@ int SYMEXPORT alpm_trans_commit(alpm_handle_t *handle, alpm_list_t **data)
 		if(trans->flags & ALPM_TRANS_FLAG_DOWNLOADONLY) {
 			return 0;
 		}
+		if(_alpm_sync_check(handle, data) != 0) {
+			/* pm_errno is set by _alpm_sync_check() */
+			return -1;
+		}
+	}
+
+	if(_alpm_hook_run(handle, ALPM_HOOK_PRE_TRANSACTION) != 0) {
+		RET_ERR(handle, ALPM_ERR_TRANS_HOOK_FAILED, -1);
 	}
 
 	trans->state = STATE_COMMITING;
@@ -198,7 +207,7 @@ int SYMEXPORT alpm_trans_commit(alpm_handle_t *handle, alpm_list_t **data)
 			return -1;
 		}
 	} else {
-		if(_alpm_sync_commit(handle, data) == -1) {
+		if(_alpm_sync_commit(handle) == -1) {
 			/* pm_errno is set by _alpm_sync_commit() */
 			alpm_errno_t save = handle->pm_errno;
 			alpm_logaction(handle, ALPM_CALLER_PREFIX, "transaction failed\n");
@@ -211,6 +220,7 @@ int SYMEXPORT alpm_trans_commit(alpm_handle_t *handle, alpm_list_t **data)
 		alpm_logaction(handle, ALPM_CALLER_PREFIX, "transaction interrupted\n");
 	} else {
 		alpm_logaction(handle, ALPM_CALLER_PREFIX, "transaction completed\n");
+		_alpm_hook_run(handle, ALPM_HOOK_POST_TRANSACTION);
 	}
 
 	trans->state = STATE_COMMITED;

@@ -1,10 +1,7 @@
 /*
- *  sync.h
+ *  hook.h
  *
- *  Copyright (c) 2006-2015 Pacman Development Team <pacman-dev@archlinux.org>
- *  Copyright (c) 2002-2006 by Judd Vinet <jvinet@zeroflux.org>
- *  Copyright (c) 2005 by Aurelien Foret <orelien@chez.com>
- *  Copyright (c) 2005, 2006 by Miklos Vajna <vmiklos@frugalware.org>
+ *  Copyright (c) 2015 Pacman Development Team <pacman-dev@archlinux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,16 +16,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _ALPM_SYNC_H
-#define _ALPM_SYNC_H
+
+#ifndef _ALPM_HOOK_H
+#define _ALPM_HOOK_H
 
 #include "alpm.h"
 
-int _alpm_sync_prepare(alpm_handle_t *handle, alpm_list_t **data);
-int _alpm_sync_load(alpm_handle_t *handle, alpm_list_t **data);
-int _alpm_sync_check(alpm_handle_t *handle, alpm_list_t **data);
-int _alpm_sync_commit(alpm_handle_t *handle);
+enum _alpm_hook_when_t {
+	ALPM_HOOK_PRE_TRANSACTION = 1,
+	ALPM_HOOK_POST_TRANSACTION
+};
 
-#endif /* _ALPM_SYNC_H */
+int _alpm_hook_run(alpm_handle_t *handle, enum _alpm_hook_when_t when);
+
+#endif /* _ALPM_HOOK_H */
 
 /* vim: set noet: */

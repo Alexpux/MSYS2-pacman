@@ -7,6 +7,7 @@ include_HEADERS = alpm_list.h alpm.h
 
 AM_CPPFLAGS = \
 	-imacros $(top_builddir)/config.h \
+	-DSYSHOOKDIR=\"@datarootdir@/libalpm/hooks/\" \
 	-DLOCALEDIR=\"@localedir@\"
 
 AM_CFLAGS = -pedantic -D_GNU_SOURCE $(WARNING_CFLAGS)
@@ -42,6 +43,8 @@ libalpm_la_SOURCES = \
 	graph.h graph.c \
 	group.h group.c \
 	handle.h handle.c \
+	hook.h hook.c \
+	ini.h ini.c \
 	libarchive-compat.h \
 	log.h log.c \
 	package.h package.c \

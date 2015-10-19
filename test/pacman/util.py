@@ -30,6 +30,7 @@ PM_SYNCDBPATH = "var/lib/pacman/sync"
 PM_LOCK     = "var/lib/pacman/db.lck"
 PM_CACHEDIR = "var/cache/pacman/pkg"
 PM_EXT_PKG  = ".pkg.tar.gz"
+PM_HOOKDIR  = "etc/pacman.d/hooks"
 
 # Pacman
 PACCONF     = "etc/pacman.conf"
@@ -83,7 +84,7 @@ def mkfile(base, name, data=""):
     if info["isdir"]:
         if not os.path.isdir(path):
             os.makedirs(path, 0o755)
-        return
+        return path
 
     dir_path = os.path.dirname(path)
     if dir_path and not os.path.isdir(dir_path):
@@ -96,6 +97,8 @@ def mkfile(base, name, data=""):
 
     if info["perms"]:
         os.chmod(path, info["perms"])
+
+    return path
 
 def writedata(filename, data):
     if isinstance(data, list):
