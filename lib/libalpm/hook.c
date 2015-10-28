@@ -210,7 +210,7 @@ static int _alpm_hook_parse_cb(const char *file, int line,
 		} else if(strcmp(key, "Exec") == 0) {
 			STRDUP(hook->cmd, value, return 1);
 		} else {
-			error(_("hook %s line %d: invalid option %s\n"), file, line, value);
+			error(_("hook %s line %d: invalid option %s\n"), file, line, key);
 		}
 	}
 
@@ -363,6 +363,11 @@ static int _alpm_hook_triggered(alpm_handle_t *handle, struct _alpm_hook_t *hook
 	return 0;
 }
 
+static int _alpm_hook_cmp(struct _alpm_hook_t *h1, struct _alpm_hook_t *h2)
+{
+	return strcmp(h1->name, h2->name);
+}
+
 static alpm_list_t *find_hook(alpm_list_t *haystack, const void *needle)
 {
 	while(haystack) {
@@ -405,30 +410,41 @@ int _alpm_hook_run(alpm_handle_t *handle, enum _alpm_hook_when_t when)
 		struct dirent entry, *result;
 		DIR *d;
 
-		if(!(d = opendir(i->data))) {
+		if((dirlen = strlen(i->data)) >= PATH_MAX) {
+			_alpm_log(handle, ALPM_LOG_ERROR, _("could not open directory: %s: %s\n"),
+					(char *)i->data, strerror(ENAMETOOLONG));
+			ret = -1;
+			continue;
+		}
+		memcpy(path, i->data, dirlen + 1);
+
+		if(!(d = opendir(path))) {
 			if(errno == ENOENT) {
 				continue;
 			} else {
-				_alpm_log(handle, ALPM_LOG_ERROR, _("could not open directory: %s: %s\n"),
-						(char *)i->data, strerror(errno));
+				_alpm_log(handle, ALPM_LOG_ERROR,
+						_("could not open directory: %s: %s\n"), path, strerror(errno));
 				ret = -1;
 				continue;
 			}
 		}
 
-		strncpy(path, i->data, PATH_MAX);
-		dirlen = strlen(i->data);
-
 		while((err = readdir_r(d, &entry, &result)) == 0 && result) {
 			struct _alpm_hook_cb_ctx ctx = { handle, NULL };
 			struct stat buf;
-			size_t name_len = strlen(entry.d_name);
+			size_t name_len;
 
 			if(strcmp(entry.d_name, ".") == 0 || strcmp(entry.d_name, "..") == 0) {
 					continue;
 			}
 
-			strncpy(path + dirlen, entry.d_name, PATH_MAX - dirlen);
+			if((name_len = strlen(entry.d_name)) >= PATH_MAX - dirlen) {
+				_alpm_log(handle, ALPM_LOG_ERROR, _("could not open file: %s%s: %s\n"),
+						path, entry.d_name, strerror(ENAMETOOLONG));
+				ret = -1;
+				continue;
+			}
+			memcpy(path + dirlen, entry.d_name, name_len + 1);
 
 			if(name_len < suflen
 					|| strcmp(entry.d_name + name_len - suflen, suffix) != 0) {
@@ -477,6 +493,9 @@ int _alpm_hook_run(alpm_handle_t *handle, enum _alpm_hook_when_t when)
 
 		closedir(d);
 	}
+
+	hooks = alpm_list_msort(hooks, alpm_list_count(hooks),
+			(alpm_list_fn_cmp)_alpm_hook_cmp);
 
 	for(i = hooks; i; i = i->next) {
 		struct _alpm_hook_t *hook = i->data;

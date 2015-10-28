@@ -104,10 +104,11 @@ static void buffer_free(struct buffer_t *buf)
 static int buffer_grow(struct buffer_t *buffer)
 {
 	size_t newsz = buffer->maxlen * 2.5;
-	buffer->mem = realloc(buffer->mem, newsz * sizeof(char));
-	if(!buffer->mem) {
+	char* new_mem = realloc(buffer->mem, newsz * sizeof(char));
+	if(!new_mem) {
 		return 1;
 	}
+	buffer->mem = new_mem;
 	buffer->maxlen = newsz;
 
 	return 0;
@@ -136,11 +137,12 @@ static struct list_t *list_new(size_t initial_size)
 static int list_grow(struct list_t *list)
 {
 	size_t newsz = list->maxcount * 2.5;
-	list->list = realloc(list->list, newsz * sizeof(char *));
-	if(!list->list) {
+	void **new_list = realloc(list->list, newsz * sizeof(char *));
+	if(!new_list) {
 		return 1;
 	}
 
+	list->list = new_list;
 	list->maxcount = newsz;
 
 	return 0;
@@ -254,7 +256,10 @@ static char *explode(struct buffer_t *buffer, struct list_t *list)
 	while((end = memchr(ptr, linedelim, &buffer->mem[buffer->len] - ptr))) {
 		*end = '\0';
 		meta = input_new(ptr, end - ptr);
-		list_add(list, meta);
+		if(meta == NULL || list_add(list, meta) != 0) {
+			input_free(meta);
+			return NULL;
+		}
 		ptr = end + 1;
 	}
 
@@ -294,6 +299,7 @@ static int splitfile(FILE *stream, struct buffer_t *buffer, struct list_t *list)
 	if(buffer->len) {
 		struct input_t *meta = input_new(buffer->mem, buffer->len + 1);
 		if(meta == NULL || list_add(list, meta) != 0) {
+			input_free(meta);
 			return 1;
 		}
 	}
@@ -478,6 +484,7 @@ int main(int argc, char *argv[])
 	struct list_t *list;
 	struct buffer_t *buffer;
 	size_t i;
+	int ret = 0;
 
 	/* option defaults */
 	opts.order = 1;
@@ -501,7 +508,8 @@ int main(int argc, char *argv[])
 	if(optind == argc) {
 		if(splitfile(stdin, buffer, list) != 0) {
 			fprintf(stderr, "%s: memory exhausted\n", argv[0]);
-			return ENOMEM;
+			ret = ENOMEM;
+			goto cleanup;
 		}
 	} else {
 		while(optind < argc) {
@@ -509,7 +517,9 @@ int main(int argc, char *argv[])
 			if(input) {
 				if(splitfile(input, buffer, list) != 0) {
 					fprintf(stderr, "%s: memory exhausted\n", argv[0]);
-					return ENOMEM;
+					fclose(input);
+					ret = ENOMEM;
+					goto cleanup;
 				}
 				fclose(input);
 			} else {
@@ -528,10 +538,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+cleanup:
 	list_free(list, input_free);
 	buffer_free(buffer);
 
-	return 0;
+	return ret;
 }
 
 /* vim: set noet: */
