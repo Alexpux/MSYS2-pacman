@@ -95,6 +95,8 @@ else
   warning "When the update has completed, you MUST close this MSYS2 window"
   warning "(use Alt-F4 or red [ X ], etc.), rather than 'exit'!!!"
   read -p "Press [Enter] key when ready to start update..."
+  export PS1='Please close this window.'
+  export PROMPT_COMMAND=
   msg "Updating core packages..."
   if ! run_pacman -S --noconfirm --needed ${CRITICAL_PACKAGES} ${OPTIONAL_PACKAGES}; then
     error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
