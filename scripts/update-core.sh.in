@@ -102,6 +102,10 @@ else
     error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
     exit 1 # TODO: error code
   fi
+  while :
+  do
+    read -p  "Please close this window."
+  done
 fi
 
 # vim: set noet:
