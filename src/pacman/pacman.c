@@ -177,10 +177,13 @@ static void usage(int op, const char * const myname)
 		} else if(op == PM_OP_FILES) {
 			addlist(_("  -l, --list           list the files owned by the queried package\n"));
 			addlist(_("  -o, --owns <file>    query the package that owns <file>\n"));
+			addlist(_("  -q, --quiet          show less information for query and search\n"));
 			addlist(_("  -s, --search <file>  search package file names for matching strings\n"));
 			addlist(_("  -x, --regex          enable searching using regular expressions\n"));
 			addlist(_("  -y, --refresh        download fresh package databases from the server\n"
 			          "                       (-yy to force a refresh even if up to date)\n"));
+			addlist(_("      --machinereadable\n"
+			          "                       produce machine-readable output\n"));
 		}
 		switch(op) {
 			case PM_OP_SYNC:
@@ -796,6 +799,9 @@ static int parsearg_files(int opt)
 		case 'x':
 			config->op_f_regex = 1;
 			break;
+		case OP_MACHINEREADABLE:
+			config->op_f_machinereadable = 1;
+			break;
 		case OP_QUIET:
 		case 'q':
 			config->quiet = 1;
@@ -945,6 +951,7 @@ static int parseargs(int argc, char *argv[])
 		{"recursive",  no_argument,       0, OP_RECURSIVE},
 		{"search",     no_argument,       0, OP_SEARCH},
 		{"regex",      no_argument,       0, OP_REGEX},
+		{"machinereadable",      no_argument,       0, OP_MACHINEREADABLE},
 		{"unrequired", no_argument,       0, OP_UNREQUIRED},
 		{"upgrades",   no_argument,       0, OP_UPGRADES},
 		{"sysupgrade", no_argument,       0, OP_SYSUPGRADE},

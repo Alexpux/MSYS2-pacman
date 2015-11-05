@@ -27,25 +27,40 @@
 #include "conf.h"
 #include "package.h"
 
+static void print_line_machinereadable(alpm_db_t *db, alpm_pkg_t *pkg, char *filename)
+{
+	/* Fields are repo, pkgname, pkgver, filename separated with \0 */
+	fputs(alpm_db_get_name(db), stdout);
+	fputc(0, stdout);
+	fputs(alpm_pkg_get_name(pkg), stdout);
+	fputc(0, stdout);
+	fputs(alpm_pkg_get_version(pkg), stdout);
+	fputc(0, stdout);
+	fputs(filename, stdout);
+	fputs("\n", stdout);
+}
+
+static void dump_pkg_machinereadable(alpm_db_t *db, alpm_pkg_t *pkg)
+{
+	alpm_filelist_t *pkgfiles = alpm_pkg_get_files(pkg);
+	for(size_t filenum = 0; filenum < pkgfiles->count; filenum++) {
+		const alpm_file_t *file = pkgfiles->files + filenum;
+		print_line_machinereadable(db, pkg, file->name);
+	}
+}
 
 static int files_fileowner(alpm_list_t *syncs, alpm_list_t *targets) {
 	int ret = 0;
 	alpm_list_t *t;
 
 	for(t = targets; t; t = alpm_list_next(t)) {
-		char *filename = NULL, *f;
+		char *filename = t->data;
 		int found = 0;
 		alpm_list_t *s;
-		size_t len;
+		size_t len = strlen(filename);
 
-		if((filename = strdup(t->data)) == NULL) {
-			goto notfound;
-		}
-
-		len = strlen(filename);
-		f = filename;
-		while(len > 1 && f[0] == '/') {
-			f = f + 1;
+		while(len > 1 && filename[0] == '/') {
+			filename++;
 			len--;
 		}
 
@@ -58,10 +73,11 @@ static int files_fileowner(alpm_list_t *syncs, alpm_list_t *targets) {
 				alpm_pkg_t *pkg = p->data;
 				alpm_filelist_t *files = alpm_pkg_get_files(pkg);
 
-				if(alpm_filelist_contains(files, f)) {
-
-					if(!config->quiet) {
-						printf(_("%s is owned by %s/%s %s\n"), f,
+				if(alpm_filelist_contains(files, filename)) {
+					if(config->op_f_machinereadable) {
+						print_line_machinereadable(repo, pkg, filename);
+					} else if(!config->quiet) {
+						printf(_("%s is owned by %s/%s %s\n"), filename,
 								alpm_db_get_name(repo), alpm_pkg_get_name(pkg),
 								alpm_pkg_get_version(pkg));
 					} else {
@@ -73,9 +89,6 @@ static int files_fileowner(alpm_list_t *syncs, alpm_list_t *targets) {
 			}
 		}
 
-		free(filename);
-
-notfound:
 		if(!found) {
 			ret++;
 		}
@@ -90,19 +103,14 @@ static int files_search(alpm_list_t *syncs, alpm_list_t *targets, int regex) {
 	const colstr_t *colstr = &config->colstr;
 
 	for(t = targets; t; t = alpm_list_next(t)) {
-		char *targ = NULL;
+		char *targ = t->data;
 		alpm_list_t *s;
 		int found = 0;
 		regex_t reg;
 
-		if((targ = strdup(t->data)) == NULL) {
-			goto notfound;
-		}
-
 		if(regex) {
 			if(regcomp(&reg, targ, REG_EXTENDED | REG_NOSUB | REG_ICASE | REG_NEWLINE) != 0) {
 				/* TODO: error message */
-				free(targ);
 				goto notfound;
 			}
 		}
@@ -129,7 +137,7 @@ static int files_search(alpm_list_t *syncs, alpm_list_t *targets, int regex) {
 							m = strcmp(c + 1, targ);
 						}
 						if(m == 0) {
-							match = alpm_list_add(match, strdup(files->files[f].name));
+							match = alpm_list_add(match, files->files[f].name);
 							found = 1;
 						}
 					}
@@ -137,7 +145,13 @@ static int files_search(alpm_list_t *syncs, alpm_list_t *targets, int regex) {
 				}
 
 				if(match != NULL) {
-					if(config->quiet) {
+					if(config->op_f_machinereadable) {
+						alpm_list_t *ml;
+						for(ml = match; ml; ml = alpm_list_next(ml)) {
+							char *filename = ml->data;
+							print_line_machinereadable(repo, pkg, filename);
+						}
+					} else if(config->quiet) {
 						printf("%s/%s\n", alpm_db_get_name(repo), alpm_pkg_get_name(pkg));
 					} else {
 						alpm_list_t *ml;
@@ -149,13 +163,15 @@ static int files_search(alpm_list_t *syncs, alpm_list_t *targets, int regex) {
 							c = ml->data;
 							printf("    %s\n", c);
 						}
-						FREELIST(match);
 					}
+					alpm_list_free(match);
 				}
 			}
 		}
 
-		free(targ);
+		if(regex) {
+			regfree(&reg);
+		}
 
 notfound:
 		if(!found) {
@@ -190,10 +206,11 @@ static void dump_file_list(alpm_pkg_t *pkg) {
 
 static int files_list(alpm_list_t *syncs, alpm_list_t *targets) {
 	alpm_list_t *i, *j;
-	int ret = 0, found = 0;
+	int ret = 0;
 
 	if(targets != NULL) {
 		for(i = targets; i; i = alpm_list_next(i)) {
+			int found = 0;
 			char *targ = i->data;
 			char *repo = NULL;
 			char *c = strchr(targ, '/');
@@ -222,7 +239,11 @@ static int files_list(alpm_list_t *syncs, alpm_list_t *targets) {
 
 				if((pkg = alpm_db_get_pkg(db, targ)) != NULL) {
 					found = 1;
-					dump_file_list(pkg);
+					if(config->op_f_machinereadable) {
+						dump_pkg_machinereadable(db, pkg);
+					} else {
+						dump_file_list(pkg);
+					}
 					break;
 				}
 			}
@@ -240,7 +261,11 @@ static int files_list(alpm_list_t *syncs, alpm_list_t *targets) {
 
 			for(j = alpm_db_get_pkgcache(db); j; j = alpm_list_next(j)) {
 				alpm_pkg_t *pkg = j->data;
-				dump_file_list(pkg);
+				if(config->op_f_machinereadable) {
+					dump_pkg_machinereadable(db, pkg);
+				} else {
+					dump_file_list(pkg);
+				}
 			}
 		}
 	}
@@ -289,6 +314,7 @@ int pacman_files(alpm_list_t *targets)
 		return files_list(files_dbs, targets);
 	}
 
-
 	return 0;
 }
+
+/* vim: set noet: */
