@@ -30,7 +30,6 @@
 #include <limits.h>
 #include <getopt.h>
 #include <string.h>
-#include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/utsname.h> /* uname */
@@ -45,6 +44,7 @@
 #include "pacman.h"
 #include "util.h"
 #include "conf.h"
+#include "sighandler.h"
 
 /* list of targets specified on command line */
 static alpm_list_t *pm_targets;
@@ -279,6 +279,7 @@ static void setuseragent(void)
  */
 static void cleanup(int ret)
 {
+	remove_soft_interrupt_handler();
 	if(config) {
 		/* free alpm library resources */
 		if(config->handle && alpm_release(config->handle) == -1) {
@@ -292,54 +293,6 @@ static void cleanup(int ret)
 	/* free memory */
 	FREELIST(pm_targets);
 	exit(ret);
-}
-
-/** Write function that correctly handles EINTR.
- */
-static ssize_t xwrite(int fd, const void *buf, size_t count)
-{
-	ssize_t ret;
-	do {
-		ret = write(fd, buf, count);
-	} while(ret == -1 && errno == EINTR);
-	return ret;
-}
-
-/** Catches thrown signals. Performs necessary cleanup to ensure database is
- * in a consistent state.
- * @param signum the thrown signal
- */
-static void handler(int signum)
-{
-	int out = fileno(stdout);
-	int err = fileno(stderr);
-	const char *msg;
-	if(signum == SIGSEGV) {
-		msg = "\nerror: segmentation fault\n"
-			"Please submit a full bug report with --debug if appropriate.\n";
-		xwrite(err, msg, strlen(msg));
-		exit(signum);
-	} else if(signum == SIGINT || signum == SIGHUP) {
-		if(signum == SIGINT) {
-			msg = "\nInterrupt signal received\n";
-		} else {
-			msg = "\nHangup signal received\n";
-		}
-		xwrite(err, msg, strlen(msg));
-		if(alpm_trans_interrupt(config->handle) == 0) {
-			/* a transaction is being interrupted, don't exit pacman yet. */
-			return;
-		}
-	} else if(signum == SIGWINCH) {
-		columns_cache_reset();
-		return;
-	}
-	/* SIGINT/SIGHUP: no committing transaction, release it now and then exit pacman
-	 * SIGTERM: release no matter what */
-	alpm_trans_release(config->handle);
-	/* output a newline to be sure we clear any line we may be on */
-	xwrite(out, "\n", 1);
-	cleanup(128 + signum);
 }
 
 static void invalid_opt(int used, const char *opt1, const char *opt2)
@@ -1137,25 +1090,11 @@ int main(int argc, char *argv[])
 {
 	int ret = 0;
 	size_t i;
-	struct sigaction new_action, old_action;
-	const int signals[] = { SIGHUP, SIGINT, SIGTERM, SIGSEGV, SIGWINCH };
 #ifndef __MSYS__
 	uid_t myuid = getuid();
 #endif
-	/* Set signal handlers */
-	/* Set up the structure to specify the new action. */
-	new_action.sa_handler = handler;
-	sigemptyset(&new_action.sa_mask);
-	new_action.sa_flags = SA_RESTART;
 
-	/* assign our handler to any signals we care about */
-	for(i = 0; i < ARRAYSIZE(signals); i++) {
-		int signal = signals[i];
-		sigaction(signal, NULL, &old_action);
-		if(old_action.sa_handler != SIG_IGN) {
-			sigaction(signal, &new_action, NULL);
-		}
-	}
+	install_segv_handler();
 
 	/* i18n init */
 #if defined(ENABLE_NLS)
@@ -1171,9 +1110,14 @@ int main(int argc, char *argv[])
 		cleanup(1);
 	}
 
-	/* disable progressbar if the output is redirected */
+	install_soft_interrupt_handler();
+
 	if(!isatty(fileno(stdout))) {
+		/* disable progressbar if the output is redirected */
 		config->noprogressbar = 1;
+	} else {
+		/* install signal handler to update output width */
+		install_winch_handler();
 	}
 
 	/* Priority of options:

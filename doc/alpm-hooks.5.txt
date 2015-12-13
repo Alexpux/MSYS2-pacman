@@ -23,6 +23,7 @@ When = PreTransaction|PostTransaction (Required)
 Exec = <Command> (Required)
 Depends = <PkgName> (Optional)
 AbortOnFail (Optional, PreTransaction only)
+NeedsTargets (Optional)
 --------
 
 DESCRIPTION
@@ -62,8 +63,9 @@ defined the hook will run if the transaction matches *any* of the triggers.
 ACTIONS
 -------
 
-*Exec =* /path/to/executable::
-	Executable to run.  Required.
+*Exec =* <command>::
+	Command to run.  Command arguments are split on whitespace.  Values
+	containing whitespace should be enclosed in quotes.  Required.
 
 *When =* PreTransaction|PostTransaction::
 	When to run the hook.  Required.
@@ -75,6 +77,10 @@ ACTIONS
 *AbortOnFail*::
 	Causes the transaction to be aborted if the hook exits non-zero.  Only
 	applies to PreTransaction hooks.
+
+*NeedsTargets*::
+	Causes the list of matched trigger targets to be passed to the running hook
+	on 'stdin'.
 
 OVERRIDING HOOKS
 ----------------
