@@ -163,6 +163,16 @@ static void fill_progress(const int bar_percent, const int disp_percent,
 	fflush(stdout);
 }
 
+static int number_length(size_t n)
+{
+	int digits = 1;
+	while((n /= 10)) {
+		++digits;
+	}
+
+	return digits;
+}
+
 /* callback to handle messages/notifications from libalpm transactions */
 void cb_event(alpm_event_t *event)
 {
@@ -170,6 +180,22 @@ void cb_event(alpm_event_t *event)
 		return;
 	}
 	switch(event->type) {
+		case ALPM_EVENT_HOOK_START:
+			if(event->hook.when == ALPM_HOOK_PRE_TRANSACTION) {
+				colon_printf(_("Running pre-transaction hooks...\n"));
+			} else {
+				colon_printf(_("Running post-transaction hooks...\n"));
+			}
+			break;
+		case ALPM_EVENT_HOOK_RUN_START:
+			{
+				alpm_event_hook_run_t *e = &event->hook_run;
+				int digits = number_length(e->total);
+				printf("(%*zu/%*zu) %s\n", digits, e->position,
+						digits, e->total, 
+						e->desc ? e->desc : e->name);
+			}
+			break;
 		case ALPM_EVENT_CHECKDEPS_START:
 			printf(_("checking dependencies...\n"));
 			break;
@@ -183,6 +209,9 @@ void cb_event(alpm_event_t *event)
 			break;
 		case ALPM_EVENT_INTERCONFLICTS_START:
 			printf(_("looking for conflicting packages...\n"));
+			break;
+		case ALPM_EVENT_TRANSACTION_START:
+			colon_printf(_("Processing package changes...\n"));
 			break;
 		case ALPM_EVENT_PACKAGE_OPERATION_START:
 			if(config->noprogressbar) {
@@ -323,6 +352,7 @@ void cb_event(alpm_event_t *event)
 		case ALPM_EVENT_CHECKDEPS_DONE:
 		case ALPM_EVENT_RESOLVEDEPS_DONE:
 		case ALPM_EVENT_INTERCONFLICTS_DONE:
+		case ALPM_EVENT_TRANSACTION_DONE:
 		case ALPM_EVENT_INTEGRITY_DONE:
 		case ALPM_EVENT_KEYRING_DONE:
 		case ALPM_EVENT_KEY_DOWNLOAD_DONE:
@@ -332,6 +362,8 @@ void cb_event(alpm_event_t *event)
 		case ALPM_EVENT_DISKSPACE_DONE:
 		case ALPM_EVENT_RETRIEVE_DONE:
 		case ALPM_EVENT_RETRIEVE_FAILED:
+		case ALPM_EVENT_HOOK_DONE:
+		case ALPM_EVENT_HOOK_RUN_DONE:
 		/* we can safely ignore those as well */
 		case ALPM_EVENT_PKGDOWNLOAD_START:
 		case ALPM_EVENT_PKGDOWNLOAD_DONE:
@@ -472,7 +504,6 @@ void cb_progress(alpm_progress_t event, const char *pkgname, int percent,
 	/* size of line to allocate for text printing (e.g. not progressbar) */
 	int infolen;
 	int digits, textlen;
-	size_t tmp;
 	char *opr = NULL;
 	/* used for wide character width determination and printing */
 	int len, wclen, wcwid, padwid;
@@ -548,11 +579,8 @@ void cb_progress(alpm_progress_t event, const char *pkgname, int percent,
 	}
 
 	/* find # of digits in package counts to scale output */
-	digits = 1;
-	tmp = howmany;
-	while((tmp /= 10)) {
-		++digits;
-	}
+	digits = number_length(howmany);
+
 	/* determine room left for non-digits text [not ( 1/12) part] */
 	textlen = infolen - 3 /* (/) */ - (2 * digits) - 1 /* space */;
 

@@ -48,11 +48,12 @@ struct _alpm_trigger_t {
 
 struct _alpm_hook_t {
 	char *name;
+	char *desc;
 	alpm_list_t *triggers;
 	alpm_list_t *depends;
 	char **cmd;
 	alpm_list_t *matches;
-	enum _alpm_hook_when_t when;
+	alpm_hook_when_t when;
 	int abort_on_fail, needs_targets;
 };
 
@@ -84,6 +85,7 @@ static void _alpm_hook_free(struct _alpm_hook_t *hook)
 {
 	if(hook) {
 		free(hook->name);
+		free(hook->desc);
 		_alpm_wordsplit_free(hook->cmd);
 		alpm_list_free_inner(hook->triggers, (alpm_list_fn_free) _alpm_trigger_free);
 		alpm_list_free(hook->triggers);
@@ -316,6 +318,8 @@ static int _alpm_hook_parse_cb(const char *file, int line,
 			} else {
 				error(_("hook %s line %d: invalid value %s\n"), file, line, value);
 			}
+		} else if(strcmp(key, "Description") == 0) {
+			STRDUP(hook->desc, value, return 1);
 		} else if(strcmp(key, "Depends") == 0) {
 			char *val;
 			STRDUP(val, value, return 1);
@@ -608,11 +612,13 @@ static int _alpm_hook_run_hook(alpm_handle_t *handle, struct _alpm_hook_t *hook)
 	}
 }
 
-int _alpm_hook_run(alpm_handle_t *handle, enum _alpm_hook_when_t when)
+int _alpm_hook_run(alpm_handle_t *handle, alpm_hook_when_t when)
 {
-	alpm_list_t *i, *hooks = NULL;
+	alpm_event_hook_t event = { .when = when };
+	alpm_event_hook_run_t hook_event;
+	alpm_list_t *i, *hooks = NULL, *hooks_triggered = NULL;
 	const char *suffix = ".hook";
-	size_t suflen = strlen(suffix);
+	size_t suflen = strlen(suffix), triggered = 0;
 	int ret = 0;
 
 	for(i = alpm_list_last(handle->hookdirs); i; i = alpm_list_previous(i)) {
@@ -706,17 +712,53 @@ int _alpm_hook_run(alpm_handle_t *handle, enum _alpm_hook_when_t when)
 		closedir(d);
 	}
 
+	if(ret != 0 && when == ALPM_HOOK_PRE_TRANSACTION) {
+		goto cleanup;
+	}
+
 	hooks = alpm_list_msort(hooks, alpm_list_count(hooks),
 			(alpm_list_fn_cmp)_alpm_hook_cmp);
 
 	for(i = hooks; i; i = i->next) {
 		struct _alpm_hook_t *hook = i->data;
 		if(hook && hook->when == when && _alpm_hook_triggered(handle, hook)) {
+			hooks_triggered = alpm_list_add(hooks_triggered, hook);
+			triggered++;
+		}
+	}
+
+	if(hooks_triggered != NULL) {
+		event.type = ALPM_EVENT_HOOK_START;
+		EVENT(handle, &event);
+
+		hook_event.position = 1;
+		hook_event.total = triggered;
+
+		for(i = hooks_triggered; i; i = i->next, hook_event.position++) {
+			struct _alpm_hook_t *hook = i->data;
 			_alpm_log(handle, ALPM_LOG_DEBUG, "running hook %s\n", hook->name);
+
+			hook_event.type = ALPM_EVENT_HOOK_RUN_START;
+			hook_event.name = hook->name;
+			hook_event.desc = hook->desc;
+			EVENT(handle, &hook_event);
+
 			if(_alpm_hook_run_hook(handle, hook) != 0 && hook->abort_on_fail) {
 				ret = -1;
 			}
+
+			hook_event.type = ALPM_EVENT_HOOK_RUN_DONE;
+			EVENT(handle, &hook_event);
+
+			if(ret != 0 && when == ALPM_HOOK_PRE_TRANSACTION) {
+				break;
+			}
 		}
+
+		alpm_list_free(hooks_triggered);
+
+		event.type = ALPM_EVENT_HOOK_DONE;
+		EVENT(handle, &event);
 	}
 
 cleanup:
