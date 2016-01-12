@@ -1,7 +1,7 @@
 /*
  *  diskspace.c
  *
- *  Copyright (c) 2010-2015 Pacman Development Team <pacman-dev@archlinux.org>
+ *  Copyright (c) 2010-2016 Pacman Development Team <pacman-dev@archlinux.org>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -237,8 +237,10 @@ static int calculate_removed_size(alpm_handle_t *handle,
 		snprintf(path, PATH_MAX, "%s%s", handle->root, filename);
 
 		if(llstat(path, &st) == -1) {
-			_alpm_log(handle, ALPM_LOG_WARNING,
-					_("could not get file information for %s\n"), filename);
+			if(alpm_option_match_noextract(handle, filename)) {
+				_alpm_log(handle, ALPM_LOG_WARNING,
+						_("could not get file information for %s\n"), filename);
+			}
 			continue;
 		}
 
