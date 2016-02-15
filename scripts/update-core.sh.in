@@ -34,8 +34,9 @@ m4_include(library/utils_fixed_path.sh)
 
 # print usage instructions
 usage() {
-	printf "update-core (pacman) %s\n" ${myver}
-	echo
+  local cmd="${0##*/}"
+  printf "${cmd} (pacman) ${myver}\n\n"
+  printf 'usage: update-core [--noconfirm]\n\n'
 }
 
 version() {
@@ -79,6 +80,14 @@ PACMAN=${PACMAN:-pacman}
 # save full path to command as PATH may change when sourcing /etc/profile
 PACMAN_PATH=$(type -P $PACMAN)
 
+# non-interactive usage
+for argument in "${@}"; do
+  if [[ "${argument}" = --noconfirm ]]; then
+    noconfirm='yes'
+    break
+  fi
+done
+
 msg "Update package databases..."
 if ! run_pacman -Sy; then
   error "$(gettext "'%s' failed to update package databases.")" "$PACMAN"
@@ -94,7 +103,7 @@ else
   msg "windows, Bash sessions, etc) before proceeding."
   warning "When the update has completed, you MUST close this MSYS2 window"
   warning "(use Alt-F4 or red [ X ], etc.), rather than 'exit'!!!"
-  read -p "Press [Enter] key when ready to start update..."
+  test -z "${noconfirm}" && read -p 'Press [Enter] key when ready to start update...'
   export PS1='Please close this window.'
   export PROMPT_COMMAND=
   msg "Updating core packages..."
@@ -102,10 +111,11 @@ else
     error "$(gettext "'%s' failed to update core packages.")" "$PACMAN"
     exit 1 # TODO: error code
   fi
-  while :
-  do
-    read -p  "Please close this window."
-  done
+  printf 'Please close this window.'
+  test -n "${noconfirm}" && exit 0
+  while true; do
+    read -s
+   done
 fi
 
 # vim: set noet:
