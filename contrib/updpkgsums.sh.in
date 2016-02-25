@@ -83,7 +83,7 @@ export BUILDDIR=$(mktemp -d  "${TMPDIR:-/tmp}/updpkgsums.XXXXXX")
 newbuildfile=$(mktemp "${TMPDIR:-/tmp}/updpkgsums.XXXXXX")
 
 trap "rm -rf '$BUILDDIR' '$newbuildfile'" EXIT
-newsums=$(makepkg -g -p "$buildfile") || die 'Failed to generate new checksums'
+newsums=$(MINGW_PACKAGE_PREFIX=mingw-w64-i686 makepkg -g -p "$buildfile") || die 'Failed to generate new checksums'
 awk -v newsums="$newsums" '
 	/^[[:blank:]]*(md|sha)[[:digit:]]+sums(_[^=]+)?=/,/\)[[:blank:]]*(#.*)?$/ {
 		if (!w) {
