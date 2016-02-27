@@ -200,7 +200,12 @@ static alpm_list_t *check_replacers(alpm_handle_t *handle, alpm_pkg_t *lpkg,
 }
 
 /** Search for packages to upgrade and add them to the transaction. */
+#ifdef __MSYS__
+static
+int SYMEXPORT do_alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade, int core_update)
+#else
 int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
+#endif
 {
 	alpm_list_t *i, *j;
 	alpm_trans_t *trans;
@@ -213,6 +218,19 @@ int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
 	_alpm_log(handle, ALPM_LOG_DEBUG, "checking for package upgrades\n");
 	for(i = _alpm_db_get_pkgcache(handle->db_local); i; i = i->next) {
 		alpm_pkg_t *lpkg = i->data;
+
+#ifdef __MSYS__
+		if(core_update
+			&& strcmp(lpkg->name, "bash")                != 0
+			&& strcmp(lpkg->name, "filesystem")          != 0
+			&& strcmp(lpkg->name, "mintty")              != 0
+			&& strcmp(lpkg->name, "msys2-runtime")       != 0
+			&& strcmp(lpkg->name, "msys2-runtime-devel") != 0
+			&& strcmp(lpkg->name, "pacman")              != 0
+			&& strcmp(lpkg->name, "pacman-mirrors")      != 0) {
+			continue;
+		}
+#endif
 
 		if(alpm_pkg_find(trans->remove, lpkg->name)) {
 			_alpm_log(handle, ALPM_LOG_DEBUG, "%s is marked for removal -- skipping\n", lpkg->name);
@@ -254,6 +272,18 @@ int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
 
 	return 0;
 }
+
+#ifdef __MSYS__
+int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
+{
+	return do_alpm_sync_sysupgrade(handle, enable_downgrade, 0);
+}
+
+int SYMEXPORT alpm_sync_sysupgrade_core(alpm_handle_t *handle, int enable_downgrade)
+{
+	return do_alpm_sync_sysupgrade(handle, enable_downgrade, 1);
+}
+#endif
 
 /** Find group members across a list of databases.
  * If a member exists in several databases, only the first database is used.

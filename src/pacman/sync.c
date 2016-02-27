@@ -28,6 +28,10 @@
 #include <sys/stat.h>
 #include <fnmatch.h>
 
+#ifdef __MSYS__
+#include <termios.h>
+#endif
+
 #include <alpm.h>
 #include <alpm_list.h>
 
@@ -670,8 +674,62 @@ cleanup:
 	return ret;
 }
 
+#ifdef __MSYS__
+static int wait_indefinitely(void)
+{
+	struct termios term;
+
+	/* disable input printing */
+	if(tcgetattr(STDIN_FILENO, &term) == 0) {
+		term.c_lflag &= ~ECHO;
+		tcsetattr(STDIN_FILENO, TCSAFLUSH, &term);
+	}
+
+	while (1) {
+		getchar();
+	}
+}
+
+static int core_update(int *needed)
+{
+	int retval;
+
+	colon_printf(_("Starting core system upgrade...\n"));
+	alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
+			"starting core system upgrade\n");
+
+	if(alpm_sync_sysupgrade_core(config->handle, config->op_s_upgrade >= 2) == -1) {
+		pm_printf(ALPM_LOG_ERROR, "%s\n", alpm_strerror(alpm_errno(config->handle)));
+		trans_release();
+		return 1;
+	}
+
+	if(!(*needed = alpm_trans_get_add(config->handle) != NULL)) {
+		if (!config->print) {
+			printf(_(" there is nothing to do\n"));
+		}
+		return 0;
+	}
+
+	pm_printf(ALPM_LOG_WARNING, _("terminate other MSYS2 programs before proceeding\n"));
+	if((retval = sync_prepare_execute()) == 0) {
+		pm_printf(ALPM_LOG_WARNING, _("terminate MSYS2 without returning to shell and check for updates again\n"));
+		pm_printf(ALPM_LOG_WARNING, _("for example close your terminal window instead of calling exit"));
+		if(config->noconfirm) {
+			fprintf(stdout, "\n");
+			return 0;
+		}
+		wait_indefinitely();
+	}
+	return retval;
+}
+#endif
+
 static int sync_trans(alpm_list_t *targets)
 {
+#ifdef __MSYS__
+	int found_core_updates = 0;
+#endif
 	int retval = 0;
 	alpm_list_t *i;
 
@@ -694,6 +752,14 @@ static int sync_trans(alpm_list_t *targets)
 	}
 
 	if(config->op_s_upgrade) {
+#ifdef __MSYS__
+		if(retval = core_update(&found_core_updates)) {
+			return retval;
+		}
+		if(found_core_updates) {
+			return retval;
+		}
+#endif
 		colon_printf(_("Starting full system upgrade...\n"));
 		alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
 				"starting full system upgrade\n");
