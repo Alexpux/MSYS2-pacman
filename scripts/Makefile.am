@@ -17,8 +17,7 @@ OURSCRIPTS = \
 	pacman-key \
 	pacman-optimize \
 	pkgdelta \
-	repo-add \
-	update-core
+	repo-add
 
 EXTRA_DIST = \
 	makepkg.sh.in \
@@ -29,7 +28,6 @@ EXTRA_DIST = \
 	pacman-optimize.sh.in \
 	pkgdelta.sh.in \
 	repo-add.sh.in \
-	update-core.sh.in \
 	$(LIBRARY) \
 	$(LIBMAKEPKG_DIST)
 
@@ -204,12 +202,6 @@ repo-remove: $(srcdir)/repo-add.sh.in
 repo-elephant: $(srcdir)/repo-add.sh.in
 	$(AM_V_at)$(RM) repo-elephant
 	$(AM_V_at)$(LN_S) repo-add repo-elephant
-
-update-core: \
-	$(srcdir)/update-core.sh.in \
-	$(srcdir)/library/term_colors.sh \
-	$(srcdir)/library/output_format.sh \
-	$(srcdir)/library/utils_fixed_path.sh
 
 makepkg-wrapper: \
 	Makefile \
