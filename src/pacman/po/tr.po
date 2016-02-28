@@ -5,14 +5,15 @@
 # Translators:
 # Atilla Öntaş <tarakbumba@gmail.com>, 2011-2015
 # Atilla Öntaş <tarakbumba@gmail.com>, 2012
+# Demiray Muhterem <mdemiray@msn.com>, 2016
 # Samed Beyribey <ras0ir@eventualis.org>, 2011,2013
 msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
-"POT-Creation-Date: 2016-01-17 13:21+1000\n"
-"PO-Revision-Date: 2016-01-17 03:31+0000\n"
-"Last-Translator: Allan McRae <allan@archlinux.org>\n"
+"POT-Creation-Date: 2016-02-23 13:06+1000\n"
+"PO-Revision-Date: 2016-02-02 19:22+0000\n"
+"Last-Translator: Demiray Muhterem <mdemiray@msn.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/toofishes/archlinux-pacman/"
 "language/tr/)\n"
 "Language: tr\n"
@@ -24,12 +25,12 @@ msgstr ""
 #: src/pacman/callback.c:182
 #, c-format
 msgid "Running pre-transaction hooks...\n"
-msgstr ""
+msgstr "Bağlantılı ön işlemler çalışıyor...\n"
 
 #: src/pacman/callback.c:184
 #, c-format
 msgid "Running post-transaction hooks...\n"
-msgstr ""
+msgstr "Bağlantılı işlemler listesi çalışıyor...\n"
 
 #: src/pacman/callback.c:197
 #, c-format
@@ -54,7 +55,7 @@ msgstr "varsa paketler arası çakışmalara bakılıyor...\n"
 #: src/pacman/callback.c:211
 #, c-format
 msgid "Processing package changes...\n"
-msgstr ""
+msgstr "Paket değişiklikleri işleniyor...\n"
 
 #: src/pacman/callback.c:218
 #, c-format
@@ -128,8 +129,8 @@ msgstr "başarısız.\n"
 
 #: src/pacman/callback.c:291
 #, c-format
-msgid "Retrieving packages ...\n"
-msgstr "Paketler alınıyor ...\n"
+msgid "Retrieving packages...\n"
+msgstr "Paketler alınıyor...\n"
 
 #: src/pacman/callback.c:295
 #, c-format
@@ -212,11 +213,13 @@ msgstr ""
 #, c-format
 msgid "Import PGP key %u%c/%s, \"%s\", created: %s (revoked)?"
 msgstr ""
+"%u%c/%s, PGP anahtarı içe aktarılıyor, \"%s\", oluşturuldu: %s (iptal "
+"edilsin mi)?"
 
 #: src/pacman/callback.c:481
 #, c-format
 msgid "Import PGP key %u%c/%s, \"%s\", created: %s?"
-msgstr ""
+msgstr "%u%c/%s, PGP anahtarı içe aktarılıyor, \"%s\", oluşturuldu: %s?"
 
 #: src/pacman/callback.c:540
 #, c-format
@@ -436,7 +439,7 @@ msgstr ""
 #: src/pacman/conf.c:725
 #, c-format
 msgid "try running pacman-db-upgrade\n"
-msgstr ""
+msgstr "pacman-db-upgrade komutunu çalıştırmayı deneyin\n"
 
 #: src/pacman/conf.c:744
 #, c-format
@@ -451,7 +454,7 @@ msgstr "'%s' gpg dizini ayarlanırken sorun oluştu (%s)\n"
 #: src/pacman/conf.c:763 src/pacman/conf.c:771
 #, c-format
 msgid "problem adding hookdir '%s' (%s)\n"
-msgstr ""
+msgstr "bağlama sorunu ekleniyor '%s' (%s)\n"
 
 #: src/pacman/conf.c:802
 #, c-format
@@ -461,7 +464,7 @@ msgstr "herhangi bir '%s' yapılandırılmamış\n"
 #: src/pacman/conf.c:830
 #, c-format
 msgid "Failed to pass %s entry to libalpm"
-msgstr ""
+msgstr "libalpm için %s girdisi başarısız oldu"
 
 #: src/pacman/conf.c:870
 #, c-format
@@ -519,209 +522,209 @@ msgstr "%s: kurulum sebebi 'bağımlılık olarak kuruldu' olarak belirlendi\n"
 msgid "%s: install reason has been set to 'explicitly installed'\n"
 msgstr "%s: kurulum sebebi 'doğrudan kurulmuş' olarak belirlendi\n"
 
-#: src/pacman/package.c:97
-#, c-format
-msgid "Architecture"
-msgstr ""
-
-#: src/pacman/package.c:98
-#, c-format
-msgid "Backup Files"
-msgstr ""
-
 #: src/pacman/package.c:99
 #, c-format
-msgid "Build Date"
-msgstr ""
+msgid "Architecture"
+msgstr "Mimari"
 
 #: src/pacman/package.c:100
 #, c-format
-msgid "Compressed Size"
-msgstr ""
+msgid "Backup Files"
+msgstr "Yedekleme Dosyası"
 
 #: src/pacman/package.c:101
 #, c-format
-msgid "Conflicts With"
-msgstr ""
+msgid "Build Date"
+msgstr "İnşa Tarihi"
 
 #: src/pacman/package.c:102
 #, c-format
-msgid "Depends On"
-msgstr ""
+msgid "Compressed Size"
+msgstr "Sıkıştırılmış Boyut"
 
 #: src/pacman/package.c:103
 #, c-format
-msgid "Description"
-msgstr ""
+msgid "Conflicts With"
+msgstr "Çakışıyor"
 
-#: src/pacman/package.c:104 src/pacman/util.c:821
+#: src/pacman/package.c:104
+#, c-format
+msgid "Depends On"
+msgstr "Bağımlılıkları"
+
+#: src/pacman/package.c:105
+#, c-format
+msgid "Description"
+msgstr "Açıklama"
+
+#: src/pacman/package.c:106 src/pacman/util.c:821
 #, c-format
 msgid "Download Size"
 msgstr "İndirme Boyutu"
 
-#: src/pacman/package.c:105
-#, c-format
-msgid "Groups"
-msgstr ""
-
-#: src/pacman/package.c:106
-#, c-format
-msgid "Install Date"
-msgstr ""
-
 #: src/pacman/package.c:107
 #, c-format
-msgid "Install Reason"
-msgstr ""
+msgid "Groups"
+msgstr "Gruplar"
 
 #: src/pacman/package.c:108
 #, c-format
-msgid "Install Script"
-msgstr ""
+msgid "Install Date"
+msgstr "Yükleme Tarihi"
 
 #: src/pacman/package.c:109
 #, c-format
-msgid "Installed Size"
-msgstr ""
+msgid "Install Reason"
+msgstr "Yükleme Sebebi"
 
 #: src/pacman/package.c:110
 #, c-format
-msgid "Licenses"
-msgstr ""
+msgid "Install Script"
+msgstr "Kurulum Betiği"
 
-#: src/pacman/package.c:111 src/pacman/package.c:232
+#: src/pacman/package.c:111
+#, c-format
+msgid "Installed Size"
+msgstr "Kurulum Boyutu"
+
+#: src/pacman/package.c:112
+#, c-format
+msgid "Licenses"
+msgstr "Lisanslar"
+
+#: src/pacman/package.c:113 src/pacman/package.c:239
 #, c-format
 msgid "MD5 Sum"
 msgstr "MD5 Özeti"
 
-#: src/pacman/package.c:112
+#: src/pacman/package.c:114
 #, c-format
 msgid "Name"
 msgstr "İsim"
 
-#: src/pacman/package.c:113
-#, c-format
-msgid "Optional Deps"
-msgstr ""
-
-#: src/pacman/package.c:114
-#, c-format
-msgid "Optional For"
-msgstr ""
-
 #: src/pacman/package.c:115
 #, c-format
-msgid "Packager"
-msgstr ""
+msgid "Optional Deps"
+msgstr "Tercihli Bağımlılıklar"
 
 #: src/pacman/package.c:116
 #, c-format
-msgid "Provides"
-msgstr ""
+msgid "Optional For"
+msgstr "İsteğe Bağlı"
 
 #: src/pacman/package.c:117
 #, c-format
-msgid "Replaces"
-msgstr ""
+msgid "Packager"
+msgstr "Paketçi"
 
 #: src/pacman/package.c:118
 #, c-format
-msgid "Repository"
-msgstr ""
+msgid "Provides"
+msgstr "Sağlananlar"
 
 #: src/pacman/package.c:119
 #, c-format
-msgid "Required By"
-msgstr ""
+msgid "Replaces"
+msgstr "Değiştirilenler"
 
-#: src/pacman/package.c:120 src/pacman/package.c:235
+#: src/pacman/package.c:120
 #, c-format
-msgid "SHA-256 Sum"
-msgstr ""
+msgid "Repository"
+msgstr "Depo"
 
 #: src/pacman/package.c:121
 #, c-format
-msgid "Signatures"
-msgstr ""
+msgid "Required By"
+msgstr "İhtiyaç Duyulanlar"
 
-#: src/pacman/package.c:122
+#: src/pacman/package.c:122 src/pacman/package.c:242
 #, c-format
-msgid "URL"
-msgstr ""
+msgid "SHA-256 Sum"
+msgstr "SHA-256 Özeti"
 
 #: src/pacman/package.c:123
 #, c-format
-msgid "Validated By"
-msgstr ""
+msgid "Signatures"
+msgstr "İmzalar"
 
 #: src/pacman/package.c:124
 #, c-format
-msgid "Version"
-msgstr ""
+msgid "URL"
+msgstr "URL"
 
-#: src/pacman/package.c:167 src/pacman/util.c:1205
+#: src/pacman/package.c:125
+#, c-format
+msgid "Validated By"
+msgstr "Doğrulayan"
+
+#: src/pacman/package.c:126
+#, c-format
+msgid "Version"
+msgstr "Sürüm"
+
+#: src/pacman/package.c:174 src/pacman/util.c:1205
 #, c-format
 msgid " [installed]"
 msgstr " [kuruldu]"
 
-#: src/pacman/package.c:216
+#: src/pacman/package.c:223
 #, c-format
 msgid "Explicitly installed"
 msgstr "Doğrudan kurulmuş"
 
-#: src/pacman/package.c:219
+#: src/pacman/package.c:226
 #, c-format
 msgid "Installed as a dependency for another package"
 msgstr "Başka bir paketin bağımlılığı olarak kurulmuş"
 
-#: src/pacman/package.c:222 src/pacman/package.c:242
+#: src/pacman/package.c:229 src/pacman/package.c:249
 #, c-format
 msgid "Unknown"
 msgstr "Bilinmiyor"
 
-#: src/pacman/package.c:229 src/pacman/package.c:314 src/pacman/package.c:332
+#: src/pacman/package.c:236 src/pacman/package.c:321 src/pacman/package.c:339
 #: src/pacman/util.c:489 src/pacman/util.c:675 src/pacman/util.c:715
 #: src/pacman/util.c:743
 #, c-format
 msgid "None"
 msgstr "Hiçbiri"
 
-#: src/pacman/package.c:238
+#: src/pacman/package.c:245
 #, c-format
 msgid "Signature"
 msgstr "İmza"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "Yes"
 msgstr "Evet"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "No"
 msgstr "Hayır"
 
-#: src/pacman/package.c:369
+#: src/pacman/package.c:376
 #, c-format
 msgid "could not calculate checksums for %s\n"
 msgstr "%s için bütünlük kontrolü hesaplanamadı\n"
 
-#: src/pacman/package.c:416
+#: src/pacman/package.c:423
 #, c-format
 msgid "(none)\n"
 msgstr "(yok)\n"
 
-#: src/pacman/package.c:453
+#: src/pacman/package.c:460
 #, c-format
 msgid "no changelog available for '%s'.\n"
 msgstr "'%s' için değişim kaydı bulunmuyor.\n"
 
-#: src/pacman/package.c:457
+#: src/pacman/package.c:464
 #, c-format
 msgid "Changelog for %s:\n"
 msgstr "%s için değişim kaydı:\n"
 
-#: src/pacman/package.c:482 src/pacman/package.c:484
+#: src/pacman/package.c:489 src/pacman/package.c:491
 #, c-format
 msgid "installed"
 msgstr "kurulu"
@@ -981,16 +984,19 @@ msgid ""
 "  -k, --check          test local database for validity (-kk for sync "
 "databases)\n"
 msgstr ""
+"yerel veritabanını doğrulamak için -k, --check ile test et (veritabanı "
+"senkronizasyonu için -kk)\n"
 
 #: src/pacman/pacman.c:181
 #, c-format
 msgid "  -s, --search <file>  search package file names for matching strings\n"
 msgstr ""
+"Dizgilerde tekrarlayan paket isimlerini -s, --search <file> biçiminde ara\n"
 
 #: src/pacman/pacman.c:182
 #, c-format
 msgid "  -x, --regex          enable searching using regular expressions\n"
-msgstr ""
+msgstr "-x, --regex ifadelerini kullanarak aramayı etkinleştir\n"
 
 #: src/pacman/pacman.c:185
 #, c-format
@@ -998,6 +1004,8 @@ msgid ""
 "      --machinereadable\n"
 "                       produce machine-readable output\n"
 msgstr ""
+"--machinereadable\n"
+"makine tarafından okunabilir bir çıktı üret\n"
 
 #: src/pacman/pacman.c:191
 #, c-format
@@ -1118,7 +1126,7 @@ msgstr "      --cachedir <dir> farklı bir önbellek yolu ayarla\n"
 #: src/pacman/pacman.c:216
 #, c-format
 msgid "      --hookdir <dir>  set an alternate hook location\n"
-msgstr ""
+msgstr "alternatif konum bağlantısı ayarla --hookdir <dir>\n"
 
 #: src/pacman/pacman.c:217
 #, c-format
@@ -1304,7 +1312,7 @@ msgstr "işlem hazırlığı başarısız oldu (%s)\n"
 #: src/pacman/remove.c:125 src/pacman/sync.c:724
 #, c-format
 msgid "%s: removing %s breaks dependency '%s'\n"
-msgstr ""
+msgstr "%s:  '%s' bağımlılığı sağlanamadı %s kaldırılıyor\n"
 
 #: src/pacman/remove.c:144
 #, c-format
@@ -1441,7 +1449,7 @@ msgstr "%s: %s paketini gerektiriyor\n"
 #: src/pacman/sync.c:720
 #, c-format
 msgid "%s: installing %s (%s) breaks dependency '%s'\n"
-msgstr ""
+msgstr "%s:  '%s' bağımlılığı sağlanamadı %s (%s) yükleniyor\n"
 
 #: src/pacman/sync.c:744
 #, c-format

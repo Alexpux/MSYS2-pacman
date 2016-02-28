@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
-"POT-Creation-Date: 2016-01-17 13:21+1000\n"
-"PO-Revision-Date: 2016-01-17 08:48+0000\n"
+"POT-Creation-Date: 2016-02-23 13:06+1000\n"
+"PO-Revision-Date: 2016-02-09 18:36+0000\n"
 "Last-Translator: Данило Коростіль <ted.korostiled@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/toofishes/archlinux-"
 "pacman/language/uk/)\n"
@@ -133,8 +133,8 @@ msgstr "невдало.\n"
 
 #: src/pacman/callback.c:291
 #, c-format
-msgid "Retrieving packages ...\n"
-msgstr "Одержання пакунків ...\n"
+msgid "Retrieving packages...\n"
+msgstr "Одержання пакунків...\n"
 
 #: src/pacman/callback.c:295
 #, c-format
@@ -525,209 +525,209 @@ msgstr "%s: причину встановлення вказано на «вст
 msgid "%s: install reason has been set to 'explicitly installed'\n"
 msgstr "%s: причину встановлення вказано на «явно встановлений»\n"
 
-#: src/pacman/package.c:97
+#: src/pacman/package.c:99
 #, c-format
 msgid "Architecture"
 msgstr "Архітектура"
 
-#: src/pacman/package.c:98
+#: src/pacman/package.c:100
 #, c-format
 msgid "Backup Files"
 msgstr "Резервні файли"
 
-#: src/pacman/package.c:99
+#: src/pacman/package.c:101
 #, c-format
 msgid "Build Date"
 msgstr "Дата збирання"
 
-#: src/pacman/package.c:100
+#: src/pacman/package.c:102
 #, c-format
 msgid "Compressed Size"
 msgstr "Розмір стиснення"
 
-#: src/pacman/package.c:101
+#: src/pacman/package.c:103
 #, c-format
 msgid "Conflicts With"
 msgstr "Конфліктує з"
 
-#: src/pacman/package.c:102
+#: src/pacman/package.c:104
 #, c-format
 msgid "Depends On"
 msgstr "Залежить від"
 
-#: src/pacman/package.c:103
+#: src/pacman/package.c:105
 #, c-format
 msgid "Description"
 msgstr "Опис"
 
-#: src/pacman/package.c:104 src/pacman/util.c:821
+#: src/pacman/package.c:106 src/pacman/util.c:821
 #, c-format
 msgid "Download Size"
 msgstr "Розмір звантаження"
 
-#: src/pacman/package.c:105
+#: src/pacman/package.c:107
 #, c-format
 msgid "Groups"
 msgstr "Групи"
 
-#: src/pacman/package.c:106
+#: src/pacman/package.c:108
 #, c-format
 msgid "Install Date"
 msgstr "Дата встановлення"
 
-#: src/pacman/package.c:107
+#: src/pacman/package.c:109
 #, c-format
 msgid "Install Reason"
 msgstr "Причина встановлення"
 
-#: src/pacman/package.c:108
+#: src/pacman/package.c:110
 #, c-format
 msgid "Install Script"
 msgstr "Сценарій встановлення"
 
-#: src/pacman/package.c:109
+#: src/pacman/package.c:111
 #, c-format
 msgid "Installed Size"
 msgstr "Розмір встановлення"
 
-#: src/pacman/package.c:110
+#: src/pacman/package.c:112
 #, c-format
 msgid "Licenses"
 msgstr "Ліцензії"
 
-#: src/pacman/package.c:111 src/pacman/package.c:232
+#: src/pacman/package.c:113 src/pacman/package.c:239
 #, c-format
 msgid "MD5 Sum"
 msgstr "Сума MD5"
 
-#: src/pacman/package.c:112
+#: src/pacman/package.c:114
 #, c-format
 msgid "Name"
 msgstr "Назва"
 
-#: src/pacman/package.c:113
+#: src/pacman/package.c:115
 #, c-format
 msgid "Optional Deps"
 msgstr "Необов'язкові залежності"
 
-#: src/pacman/package.c:114
+#: src/pacman/package.c:116
 #, c-format
 msgid "Optional For"
 msgstr "Необов’язково для"
 
-#: src/pacman/package.c:115
+#: src/pacman/package.c:117
 #, c-format
 msgid "Packager"
 msgstr "Пакувальник"
 
-#: src/pacman/package.c:116
+#: src/pacman/package.c:118
 #, c-format
 msgid "Provides"
 msgstr "Забезпечує"
 
-#: src/pacman/package.c:117
+#: src/pacman/package.c:119
 #, c-format
 msgid "Replaces"
 msgstr "Замінює"
 
-#: src/pacman/package.c:118
+#: src/pacman/package.c:120
 #, c-format
 msgid "Repository"
 msgstr "Сховище"
 
-#: src/pacman/package.c:119
+#: src/pacman/package.c:121
 #, c-format
 msgid "Required By"
 msgstr "Потрібен для"
 
-#: src/pacman/package.c:120 src/pacman/package.c:235
+#: src/pacman/package.c:122 src/pacman/package.c:242
 #, c-format
 msgid "SHA-256 Sum"
 msgstr "Сума SHA-256"
 
-#: src/pacman/package.c:121
+#: src/pacman/package.c:123
 #, c-format
 msgid "Signatures"
 msgstr "Підпис"
 
-#: src/pacman/package.c:122
+#: src/pacman/package.c:124
 #, c-format
 msgid "URL"
 msgstr "Посилання"
 
-#: src/pacman/package.c:123
+#: src/pacman/package.c:125
 #, c-format
 msgid "Validated By"
 msgstr "Підтверджено через"
 
-#: src/pacman/package.c:124
+#: src/pacman/package.c:126
 #, c-format
 msgid "Version"
 msgstr "Версія"
 
-#: src/pacman/package.c:167 src/pacman/util.c:1205
+#: src/pacman/package.c:174 src/pacman/util.c:1205
 #, c-format
 msgid " [installed]"
 msgstr "[встановлено]"
 
-#: src/pacman/package.c:216
+#: src/pacman/package.c:223
 #, c-format
 msgid "Explicitly installed"
 msgstr "Явно встановлено"
 
-#: src/pacman/package.c:219
+#: src/pacman/package.c:226
 #, c-format
 msgid "Installed as a dependency for another package"
 msgstr "Встановлений як залежність до іншого пакунка"
 
-#: src/pacman/package.c:222 src/pacman/package.c:242
+#: src/pacman/package.c:229 src/pacman/package.c:249
 #, c-format
 msgid "Unknown"
 msgstr "Невідомо"
 
-#: src/pacman/package.c:229 src/pacman/package.c:314 src/pacman/package.c:332
+#: src/pacman/package.c:236 src/pacman/package.c:321 src/pacman/package.c:339
 #: src/pacman/util.c:489 src/pacman/util.c:675 src/pacman/util.c:715
 #: src/pacman/util.c:743
 #, c-format
 msgid "None"
 msgstr "Немає"
 
-#: src/pacman/package.c:238
+#: src/pacman/package.c:245
 #, c-format
 msgid "Signature"
 msgstr "Підпис"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "Yes"
 msgstr "Так"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "No"
 msgstr "Ні"
 
-#: src/pacman/package.c:369
+#: src/pacman/package.c:376
 #, c-format
 msgid "could not calculate checksums for %s\n"
 msgstr "неможливо підрахувати контрольні суми для %s\n"
 
-#: src/pacman/package.c:416
+#: src/pacman/package.c:423
 #, c-format
 msgid "(none)\n"
 msgstr "(немає)\n"
 
-#: src/pacman/package.c:453
+#: src/pacman/package.c:460
 #, c-format
 msgid "no changelog available for '%s'.\n"
 msgstr "немає списку змін для «%s».\n"
 
-#: src/pacman/package.c:457
+#: src/pacman/package.c:464
 #, c-format
 msgid "Changelog for %s:\n"
 msgstr "Список змін для %s:\n"
 
-#: src/pacman/package.c:482 src/pacman/package.c:484
+#: src/pacman/package.c:489 src/pacman/package.c:491
 #, c-format
 msgid "installed"
 msgstr "встановлено"
@@ -899,7 +899,7 @@ msgid ""
 "                       package (-tt to ignore optdepends) [filter]\n"
 msgstr ""
 " -t, --unrequired перелічити пакунки, які (необов'язкові) потрібні\n"
-"жодному іншому пакунку (-tt для нехтування optdepends) [фільтер]\n"
+"жодному іншому пакунку (-tt для нехтування optdepends) [фільтр]\n"
 
 #: src/pacman/pacman.c:152
 #, c-format
@@ -920,7 +920,7 @@ msgid ""
 "                       (-gg to view all groups and members)\n"
 msgstr ""
 "-g, --groups переглянути всі елементи групи пакунка\n"
-"(-gg для переглядання всіх груп і елеметів)\n"
+"(-gg для переглядання всіх груп і елементів)\n"
 
 #: src/pacman/pacman.c:159
 #, c-format
@@ -1124,7 +1124,7 @@ msgstr "      --arch <arch>    встановити альтернативну �
 #, c-format
 msgid "      --cachedir <dir> set an alternate package cache location\n"
 msgstr ""
-"      --cachedir <dir> використати альтернативний шлях до кеша пакунків\n"
+"      --cachedir <dir> використати альтернативний шлях до кешу пакунків\n"
 
 #: src/pacman/pacman.c:216
 #, c-format
@@ -1383,37 +1383,37 @@ msgstr ""
 #: src/pacman/sync.c:172
 #, c-format
 msgid "  All current sync database packages\n"
-msgstr "  Усі поточно синронізовані пакнуки\n"
+msgstr "  Усі поточно синхронізовані пакунки\n"
 
 #: src/pacman/sync.c:182
 #, c-format
 msgid "Cache directory: %s\n"
-msgstr "Каталог кеша: %s\n"
+msgstr "Каталог кешу: %s\n"
 
 #: src/pacman/sync.c:185
 #, c-format
 msgid "Do you want to remove all other packages from cache?"
-msgstr "Вилучити всі інші пакунки з кеша?"
+msgstr "Вилучити всі інші пакунки з кешу?"
 
 #: src/pacman/sync.c:189
 #, c-format
 msgid "removing old packages from cache...\n"
-msgstr "вилучення старих пакунків з кеша...\n"
+msgstr "вилучення старих пакунків з кешу...\n"
 
 #: src/pacman/sync.c:191
 #, c-format
 msgid "Do you want to remove ALL files from cache?"
-msgstr "Вилучити ВСІ файли з кеша?"
+msgstr "Вилучити ВСІ файли з кешу?"
 
 #: src/pacman/sync.c:195
 #, c-format
 msgid "removing all files from cache...\n"
-msgstr "вилучення всіх файлів з кеша...\n"
+msgstr "вилучення всіх файлів з кешу...\n"
 
 #: src/pacman/sync.c:201
 #, c-format
 msgid "could not access cache directory %s\n"
-msgstr "немає доступу до каталогу кеша %s\n"
+msgstr "немає доступу до каталогу кешу %s\n"
 
 #: src/pacman/sync.c:424
 #, c-format
@@ -1730,32 +1730,32 @@ msgstr "Введіть число (типово=%d)"
 #: src/pacman/util.c:1514
 #, c-format
 msgid "[Y/n]"
-msgstr "[Т/н]"
+msgstr "[Y/n]"
 
 #: src/pacman/util.c:1516
 #, c-format
 msgid "[y/N]"
-msgstr "[т/Н]"
+msgstr "[y/N]"
 
 #: src/pacman/util.c:1541
 #, c-format
 msgid "Y"
-msgstr "Т"
+msgstr "Y"
 
 #: src/pacman/util.c:1541
 #, c-format
 msgid "YES"
-msgstr "ТАК"
+msgstr "YES"
 
 #: src/pacman/util.c:1543
 #, c-format
 msgid "N"
-msgstr "Н"
+msgstr "N"
 
 #: src/pacman/util.c:1543
 #, c-format
 msgid "NO"
-msgstr "НІ"
+msgstr "NO"
 
 #: src/pacman/util.c:1610
 #, c-format

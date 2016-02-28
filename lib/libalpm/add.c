@@ -178,7 +178,7 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 	char filename[PATH_MAX]; /* the actual file we're extracting */
 	int needbackup = 0, notouch = 0;
 	const char *hash_orig = NULL;
-	int errors = 0;
+	int isnewfile = 0, errors = 0;
 	struct stat lsbuf;
 	size_t filename_len;
 
@@ -226,7 +226,8 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 	 *  6- skip extraction, dir already exists.
 	 */
 
-	if(llstat(filename, &lsbuf) != 0) {
+	isnewfile = llstat(filename, &lsbuf) != 0;
+	if(isnewfile) {
 		/* cases 1,2: file doesn't exist, skip all backup checks */
 	} else if(S_ISDIR(lsbuf.st_mode) && S_ISDIR(entrymode)) {
 #if 0
@@ -303,6 +304,7 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 			return 1;
 		}
 		strcpy(filename + filename_len, ".pacnew");
+		isnewfile = (llstat(filename, &lsbuf) != 0 && errno == ENOENT);
 	}
 
 	_alpm_log(handle, ALPM_LOG_DEBUG, "extracting %s\n", filename);
@@ -356,7 +358,9 @@ static int extract_single_file(alpm_handle_t *handle, struct archive *archive,
 			 * including any user changes */
 			_alpm_log(handle, ALPM_LOG_DEBUG,
 					"action: leaving existing file in place\n");
-			unlink(filename);
+			if(isnewfile) {
+				unlink(filename);
+			}
 		} else if(hash_orig && hash_local && strcmp(hash_orig, hash_local) == 0) {
 			/* installed file has NOT been changed by user,
 			 * update to the new version */
@@ -407,9 +411,8 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 	ASSERT(trans != NULL, return -1);
 
 	/* see if this is an upgrade. if so, remove the old package first */
-	alpm_pkg_t *local = _alpm_db_get_pkgfromcache(db, newpkg->name);
-	if(local) {
-		int cmp = _alpm_pkg_compare_versions(newpkg, local);
+	if((oldpkg = newpkg->oldpkg)) {
+		int cmp = _alpm_pkg_compare_versions(newpkg, oldpkg);
 		if(cmp < 0) {
 			log_msg = "downgrading";
 			progress = ALPM_PROGRESS_DOWNGRADE_START;
@@ -425,14 +428,8 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 		}
 		is_upgrade = 1;
 
-		/* we'll need to save some record for backup checks later */
-		if(_alpm_pkg_dup(local, &oldpkg) == -1) {
-			ret = -1;
-			goto cleanup;
-		}
-
 		/* copy over the install reason */
-		newpkg->reason = alpm_pkg_get_reason(local);
+		newpkg->reason = alpm_pkg_get_reason(oldpkg);
 	} else {
 		event.operation = ALPM_PACKAGE_INSTALL;
 	}
@@ -628,7 +625,6 @@ static int commit_single_pkg(alpm_handle_t *handle, alpm_pkg_t *newpkg,
 	EVENT(handle, &event);
 
 cleanup:
-	_alpm_pkg_free(oldpkg);
 	return ret;
 }
 

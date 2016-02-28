@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <string.h>
 
 #include "handle.h"
@@ -373,7 +374,7 @@ static int _alpm_hook_trigger_match_file(alpm_handle_t *handle,
 	/* check if file will be removed due to package upgrade */
 	for(i = handle->trans->add; i; i = i->next) {
 		alpm_pkg_t *spkg = i->data;
-		alpm_pkg_t *pkg = alpm_db_get_pkg(handle->db_local, spkg->name);
+		alpm_pkg_t *pkg = spkg->oldpkg;
 		if(pkg) {
 			alpm_filelist_t filelist = pkg->files;
 			size_t f;
@@ -462,7 +463,7 @@ static int _alpm_hook_trigger_match_pkg(alpm_handle_t *handle,
 		for(i = handle->trans->add; i; i = i->next) {
 			alpm_pkg_t *pkg = i->data;
 			if(_alpm_fnmatch_patterns(t->targets, pkg->name) == 0) {
-				if(alpm_db_get_pkg(handle->db_local, pkg->name)) {
+				if(pkg->oldpkg) {
 					if(t->op & ALPM_HOOK_OP_UPGRADE) {
 						if(hook->needs_targets) {
 							upgrade = alpm_list_add(upgrade, pkg->name);
@@ -736,7 +737,7 @@ int _alpm_hook_run(alpm_handle_t *handle, alpm_hook_when_t when)
 
 		for(i = hooks_triggered; i; i = i->next, hook_event.position++) {
 			struct _alpm_hook_t *hook = i->data;
-			_alpm_log(handle, ALPM_LOG_DEBUG, "running hook %s\n", hook->name);
+			alpm_logaction(handle, ALPM_CALLER_PREFIX, "running '%s'...\n", hook->name);
 
 			hook_event.type = ALPM_EVENT_HOOK_RUN_START;
 			hook_event.name = hook->name;

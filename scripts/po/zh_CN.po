@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Translators:
-# Felix Yan <felixonmars@gmail.com>, 2015
+# Felix Yan <felixonmars@gmail.com>, 2015-2016
 # Isaac Ge <acgtyrant@gmail.com>, 2014
 # leonfeng <chaofeng111@gmail.com>, 2011
 # leonfeng <chaofeng111@gmail.com>, 2011
@@ -19,9 +19,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
-"POT-Creation-Date: 2016-01-30 10:08+1000\n"
-"PO-Revision-Date: 2016-01-17 05:29+0000\n"
-"Last-Translator: mytbk <mytbk920423@gmail.com>\n"
+"POT-Creation-Date: 2016-02-23 13:08+1000\n"
+"PO-Revision-Date: 2016-02-01 15:41+0000\n"
+"Last-Translator: Felix Yan <felixonmars@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/toofishes/archlinux-"
 "pacman/language/zh_CN/)\n"
 "Language: zh_CN\n"
@@ -59,11 +59,11 @@ msgid "Unable to find source file %s."
 msgstr "无法找到源文件 %s。"
 
 #: scripts/makepkg.sh.in:203 scripts/makepkg.sh.in:735
-#: scripts/makepkg.sh.in:1174 scripts/makepkg.sh.in:1441
-#: scripts/makepkg.sh.in:1876 scripts/makepkg.sh.in:1910
-#: scripts/makepkg.sh.in:1917 scripts/makepkg.sh.in:1930
-#: scripts/makepkg.sh.in:1938 scripts/makepkg.sh.in:1947
-#: scripts/makepkg.sh.in:1960 scripts/libmakepkg/source/bzr.sh.in:50
+#: scripts/makepkg.sh.in:1181 scripts/makepkg.sh.in:1448
+#: scripts/makepkg.sh.in:1884 scripts/makepkg.sh.in:1918
+#: scripts/makepkg.sh.in:1925 scripts/makepkg.sh.in:1938
+#: scripts/makepkg.sh.in:1946 scripts/makepkg.sh.in:1955
+#: scripts/makepkg.sh.in:1968 scripts/libmakepkg/source/bzr.sh.in:50
 #: scripts/libmakepkg/source/bzr.sh.in:81
 #: scripts/libmakepkg/source/bzr.sh.in:96
 #: scripts/libmakepkg/source/bzr.sh.in:101
@@ -250,361 +250,361 @@ msgstr "%s 列出的库不是共享对象：%s"
 msgid "Cannot find library listed in %s: %s"
 msgstr "无法找到列在 %s 中的库： %s"
 
-#: scripts/makepkg.sh.in:1109 scripts/makepkg.sh.in:1153
-#: scripts/makepkg.sh.in:1318
+#: scripts/makepkg.sh.in:1116 scripts/makepkg.sh.in:1160
+#: scripts/makepkg.sh.in:1325
 msgid "Generating %s file..."
 msgstr "正在生成 %s 文件..."
 
-#: scripts/makepkg.sh.in:1173
+#: scripts/makepkg.sh.in:1180
 msgid "Missing %s directory."
 msgstr "缺失 %s 目录。"
 
-#: scripts/makepkg.sh.in:1179
+#: scripts/makepkg.sh.in:1186
 msgid "Creating package \"%s\"..."
 msgstr "正在创建软件包\"%s\"..."
 
-#: scripts/makepkg.sh.in:1192
+#: scripts/makepkg.sh.in:1199
 msgid "Adding %s file..."
 msgstr "正在添加 %s 文件..."
 
-#: scripts/makepkg.sh.in:1194
+#: scripts/makepkg.sh.in:1201
 msgid "Failed to add %s file to package."
 msgstr "无法添加文件 %s 到软件包。"
 
-#: scripts/makepkg.sh.in:1214
+#: scripts/makepkg.sh.in:1221
 msgid "Generating .MTREE file..."
 msgstr "正在生成 .MTREE 文件..."
 
-#: scripts/makepkg.sh.in:1220
+#: scripts/makepkg.sh.in:1227
 msgid "Compressing package..."
 msgstr "正在压缩软件包..."
 
-#: scripts/makepkg.sh.in:1235 scripts/makepkg.sh.in:1361
+#: scripts/makepkg.sh.in:1242 scripts/makepkg.sh.in:1368
 msgid "'%s' is not a valid archive extension."
 msgstr "'%s' 是无效的压缩包扩展名。"
 
-#: scripts/makepkg.sh.in:1243
+#: scripts/makepkg.sh.in:1250
 msgid "Failed to create package file."
 msgstr "无法创建软件包文件。"
 
-#: scripts/makepkg.sh.in:1260
+#: scripts/makepkg.sh.in:1267
 msgid "Failed to create symlink to package file."
 msgstr "创建软件包文件系统链接失败。"
 
-#: scripts/makepkg.sh.in:1292
+#: scripts/makepkg.sh.in:1299
 msgid "Signing package..."
 msgstr "正在签名软件包..."
 
-#: scripts/makepkg.sh.in:1303
+#: scripts/makepkg.sh.in:1310
 msgid "Created signature file %s."
 msgstr "已创建签名文件 %s。"
 
-#: scripts/makepkg.sh.in:1305
+#: scripts/makepkg.sh.in:1312
 msgid "Failed to sign package file."
 msgstr "无法签名软件包文件。"
 
-#: scripts/makepkg.sh.in:1311
+#: scripts/makepkg.sh.in:1318
 msgid "Creating source package..."
 msgstr "正在创建源码包..."
 
-#: scripts/makepkg.sh.in:1315 scripts/makepkg.sh.in:1328
+#: scripts/makepkg.sh.in:1322 scripts/makepkg.sh.in:1335
 msgid "Adding %s..."
 msgstr "正在添加 %s..."
 
-#: scripts/makepkg.sh.in:1346
+#: scripts/makepkg.sh.in:1353
 msgid "Adding %s file (%s)..."
 msgstr "正在添加 %s 文件 (%s) ..."
 
-#: scripts/makepkg.sh.in:1369
+#: scripts/makepkg.sh.in:1376
 msgid "Compressing source package..."
 msgstr "正在压缩源码包..."
 
-#: scripts/makepkg.sh.in:1372
+#: scripts/makepkg.sh.in:1379
 msgid "Failed to create source package file."
 msgstr "创建源码包文件失败。"
 
-#: scripts/makepkg.sh.in:1389
+#: scripts/makepkg.sh.in:1396
 msgid "Failed to create symlink to source package file."
 msgstr "无法创建源软件包文件的系统链接。"
 
-#: scripts/makepkg.sh.in:1401
+#: scripts/makepkg.sh.in:1408
 msgid "Installing package %s with %s..."
 msgstr "正在安装软件包 %s，使用 %s..."
 
-#: scripts/makepkg.sh.in:1403
+#: scripts/makepkg.sh.in:1410
 msgid "Installing %s package group with %s..."
 msgstr "正在安装 %s 软件包组，使用 %s..."
 
-#: scripts/makepkg.sh.in:1421
+#: scripts/makepkg.sh.in:1428
 msgid "Failed to install built package(s)."
 msgstr "安装创建的软件包失败。"
 
-#: scripts/makepkg.sh.in:1440 scripts/libmakepkg/util/source.sh.in:129
+#: scripts/makepkg.sh.in:1447 scripts/libmakepkg/util/source.sh.in:129
 msgid "Unknown download protocol: %s"
 msgstr "未知下载协议：%s"
 
-#: scripts/makepkg.sh.in:1457
+#: scripts/makepkg.sh.in:1464
 msgid "Cannot find the %s binary needed to check VCS source requirements."
 msgstr "找不到用来检查 VCS 源需求的 %s 库"
 
-#: scripts/makepkg.sh.in:1485
+#: scripts/makepkg.sh.in:1492
 msgid "Cannot find the %s package needed to handle %s sources."
-msgstr "找不到 % 软件包以处理 %s 源。"
+msgstr "找不到 %s 软件包以处理 %s 源。"
 
-#: scripts/makepkg.sh.in:1508
+#: scripts/makepkg.sh.in:1515
 msgid "Cannot find the %s binary required for dependency operations."
 msgstr "无法找到依赖操作所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1516
+#: scripts/makepkg.sh.in:1523
 msgid "Cannot find the %s binary. Will use %s to acquire root privileges."
 msgstr "无法找到二进制文件 %s。将使用 %s 获得 root 权限。"
 
-#: scripts/makepkg.sh.in:1523
+#: scripts/makepkg.sh.in:1530
 msgid "Cannot find the %s binary."
 msgstr "无法找到 %s 的二进制文件。"
 
-#: scripts/makepkg.sh.in:1531
+#: scripts/makepkg.sh.in:1538
 msgid "Cannot find the %s binary required for signing packages."
 msgstr "无法找到签名软件包所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1539
+#: scripts/makepkg.sh.in:1546
 msgid "Cannot find the %s binary required for verifying source files."
 msgstr "无法找到验证源文件所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1547
+#: scripts/makepkg.sh.in:1554
 msgid ""
 "Cannot find the %s binary required for validating source file checksums."
 msgstr "无法找到验证源文件校验值所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1555
+#: scripts/makepkg.sh.in:1562
 msgid "Cannot find the %s binary required for compressing binaries."
 msgstr "无法找到压缩二进制文件所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1563
+#: scripts/makepkg.sh.in:1570
 msgid "Cannot find the %s binary required for optimizing PNG images."
 msgstr "无法找到优化PNG图像所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1571
+#: scripts/makepkg.sh.in:1578
 msgid "Cannot find the %s binary required for distributed compilation."
 msgstr "无法找到分发编译所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1579
+#: scripts/makepkg.sh.in:1586
 msgid "Cannot find the %s binary required for compiler cache usage."
 msgstr "无法找到编译器缓存使用所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1587
+#: scripts/makepkg.sh.in:1594
 msgid "Cannot find the %s binary required for object file stripping."
 msgstr "无法找到目标文件分割所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1595
+#: scripts/makepkg.sh.in:1602
 msgid "Cannot find the %s binary required for compressing man and info pages."
 msgstr "无法找到压缩帮助及信息页面所需的 %s 二进制文件。"
 
-#: scripts/makepkg.sh.in:1615
+#: scripts/makepkg.sh.in:1622
 msgid "A package has already been built, installing existing package..."
 msgstr "已有一个编译好的软件包，正在安装现有的软件包..."
 
-#: scripts/makepkg.sh.in:1619
+#: scripts/makepkg.sh.in:1626
 msgid "A package has already been built. (use %s to overwrite)"
 msgstr "软件包已经创建过。(使用 %s 覆盖)"
 
-#: scripts/makepkg.sh.in:1638
+#: scripts/makepkg.sh.in:1645
 msgid ""
 "The package group has already been built, installing existing packages..."
 msgstr "已有一个编译好的软件包组，正在安装现有的软件包..."
 
-#: scripts/makepkg.sh.in:1642
+#: scripts/makepkg.sh.in:1649
 msgid "The package group has already been built. (use %s to overwrite)"
 msgstr "该软件包组已创建过。(使用 %s 覆盖)"
 
-#: scripts/makepkg.sh.in:1647
+#: scripts/makepkg.sh.in:1654
 msgid "Part of the package group has already been built. (use %s to overwrite)"
 msgstr "软件包组的一部分已经创建过。(使用 %s 覆盖)"
 
-#: scripts/makepkg.sh.in:1696
+#: scripts/makepkg.sh.in:1703
 msgid "Make packages compatible for use with pacman"
 msgstr "让软件包兼容于 pacman 的用法"
 
-#: scripts/makepkg.sh.in:1698 scripts/pacman-db-upgrade.sh.in:40
+#: scripts/makepkg.sh.in:1705 scripts/pacman-db-upgrade.sh.in:40
 msgid "Usage: %s [options]"
 msgstr "用法：%s [选项]"
 
-#: scripts/makepkg.sh.in:1700 scripts/pacman-key.sh.in:81
+#: scripts/makepkg.sh.in:1707 scripts/pacman-key.sh.in:81
 msgid "Options:"
 msgstr "选项："
 
-#: scripts/makepkg.sh.in:1701
+#: scripts/makepkg.sh.in:1708
 msgid "  -A, --ignorearch Ignore incomplete %s field in %s"
 msgstr "  -A, --ignorearch 忽略不完整的 %s 字段 (位于 %s 中)"
 
-#: scripts/makepkg.sh.in:1702
+#: scripts/makepkg.sh.in:1709
 msgid "  -c, --clean      Clean up work files after build"
 msgstr "  -c, --clean      编译后清理工作文件"
 
-#: scripts/makepkg.sh.in:1703
+#: scripts/makepkg.sh.in:1710
 msgid "  -C, --cleanbuild Remove %s dir before building the package"
 msgstr "-C, --cleanbuild 在编译软件包之前删除 %s 文件夹"
 
-#: scripts/makepkg.sh.in:1704
+#: scripts/makepkg.sh.in:1711
 msgid "  -d, --nodeps     Skip all dependency checks"
 msgstr " -d, --nodeps     跳过所有依赖关系检查"
 
-#: scripts/makepkg.sh.in:1705
+#: scripts/makepkg.sh.in:1712
 msgid "  -e, --noextract  Do not extract source files (use existing %s dir)"
 msgstr "  -e, --noextract  不解压源文件 (使用现存的 %s 目录)"
 
-#: scripts/makepkg.sh.in:1706
+#: scripts/makepkg.sh.in:1713
 msgid "  -f, --force      Overwrite existing package"
 msgstr "  -f, --force      覆盖现存的软件包"
 
-#: scripts/makepkg.sh.in:1707
+#: scripts/makepkg.sh.in:1714
 msgid "  -g, --geninteg   Generate integrity checks for source files"
 msgstr "  -g, --geninteg   为源码文件生成完整性检查值"
 
-#: scripts/makepkg.sh.in:1708
+#: scripts/makepkg.sh.in:1715
 msgid "  -h, --help       Show this help message and exit"
 msgstr "  -h, --help       显示本帮助信息并退出"
 
-#: scripts/makepkg.sh.in:1709
+#: scripts/makepkg.sh.in:1716
 msgid "  -i, --install    Install package after successful build"
 msgstr "  -i, --install    成功编译后安装软件包"
 
-#: scripts/makepkg.sh.in:1710
+#: scripts/makepkg.sh.in:1717
 msgid "  -L, --log        Log package build process"
 msgstr "  -L, --log        记录软件包编译过程"
 
-#: scripts/makepkg.sh.in:1711
+#: scripts/makepkg.sh.in:1718
 msgid "  -m, --nocolor    Disable colorized output messages"
 msgstr "  -m, --nocolor    禁止彩色输出信息"
 
-#: scripts/makepkg.sh.in:1712
+#: scripts/makepkg.sh.in:1719
 msgid "  -o, --nobuild    Download and extract files only"
 msgstr "  -o, --nobuild    仅下载和解压缩文件"
 
-#: scripts/makepkg.sh.in:1713
+#: scripts/makepkg.sh.in:1720
 msgid "  -p <file>        Use an alternate build script (instead of '%s')"
 msgstr "  -p <文件> 使用另外的编译脚本 (而不是 '%s' ) "
 
-#: scripts/makepkg.sh.in:1714
+#: scripts/makepkg.sh.in:1721
 msgid ""
 "  -r, --rmdeps     Remove installed dependencies after a successful build"
 msgstr "  -r, --rmdeps     编译成功后删除安装的依赖关系"
 
-#: scripts/makepkg.sh.in:1715
+#: scripts/makepkg.sh.in:1722
 msgid "  -R, --repackage  Repackage contents of the package without rebuilding"
 msgstr "  -R, --repackage  不编译而重新打包软件包内容"
 
-#: scripts/makepkg.sh.in:1716
+#: scripts/makepkg.sh.in:1723
 msgid "  -s, --syncdeps   Install missing dependencies with %s"
 msgstr "  -s, --syncdeps   使用 %s 安装缺失的依赖关系"
 
-#: scripts/makepkg.sh.in:1717
+#: scripts/makepkg.sh.in:1724
 msgid ""
 "  -S, --source     Generate a source-only tarball without downloaded sources"
 msgstr "  -S, --source     不下载源文件只生成仅包含源的包"
 
-#: scripts/makepkg.sh.in:1718
+#: scripts/makepkg.sh.in:1725
 msgid "  -V, --version    Show version information and exit"
 msgstr "  -V, --version             显示版本信息并退出"
 
-#: scripts/makepkg.sh.in:1719
+#: scripts/makepkg.sh.in:1726
 msgid ""
 "  --allsource      Generate a source-only tarball including downloaded "
 "sources"
 msgstr "    --allsource     只生成源码包 (包括有已下载的源码) "
 
-#: scripts/makepkg.sh.in:1720
+#: scripts/makepkg.sh.in:1727
 msgid "  --check          Run the %s function in the %s"
 msgstr "  --check          运行 %s 函数 (包含于 %s 中)"
 
-#: scripts/makepkg.sh.in:1721
+#: scripts/makepkg.sh.in:1728
 msgid "  --config <file>  Use an alternate config file (instead of '%s')"
 msgstr "  --config <文件> 使用另外的配置文件 (而不是 '%s')"
 
-#: scripts/makepkg.sh.in:1722
+#: scripts/makepkg.sh.in:1729
 msgid "  --holdver        Do not update VCS sources"
 msgstr "--holdver 不升级版本控制系统源"
 
-#: scripts/makepkg.sh.in:1723
+#: scripts/makepkg.sh.in:1730
 msgid ""
 "  --key <key>      Specify a key to use for %s signing instead of the default"
 msgstr "--key <密匙>      指定签名 %s 使用的密匙而不用默认密匙"
 
-#: scripts/makepkg.sh.in:1724
+#: scripts/makepkg.sh.in:1731
 msgid "  --noarchive      Do not create package archive"
 msgstr "--noarchive 不生成软件包归档"
 
-#: scripts/makepkg.sh.in:1725
+#: scripts/makepkg.sh.in:1732
 msgid "  --nocheck        Do not run the %s function in the %s"
 msgstr "  --nocheck        不执行 %s 函数在 %s 中"
 
-#: scripts/makepkg.sh.in:1726
+#: scripts/makepkg.sh.in:1733
 msgid "  --noprepare      Do not run the %s function in the %s"
 msgstr "--noprepare 不执行 %s 函数在 %s 中"
 
-#: scripts/makepkg.sh.in:1727
+#: scripts/makepkg.sh.in:1734
 msgid "  --nosign         Do not create a signature for the package"
 msgstr "  --nosign         不为该软件包创建签名"
 
-#: scripts/makepkg.sh.in:1728
+#: scripts/makepkg.sh.in:1735
 msgid ""
 "  --packagelist    Only list packages that would be produced, without PKGEXT"
 msgstr "--packagelist 只列出将会产生的包，不带PKGEXT"
 
-#: scripts/makepkg.sh.in:1729
+#: scripts/makepkg.sh.in:1736
 msgid "  --printsrcinfo   Print the generated SRCINFO and exit"
 msgstr "--printsrcinfo 打印出生成的SRCINFO并退出"
 
-#: scripts/makepkg.sh.in:1730
+#: scripts/makepkg.sh.in:1737
 msgid "  --sign           Sign the resulting package with %s"
 msgstr "  --sign           使用 %s 签名生成的软件包"
 
-#: scripts/makepkg.sh.in:1731
+#: scripts/makepkg.sh.in:1738
 msgid "  --skipchecksums  Do not verify checksums of the source files"
 msgstr "  --skipchecksums  不验证源文件的检验值"
 
-#: scripts/makepkg.sh.in:1732
+#: scripts/makepkg.sh.in:1739
 msgid ""
 "  --skipinteg      Do not perform any verification checks on source files"
 msgstr "  --skipinteg      不对源文件执行任何验证检查"
 
-#: scripts/makepkg.sh.in:1733
+#: scripts/makepkg.sh.in:1740
 msgid "  --skippgpcheck   Do not verify source files with PGP signatures"
 msgstr "--skippgpcheck   不验证有 PGP 签名的源文件"
 
-#: scripts/makepkg.sh.in:1734
+#: scripts/makepkg.sh.in:1741
 msgid ""
 "  --verifysource   Download source files (if needed) and perform integrity "
 "checks"
 msgstr " --verifysource 下载源文件(如果需要)并进行完整性检查"
 
-#: scripts/makepkg.sh.in:1736
+#: scripts/makepkg.sh.in:1743
 msgid "These options can be passed to %s:"
 msgstr "这些选项可以传递给 %s："
 
-#: scripts/makepkg.sh.in:1738
+#: scripts/makepkg.sh.in:1745
 msgid "  --asdeps         Install packages as non-explicitly installed"
 msgstr "      --asdeps         作为依赖安装"
 
-#: scripts/makepkg.sh.in:1739
+#: scripts/makepkg.sh.in:1746
 msgid ""
 "  --needed         Do not reinstall the targets that are already up to date"
 msgstr "      --needed         不重装已是最新的目标软件包"
 
-#: scripts/makepkg.sh.in:1740
+#: scripts/makepkg.sh.in:1747
 msgid ""
 "  --noconfirm      Do not ask for confirmation when resolving dependencies"
 msgstr "   --noconfirm      当解决依赖关系时不询问确认"
 
-#: scripts/makepkg.sh.in:1741
+#: scripts/makepkg.sh.in:1748
 msgid "  --noprogressbar  Do not show a progress bar when downloading files"
 msgstr "  --noprogressbar  下载文件时不显示进度条"
 
-#: scripts/makepkg.sh.in:1743
+#: scripts/makepkg.sh.in:1750
 msgid "If %s is not specified, %s will look for '%s'"
 msgstr "如果没有指定 %s，%s 将寻找 '%s'"
 
-#: scripts/makepkg.sh.in:1749 scripts/pacman-optimize.sh.in:53
+#: scripts/makepkg.sh.in:1756 scripts/pacman-optimize.sh.in:53
 msgid ""
 "Copyright (c) 2006-2016 Pacman Development Team <pacman-dev@archlinux.org>."
 "\\nCopyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\\n\\nThis is "
@@ -615,113 +615,113 @@ msgstr ""
 "\\nCopyright (C) 2002-2006 Judd Vinet <jvinet@zeroflux.org>.\\n\\n本程序是自"
 "由软件；版权情况请详见源代码。\\n无法律所允许范围内的任何担保。 \\n"
 
-#: scripts/makepkg.sh.in:1851 scripts/repo-add.sh.in:743
+#: scripts/makepkg.sh.in:1859 scripts/repo-add.sh.in:743
 msgid "%s signal caught. Exiting..."
 msgstr "发现 %s 信号。退出中..."
 
-#: scripts/makepkg.sh.in:1875
+#: scripts/makepkg.sh.in:1883
 msgid "%s not found."
 msgstr "%s 未找到。"
 
-#: scripts/makepkg.sh.in:1909 scripts/makepkg.sh.in:1916
+#: scripts/makepkg.sh.in:1917 scripts/makepkg.sh.in:1924
 msgid "You do not have write permission to create packages in %s."
 msgstr "您没有在 %s 中创建软件包需要的写入许可。"
 
-#: scripts/makepkg.sh.in:1929
+#: scripts/makepkg.sh.in:1937
 msgid "You do not have write permission to store packages in %s."
 msgstr "你没有写入权限来保存软件包到 %s。"
 
-#: scripts/makepkg.sh.in:1937
+#: scripts/makepkg.sh.in:1945
 msgid "You do not have write permission to store downloads in %s."
 msgstr "你没有权限将下载数据写入 %s。"
 
-#: scripts/makepkg.sh.in:1946
+#: scripts/makepkg.sh.in:1954
 msgid "You do not have write permission to store source tarballs in %s."
 msgstr "您没有在 %s 内保存源码包所需的写入权限。"
 
-#: scripts/makepkg.sh.in:1959
+#: scripts/makepkg.sh.in:1967
 msgid "You do not have write permission to store logs in %s."
 msgstr "你没有权限将日志保存至 %s。"
 
-#: scripts/makepkg.sh.in:1972
+#: scripts/makepkg.sh.in:1980
 msgid ""
 "Running %s as root is not allowed as it can cause permanent,\\ncatastrophic "
 "damage to your system."
 msgstr "不能使用 root 用户运行 %s，\\n因为可能会系统造成灾难性的损坏。"
 
-#: scripts/makepkg.sh.in:1978
+#: scripts/makepkg.sh.in:1986
 msgid "Do not use the %s option. This option is only for use by %s."
 msgstr "请不要使用 %s 选项。该选项仅供 %s 使用。"
 
-#: scripts/makepkg.sh.in:1989
+#: scripts/makepkg.sh.in:1997
 msgid "%s does not exist."
 msgstr "%s 不存在。"
 
-#: scripts/makepkg.sh.in:1993
+#: scripts/makepkg.sh.in:2001
 msgid "%s contains %s characters and cannot be sourced."
 msgstr "%s 包含 %s 字符，无法供源。"
 
-#: scripts/makepkg.sh.in:1998
+#: scripts/makepkg.sh.in:2006
 msgid "%s must be in the current working directory."
 msgstr "%s 必须在当前工作目录。"
 
-#: scripts/makepkg.sh.in:2078
+#: scripts/makepkg.sh.in:2086
 msgid "The key %s does not exist in your keyring."
 msgstr "在您的密匙环中不存在密匙 %s。"
 
-#: scripts/makepkg.sh.in:2080 scripts/repo-add.sh.in:225
+#: scripts/makepkg.sh.in:2088 scripts/repo-add.sh.in:225
 msgid "There is no key in your keyring."
 msgstr "您密匙环中无密匙。"
 
-#: scripts/makepkg.sh.in:2104 scripts/makepkg.sh.in:2123
+#: scripts/makepkg.sh.in:2112 scripts/makepkg.sh.in:2131
 msgid "Leaving %s environment."
 msgstr "正在离开 %s 环境。"
 
-#: scripts/makepkg.sh.in:2127
+#: scripts/makepkg.sh.in:2135
 msgid "Making package: %s"
 msgstr "正在创建软件包：%s"
 
-#: scripts/makepkg.sh.in:2133
+#: scripts/makepkg.sh.in:2141
 msgid "A source package has already been built. (use %s to overwrite)"
 msgstr "源软件包已经创建过。(使用 %s 覆盖)"
 
-#: scripts/makepkg.sh.in:2152
+#: scripts/makepkg.sh.in:2160
 msgid "Source package created: %s"
 msgstr "源代码包已创建：%s"
 
-#: scripts/makepkg.sh.in:2158
+#: scripts/makepkg.sh.in:2166
 msgid "Skipping dependency checks."
 msgstr "跳过依赖关系检查。"
 
-#: scripts/makepkg.sh.in:2166
+#: scripts/makepkg.sh.in:2174
 msgid "Checking runtime dependencies..."
 msgstr "正在检查运行时依赖关系..."
 
-#: scripts/makepkg.sh.in:2173
+#: scripts/makepkg.sh.in:2181
 msgid "Checking buildtime dependencies..."
 msgstr "正在检查编译时依赖关系"
 
-#: scripts/makepkg.sh.in:2185
+#: scripts/makepkg.sh.in:2193
 msgid "Could not resolve all dependencies."
 msgstr "无法解决所有的依赖关系。"
 
-#: scripts/makepkg.sh.in:2197
+#: scripts/makepkg.sh.in:2205
 msgid "Using existing %s tree"
 msgstr "使用现存的 %s 树"
 
-#: scripts/makepkg.sh.in:2204 scripts/makepkg.sh.in:2227
+#: scripts/makepkg.sh.in:2212 scripts/makepkg.sh.in:2235
 msgid "Removing existing %s directory..."
 msgstr "正在删除现存的 %s 目录..."
 
-#: scripts/makepkg.sh.in:2222
+#: scripts/makepkg.sh.in:2230
 msgid "Sources are ready."
 msgstr "源代码已就绪。"
 
-#: scripts/makepkg.sh.in:2248
+#: scripts/makepkg.sh.in:2253
 msgid "Package directory is ready."
 msgstr "软件包目录已准备好。"
 
-#: scripts/makepkg.sh.in:2252
+#: scripts/makepkg.sh.in:2257
 msgid "Finished making: %s"
 msgstr "完成创建：%s"
 

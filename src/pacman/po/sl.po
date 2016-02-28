@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
-"POT-Creation-Date: 2016-01-17 13:21+1000\n"
+"POT-Creation-Date: 2016-02-23 13:06+1000\n"
 "PO-Revision-Date: 2016-01-17 03:30+0000\n"
 "Last-Translator: Allan McRae <allan@archlinux.org>\n"
 "Language-Team: Slovenian (http://www.transifex.com/toofishes/archlinux-"
@@ -40,17 +40,17 @@ msgstr ""
 #: src/pacman/callback.c:197
 #, c-format
 msgid "checking dependencies...\n"
-msgstr "preverjanje odvisnosti ...\n"
+msgstr "preverjanje odvisnosti...\n"
 
 #: src/pacman/callback.c:201
 #, c-format
 msgid "checking for file conflicts...\n"
-msgstr "preverjanje spornosti datoteke ...\n"
+msgstr "preverjanje spornosti datoteke...\n"
 
 #: src/pacman/callback.c:205
 #, c-format
 msgid "resolving dependencies...\n"
-msgstr "razreševanje odvisnosti ...\n"
+msgstr "razreševanje odvisnosti...\n"
 
 #: src/pacman/callback.c:208
 #, c-format
@@ -65,66 +65,66 @@ msgstr ""
 #: src/pacman/callback.c:218
 #, c-format
 msgid "installing %s...\n"
-msgstr "nameščanje: %s ...\n"
+msgstr "nameščanje: %s...\n"
 
 #: src/pacman/callback.c:221
 #, c-format
 msgid "upgrading %s...\n"
-msgstr "nadgrajevanje: %s ...\n"
+msgstr "nadgrajevanje: %s...\n"
 
 #: src/pacman/callback.c:224
 #, c-format
 msgid "reinstalling %s...\n"
-msgstr "ponovno nameščanje %s ...\n"
+msgstr "ponovno nameščanje %s...\n"
 
 #: src/pacman/callback.c:227
 #, c-format
 msgid "downgrading %s...\n"
-msgstr "obnavljanje prejšnje različice %s ...\n"
+msgstr "obnavljanje prejšnje različice %s...\n"
 
 #: src/pacman/callback.c:230
 #, c-format
 msgid "removing %s...\n"
-msgstr "odstranjevanje: %s ...\n"
+msgstr "odstranjevanje: %s...\n"
 
 #: src/pacman/callback.c:254
 #, c-format
 msgid "checking package integrity...\n"
 msgstr ""
-"preverjanje celovitosti paketa ...\n"
+"preverjanje celovitosti paketa...\n"
 "\n"
 
 #: src/pacman/callback.c:259
 #, c-format
 msgid "checking keyring...\n"
-msgstr "preverjanje obroča ključev ...\n"
+msgstr "preverjanje obroča ključev...\n"
 
 #: src/pacman/callback.c:263
 #, c-format
 msgid "downloading required keys...\n"
-msgstr "prenašanje zahtevanih ključev ...\n"
+msgstr "prenašanje zahtevanih ključev...\n"
 
 #: src/pacman/callback.c:267
 #, c-format
 msgid "loading package files...\n"
-msgstr "nalaganje datoteke ...\n"
+msgstr "nalaganje datoteke...\n"
 
 #: src/pacman/callback.c:271
 #, c-format
 msgid "checking delta integrity...\n"
 msgstr ""
-"preverjanje celovitosti delte ...\n"
+"preverjanje celovitosti delte...\n"
 "\n"
 
 #: src/pacman/callback.c:274
 #, c-format
 msgid "applying deltas...\n"
-msgstr "uveljavljanje delt ...\n"
+msgstr "uveljavljanje delt...\n"
 
 #: src/pacman/callback.c:277
 #, c-format
 msgid "generating %s with %s... "
-msgstr "ustvarjanje %s s/z %s ... "
+msgstr "ustvarjanje %s s/z %s... "
 
 #: src/pacman/callback.c:282
 #, c-format
@@ -138,13 +138,13 @@ msgstr "spodletelo.\n"
 
 #: src/pacman/callback.c:291
 #, c-format
-msgid "Retrieving packages ...\n"
-msgstr "Pridobivanje paketov ...\n"
+msgid "Retrieving packages...\n"
+msgstr "Pridobivanje paketov...\n"
 
 #: src/pacman/callback.c:295
 #, c-format
 msgid "checking available disk space...\n"
-msgstr "preverjanje prostora na disku ...\n"
+msgstr "preverjanje prostora na disku...\n"
 
 #: src/pacman/callback.c:302
 #, c-format
@@ -290,7 +290,7 @@ msgstr "nalaganje datotek"
 #: src/pacman/callback.c:679
 #, c-format
 msgid "downloading %s...\n"
-msgstr "prenašanje %s ...\n"
+msgstr "prenašanje %s...\n"
 
 #: src/pacman/check.c:63 src/pacman/check.c:232
 #, c-format
@@ -557,209 +557,209 @@ msgstr ""
 msgid "%s: install reason has been set to 'explicitly installed'\n"
 msgstr "%s: namestitveni razlog je bil nastavljen na 'izrecno nameščeno'\n"
 
-#: src/pacman/package.c:97
+#: src/pacman/package.c:99
 #, c-format
 msgid "Architecture"
 msgstr ""
 
-#: src/pacman/package.c:98
+#: src/pacman/package.c:100
 #, c-format
 msgid "Backup Files"
 msgstr ""
 
-#: src/pacman/package.c:99
+#: src/pacman/package.c:101
 #, c-format
 msgid "Build Date"
 msgstr ""
 
-#: src/pacman/package.c:100
+#: src/pacman/package.c:102
 #, c-format
 msgid "Compressed Size"
 msgstr ""
 
-#: src/pacman/package.c:101
+#: src/pacman/package.c:103
 #, c-format
 msgid "Conflicts With"
 msgstr ""
 
-#: src/pacman/package.c:102
+#: src/pacman/package.c:104
 #, c-format
 msgid "Depends On"
 msgstr ""
 
-#: src/pacman/package.c:103
+#: src/pacman/package.c:105
 #, c-format
 msgid "Description"
 msgstr ""
 
-#: src/pacman/package.c:104 src/pacman/util.c:821
+#: src/pacman/package.c:106 src/pacman/util.c:821
 #, c-format
 msgid "Download Size"
 msgstr "Velikost prenosa"
 
-#: src/pacman/package.c:105
+#: src/pacman/package.c:107
 #, c-format
 msgid "Groups"
 msgstr ""
 
-#: src/pacman/package.c:106
+#: src/pacman/package.c:108
 #, c-format
 msgid "Install Date"
 msgstr ""
 
-#: src/pacman/package.c:107
+#: src/pacman/package.c:109
 #, c-format
 msgid "Install Reason"
 msgstr ""
 
-#: src/pacman/package.c:108
+#: src/pacman/package.c:110
 #, c-format
 msgid "Install Script"
 msgstr ""
 
-#: src/pacman/package.c:109
+#: src/pacman/package.c:111
 #, c-format
 msgid "Installed Size"
 msgstr ""
 
-#: src/pacman/package.c:110
+#: src/pacman/package.c:112
 #, c-format
 msgid "Licenses"
 msgstr ""
 
-#: src/pacman/package.c:111 src/pacman/package.c:232
+#: src/pacman/package.c:113 src/pacman/package.c:239
 #, c-format
 msgid "MD5 Sum"
 msgstr "Vsota MD5"
 
-#: src/pacman/package.c:112
+#: src/pacman/package.c:114
 #, c-format
 msgid "Name"
 msgstr "Naziv"
 
-#: src/pacman/package.c:113
+#: src/pacman/package.c:115
 #, c-format
 msgid "Optional Deps"
 msgstr ""
 
-#: src/pacman/package.c:114
+#: src/pacman/package.c:116
 #, c-format
 msgid "Optional For"
 msgstr ""
 
-#: src/pacman/package.c:115
+#: src/pacman/package.c:117
 #, c-format
 msgid "Packager"
 msgstr ""
 
-#: src/pacman/package.c:116
+#: src/pacman/package.c:118
 #, c-format
 msgid "Provides"
 msgstr ""
 
-#: src/pacman/package.c:117
+#: src/pacman/package.c:119
 #, c-format
 msgid "Replaces"
 msgstr ""
 
-#: src/pacman/package.c:118
+#: src/pacman/package.c:120
 #, c-format
 msgid "Repository"
 msgstr ""
 
-#: src/pacman/package.c:119
+#: src/pacman/package.c:121
 #, c-format
 msgid "Required By"
 msgstr ""
 
-#: src/pacman/package.c:120 src/pacman/package.c:235
+#: src/pacman/package.c:122 src/pacman/package.c:242
 #, c-format
 msgid "SHA-256 Sum"
 msgstr ""
 
-#: src/pacman/package.c:121
+#: src/pacman/package.c:123
 #, c-format
 msgid "Signatures"
 msgstr ""
 
-#: src/pacman/package.c:122
+#: src/pacman/package.c:124
 #, c-format
 msgid "URL"
 msgstr ""
 
-#: src/pacman/package.c:123
+#: src/pacman/package.c:125
 #, c-format
 msgid "Validated By"
 msgstr ""
 
-#: src/pacman/package.c:124
+#: src/pacman/package.c:126
 #, c-format
 msgid "Version"
 msgstr ""
 
-#: src/pacman/package.c:167 src/pacman/util.c:1205
+#: src/pacman/package.c:174 src/pacman/util.c:1205
 #, c-format
 msgid " [installed]"
 msgstr "[nameščeno]"
 
-#: src/pacman/package.c:216
+#: src/pacman/package.c:223
 #, c-format
 msgid "Explicitly installed"
 msgstr "Izrecno nameščeno"
 
-#: src/pacman/package.c:219
+#: src/pacman/package.c:226
 #, c-format
 msgid "Installed as a dependency for another package"
 msgstr "Nameščeno kot odvisnost drugega paketa"
 
-#: src/pacman/package.c:222 src/pacman/package.c:242
+#: src/pacman/package.c:229 src/pacman/package.c:249
 #, c-format
 msgid "Unknown"
 msgstr "Neznano"
 
-#: src/pacman/package.c:229 src/pacman/package.c:314 src/pacman/package.c:332
+#: src/pacman/package.c:236 src/pacman/package.c:321 src/pacman/package.c:339
 #: src/pacman/util.c:489 src/pacman/util.c:675 src/pacman/util.c:715
 #: src/pacman/util.c:743
 #, c-format
 msgid "None"
 msgstr "Nič"
 
-#: src/pacman/package.c:238
+#: src/pacman/package.c:245
 #, c-format
 msgid "Signature"
 msgstr "Podpis"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "Yes"
 msgstr "Da"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "No"
 msgstr "Ne"
 
-#: src/pacman/package.c:369
+#: src/pacman/package.c:376
 #, c-format
 msgid "could not calculate checksums for %s\n"
 msgstr "ni bilo mogoče izračunati kontrolne vsote %s \n"
 
-#: src/pacman/package.c:416
+#: src/pacman/package.c:423
 #, c-format
 msgid "(none)\n"
 msgstr "(nič)\n"
 
-#: src/pacman/package.c:453
+#: src/pacman/package.c:460
 #, c-format
 msgid "no changelog available for '%s'.\n"
 msgstr "seznam sprememb ni na voljo za  '%s' .\n"
 
-#: src/pacman/package.c:457
+#: src/pacman/package.c:464
 #, c-format
 msgid "Changelog for %s:\n"
 msgstr "Dnevnik sprememb za %s:\n"
 
-#: src/pacman/package.c:482 src/pacman/package.c:484
+#: src/pacman/package.c:489 src/pacman/package.c:491
 #, c-format
 msgid "installed"
 msgstr "nameščeno"
@@ -1381,7 +1381,7 @@ msgstr "Ali želite odstraniti neuporabljena skladišča?"
 #: src/pacman/sync.c:141
 #, c-format
 msgid "removing unused sync repositories...\n"
-msgstr "odstranjevanje neuporabljenih sinh. skladišč ...\n"
+msgstr "odstranjevanje neuporabljenih sinh. skladišč...\n"
 
 #: src/pacman/sync.c:167
 #, c-format
@@ -1411,7 +1411,7 @@ msgstr "Ali želite odstraniti vse ostale pakete iz predpomnilnika?"
 #: src/pacman/sync.c:189
 #, c-format
 msgid "removing old packages from cache...\n"
-msgstr "odstranjevanje starih paketov iz predpomnilnika ...\n"
+msgstr "odstranjevanje starih paketov iz predpomnilnika...\n"
 
 #: src/pacman/sync.c:191
 #, c-format
@@ -1421,7 +1421,7 @@ msgstr "Ali želite odstraniti VSE datoteke iz predpomnilnika?"
 #: src/pacman/sync.c:195
 #, c-format
 msgid "removing all files from cache...\n"
-msgstr "odstranjevanje vseh datotek iz predpomnilnika ...\n"
+msgstr "odstranjevanje vseh datotek iz predpomnilnika...\n"
 
 #: src/pacman/sync.c:201
 #, c-format
@@ -1460,7 +1460,7 @@ msgstr "'%s' je datoteka, ali ste mislili %s namesto %s?\n"
 #: src/pacman/sync.c:697
 #, c-format
 msgid "Starting full system upgrade...\n"
-msgstr " Zagon popolne nadgradnje sistema ...\n"
+msgstr " Zagon popolne nadgradnje sistema...\n"
 
 #: src/pacman/sync.c:717
 #, c-format
@@ -1525,7 +1525,7 @@ msgstr "preverjanje integritete paketa...\n"
 #: src/pacman/sync.c:889
 #, c-format
 msgid "Synchronizing package databases...\n"
-msgstr "Sinhronizacija podatkovnih baz ...\n"
+msgstr "Sinhronizacija podatkovnih baz...\n"
 
 #: src/pacman/upgrade.c:56
 #, c-format
@@ -1535,7 +1535,7 @@ msgstr "pomnilnik izčrpan\n"
 #: src/pacman/upgrade.c:87
 #, c-format
 msgid "loading packages...\n"
-msgstr "nalaganje paketov ...\n"
+msgstr "nalaganje paketov...\n"
 
 #: src/pacman/util.c:80
 #, c-format

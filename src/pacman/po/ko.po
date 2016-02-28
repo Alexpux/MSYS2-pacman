@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Arch Linux Pacman package manager\n"
 "Report-Msgid-Bugs-To: http://bugs.archlinux.org/index.php?project=3\n"
-"POT-Creation-Date: 2016-01-17 13:21+1000\n"
-"PO-Revision-Date: 2016-01-18 11:30+0000\n"
+"POT-Creation-Date: 2016-02-23 13:06+1000\n"
+"PO-Revision-Date: 2016-01-30 17:00+0000\n"
 "Last-Translator: Taegil Bae <esrevinu@gmail.com>\n"
 "Language-Team: Korean (http://www.transifex.com/toofishes/archlinux-pacman/"
 "language/ko/)\n"
@@ -134,7 +134,7 @@ msgstr "실패.\n"
 
 #: src/pacman/callback.c:291
 #, c-format
-msgid "Retrieving packages ...\n"
+msgid "Retrieving packages...\n"
 msgstr "꾸러미 가져오는 중...\n"
 
 #: src/pacman/callback.c:295
@@ -511,209 +511,209 @@ msgstr "%s: 설치 이유를 '의존성 요소로 설치'로 설정했습니다\
 msgid "%s: install reason has been set to 'explicitly installed'\n"
 msgstr "%s: 설치 이유를 '명시적으로 설치함'으로 설정했습니다\n"
 
-#: src/pacman/package.c:97
+#: src/pacman/package.c:99
 #, c-format
 msgid "Architecture"
 msgstr "아키텍처"
 
-#: src/pacman/package.c:98
+#: src/pacman/package.c:100
 #, c-format
 msgid "Backup Files"
 msgstr "백업 파일들"
 
-#: src/pacman/package.c:99
+#: src/pacman/package.c:101
 #, c-format
 msgid "Build Date"
 msgstr "빌드 날짜"
 
-#: src/pacman/package.c:100
+#: src/pacman/package.c:102
 #, c-format
 msgid "Compressed Size"
 msgstr "압축된 크기"
 
-#: src/pacman/package.c:101
+#: src/pacman/package.c:103
 #, c-format
 msgid "Conflicts With"
 msgstr "다음과 충돌"
 
-#: src/pacman/package.c:102
+#: src/pacman/package.c:104
 #, c-format
 msgid "Depends On"
 msgstr "다음에 의존"
 
-#: src/pacman/package.c:103
+#: src/pacman/package.c:105
 #, c-format
 msgid "Description"
 msgstr "설명"
 
-#: src/pacman/package.c:104 src/pacman/util.c:821
+#: src/pacman/package.c:106 src/pacman/util.c:821
 #, c-format
 msgid "Download Size"
 msgstr "다운로드 크기"
 
-#: src/pacman/package.c:105
+#: src/pacman/package.c:107
 #, c-format
 msgid "Groups"
-msgstr "그룹들"
+msgstr "모음들"
 
-#: src/pacman/package.c:106
+#: src/pacman/package.c:108
 #, c-format
 msgid "Install Date"
 msgstr "설치 날짜"
 
-#: src/pacman/package.c:107
+#: src/pacman/package.c:109
 #, c-format
 msgid "Install Reason"
 msgstr "설치 이유"
 
-#: src/pacman/package.c:108
+#: src/pacman/package.c:110
 #, c-format
 msgid "Install Script"
 msgstr "설치 스크립트"
 
-#: src/pacman/package.c:109
+#: src/pacman/package.c:111
 #, c-format
 msgid "Installed Size"
 msgstr "설치된 크기"
 
-#: src/pacman/package.c:110
+#: src/pacman/package.c:112
 #, c-format
 msgid "Licenses"
 msgstr "라이선스"
 
-#: src/pacman/package.c:111 src/pacman/package.c:232
+#: src/pacman/package.c:113 src/pacman/package.c:239
 #, c-format
 msgid "MD5 Sum"
 msgstr "MD5 합"
 
-#: src/pacman/package.c:112
+#: src/pacman/package.c:114
 #, c-format
 msgid "Name"
 msgstr "이름"
 
-#: src/pacman/package.c:113
+#: src/pacman/package.c:115
 #, c-format
 msgid "Optional Deps"
 msgstr "선택 의존성"
 
-#: src/pacman/package.c:114
+#: src/pacman/package.c:116
 #, c-format
 msgid "Optional For"
 msgstr "다음의 선택 의존성"
 
-#: src/pacman/package.c:115
+#: src/pacman/package.c:117
 #, c-format
 msgid "Packager"
 msgstr "꾸러미 만든이"
 
-#: src/pacman/package.c:116
+#: src/pacman/package.c:118
 #, c-format
 msgid "Provides"
 msgstr "다음을 제공"
 
-#: src/pacman/package.c:117
+#: src/pacman/package.c:119
 #, c-format
 msgid "Replaces"
 msgstr "다음을 대체"
 
-#: src/pacman/package.c:118
+#: src/pacman/package.c:120
 #, c-format
 msgid "Repository"
 msgstr "저장소"
 
-#: src/pacman/package.c:119
+#: src/pacman/package.c:121
 #, c-format
 msgid "Required By"
 msgstr "다음이 요구"
 
-#: src/pacman/package.c:120 src/pacman/package.c:235
+#: src/pacman/package.c:122 src/pacman/package.c:242
 #, c-format
 msgid "SHA-256 Sum"
 msgstr "SHA-256 합"
 
-#: src/pacman/package.c:121
+#: src/pacman/package.c:123
 #, c-format
 msgid "Signatures"
 msgstr "서명들"
 
-#: src/pacman/package.c:122
+#: src/pacman/package.c:124
 #, c-format
 msgid "URL"
 msgstr "URL"
 
-#: src/pacman/package.c:123
+#: src/pacman/package.c:125
 #, c-format
 msgid "Validated By"
 msgstr "유효검사자"
 
-#: src/pacman/package.c:124
+#: src/pacman/package.c:126
 #, c-format
 msgid "Version"
 msgstr "버전"
 
-#: src/pacman/package.c:167 src/pacman/util.c:1205
+#: src/pacman/package.c:174 src/pacman/util.c:1205
 #, c-format
 msgid " [installed]"
 msgstr " [설치함]"
 
-#: src/pacman/package.c:216
+#: src/pacman/package.c:223
 #, c-format
 msgid "Explicitly installed"
 msgstr "명시적으로 설치했습니다"
 
-#: src/pacman/package.c:219
+#: src/pacman/package.c:226
 #, c-format
 msgid "Installed as a dependency for another package"
 msgstr "다른 꾸러미의 의존 요소로 설치했습니다"
 
-#: src/pacman/package.c:222 src/pacman/package.c:242
+#: src/pacman/package.c:229 src/pacman/package.c:249
 #, c-format
 msgid "Unknown"
 msgstr "알 수 없음"
 
-#: src/pacman/package.c:229 src/pacman/package.c:314 src/pacman/package.c:332
+#: src/pacman/package.c:236 src/pacman/package.c:321 src/pacman/package.c:339
 #: src/pacman/util.c:489 src/pacman/util.c:675 src/pacman/util.c:715
 #: src/pacman/util.c:743
 #, c-format
 msgid "None"
 msgstr "없음"
 
-#: src/pacman/package.c:238
+#: src/pacman/package.c:245
 #, c-format
 msgid "Signature"
 msgstr "서명"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "Yes"
 msgstr "예"
 
-#: src/pacman/package.c:300
+#: src/pacman/package.c:307
 #, c-format
 msgid "No"
 msgstr "아니요"
 
-#: src/pacman/package.c:369
+#: src/pacman/package.c:376
 #, c-format
 msgid "could not calculate checksums for %s\n"
 msgstr "%s에 대한 검사합을 계산할 수 없습니다\n"
 
-#: src/pacman/package.c:416
+#: src/pacman/package.c:423
 #, c-format
 msgid "(none)\n"
 msgstr "(없음)\n"
 
-#: src/pacman/package.c:453
+#: src/pacman/package.c:460
 #, c-format
 msgid "no changelog available for '%s'.\n"
 msgstr "'%s'의 변경 기록이 없습니다.\n"
 
-#: src/pacman/package.c:457
+#: src/pacman/package.c:464
 #, c-format
 msgid "Changelog for %s:\n"
 msgstr "%s의 변경 기록 :\n"
 
-#: src/pacman/package.c:482 src/pacman/package.c:484
+#: src/pacman/package.c:489 src/pacman/package.c:491
 #, c-format
 msgid "installed"
 msgstr "설치함"
@@ -768,7 +768,7 @@ msgstr ""
 #: src/pacman/pacman.c:126
 #, c-format
 msgid "  -n, --nosave         remove configuration files\n"
-msgstr "  -n, --nosave 설정 파일을 제거합니다.\n"
+msgstr "  -n, --nosave         설정 파일을 제거합니다.\n"
 
 #: src/pacman/pacman.c:127
 #, c-format
@@ -776,9 +776,9 @@ msgid ""
 "  -s, --recursive      remove unnecessary dependencies\n"
 "                       (-ss includes explicitly installed dependencies)\n"
 msgstr ""
-"  -s, --recursive      필요하지 않은 의존성을 제거합니다\n"
-"                       (명시적으로 설치한 요소의 의존성을 포함하려면 -ss를 사"
-"용하십시오.)\n"
+"  -s, --recursive      필요하지 않은 의존성 요소를 제거합니다\n"
+"                       (명시적으로 설치한 의존성 요소도 포함하려면 -ss 사"
+"용)\n"
 
 #: src/pacman/pacman.c:129
 #, c-format
@@ -810,7 +810,7 @@ msgstr "  -e, --explicit       명시적으로 설치한 꾸러미를 조회합�
 #: src/pacman/pacman.c:140
 #, c-format
 msgid "  -g, --groups         view all members of a package group\n"
-msgstr "  -g, --groups         꾸러미 모음의 모든 구성 요소를 봅니다.\n"
+msgstr "  -g, --groups         꾸러미 모음의 모든 구성원을 봅니다.\n"
 
 #: src/pacman/pacman.c:141
 #, c-format
@@ -847,8 +847,8 @@ msgid ""
 "  -n, --native         list installed packages only found in sync db(s) "
 "[filter]\n"
 msgstr ""
-"  -n, --native         동기화 DB에서만 찾을 수 있는 설치한 꾸러미를 조회합니"
-"다. [필터]\n"
+"  -n, --native         동기화 DB에만 있는 설치된 꾸러미를 조회합니다. [필"
+"터]\n"
 
 #: src/pacman/pacman.c:146 src/pacman/pacman.c:179
 #, c-format
@@ -904,8 +904,8 @@ msgid ""
 "  -g, --groups         view all members of a package group\n"
 "                       (-gg to view all groups and members)\n"
 msgstr ""
-"  -g, --groups         꾸러미 그룹의 모든 멤버를 봅니다.\n"
-"                       (-gg 는 모든 그룹과 멤버를 다 볼 수 있습니다.)\n"
+"  -g, --groups         꾸러미 모음의 모든 구성원을 봅니다.\n"
+"                       (-gg는 모든 모음과 구성원을 볼 수 있습니다.)\n"
 
 #: src/pacman/pacman.c:159
 #, c-format
@@ -917,7 +917,7 @@ msgstr "  -i, --info           꾸러미 정보를 봅니다. (-ii 경우 더 �
 #: src/pacman/pacman.c:160
 #, c-format
 msgid "  -l, --list <repo>    view a list of packages in a repo\n"
-msgstr "  -l, --list <저장소>  저장소에 있는 꾸러미 목록을 봅니다.\n"
+msgstr "  -l, --list <repo>    저장소에 있는 꾸러미 목록을 봅니다.\n"
 
 #: src/pacman/pacman.c:162
 #, c-format
@@ -1022,7 +1022,8 @@ msgid ""
 "                       ignore a group upgrade (can be used more than once)\n"
 msgstr ""
 "      --ignoregroup <grp>\n"
-"                       그룹 업그레이드를 무시합니다. (한 번 이상 사용 가능)\n"
+"                       모음의 업그레이드를 무시합니다. (한 번 이상 사용 가"
+"능)\n"
 
 #: src/pacman/pacman.c:199
 #, c-format
@@ -1256,7 +1257,7 @@ msgstr "[무시]"
 #: src/pacman/query.c:380
 #, c-format
 msgid "group '%s' was not found\n"
-msgstr "'%s' 그룹을 찾을 수 없습니다\n"
+msgstr "'%s' 모음을 찾을 수 없습니다\n"
 
 #: src/pacman/query.c:471 src/pacman/sync.c:429
 #, c-format
@@ -1402,7 +1403,7 @@ msgstr "\"%s\" 저장소가 없습니다.\n"
 #, c-format
 msgid "There is %d member in group %s:\n"
 msgid_plural "There are %d members in group %s:\n"
-msgstr[0] "%2$s 그룹에 %1$d 개의 구성원이 있습니다:\n"
+msgstr[0] "%2$s 모음에 %1$d 개의 구성원이 있습니다:\n"
 
 #: src/pacman/sync.c:639
 #, c-format
@@ -1521,7 +1522,7 @@ msgstr "릴리즈 트랜잭션에 실패했습니다. (%s)\n"
 #: src/pacman/util.c:129
 #, c-format
 msgid "no usable package repositories configured.\n"
-msgstr "설정한 꾸러미 저장소 중 사용할 수 있는 요소가 없습니다.\n"
+msgstr "가용한 꾸러미 저장소가 설정되지 않았습니다.\n"
 
 #: src/pacman/util.c:138
 #, c-format

@@ -548,8 +548,8 @@ prepare_repo_db() {
 					# TODO: remove if statement
 					if [[ $repo == "db" ]]; then
 						error "$(gettext "Repository file '%s' was not found.")" "$dbfile"
+						exit 1
 					fi
-					exit 1
 					;;
 				repo-add)
 					# check if the file can be created (write permission, directory existence, etc)
@@ -802,6 +802,17 @@ if (( SIGN || VERIFY )); then
 fi
 
 check_xdelta
+
+if (( VERIFY && ${#args[@]} == 1 )); then
+	for repo in "db" "files"; do
+		dbfile=${repodir}/$REPO_DB_PREFIX.$repo.$REPO_DB_SUFFIX
+
+		if [[ -f $dbfile ]]; then
+			verify_signature "$dbfile"
+		fi
+	done
+	exit 0
+fi
 
 prepare_repo_db
 
