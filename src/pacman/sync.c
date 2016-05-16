@@ -561,9 +561,10 @@ static int process_group(alpm_list_t *dbs, const char *group, int error)
 	if(config->print == 0) {
 		char *array = malloc(count);
 		int n = 0;
-		colon_printf(_n("There is %d member in group %s:\n",
-				"There are %d members in group %s:\n", count),
-				count, group);
+		const colstr_t *colstr = &config->colstr;
+		colon_printf(_n("There is %d member in group %s%s%s:\n",
+				"There are %d members in group %s%s%s:\n", count),
+				count, colstr->groups, group, colstr->title);
 		select_display(pkgs);
 		if(!array) {
 			ret = 1;
@@ -760,9 +761,11 @@ static int sync_trans(alpm_list_t *targets)
 			return retval;
 		}
 #endif
-		colon_printf(_("Starting full system upgrade...\n"));
-		alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
-				"starting full system upgrade\n");
+		if(!config->print) {
+			colon_printf(_("Starting full system upgrade...\n"));
+			alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
+					"starting full system upgrade\n");
+		}
 		if(alpm_sync_sysupgrade(config->handle, config->op_s_upgrade >= 2) == -1) {
 			pm_printf(ALPM_LOG_ERROR, "%s\n", alpm_strerror(alpm_errno(config->handle)));
 			trans_release();

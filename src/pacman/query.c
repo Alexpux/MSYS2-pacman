@@ -83,8 +83,9 @@ static int search_path(char **filename, struct stat *bufptr)
 static void print_query_fileowner(const char *filename, alpm_pkg_t *info)
 {
 	if(!config->quiet) {
-		printf(_("%s is owned by %s %s\n"), filename,
-				alpm_pkg_get_name(info), alpm_pkg_get_version(info));
+		const colstr_t *colstr = &config->colstr;
+		printf(_("%s is owned by %s%s %s%s\n"), filename, colstr->title,
+				alpm_pkg_get_name(info), colstr->version, alpm_pkg_get_version(info));
 	} else {
 		printf("%s\n", alpm_pkg_get_name(info));
 	}
@@ -460,27 +461,30 @@ int pacman_query(alpm_list_t *targets)
 
 		if(config->op_q_isfile) {
 			alpm_pkg_load(config->handle, strname, 1, 0, &pkg);
+
+			if(pkg == NULL) {
+				pm_printf(ALPM_LOG_ERROR,
+						_("could not load package '%s': %s\n"), strname,
+						alpm_strerror(alpm_errno(config->handle)));
+			}
 		} else {
 			pkg = alpm_db_get_pkg(db_local, strname);
+			if(pkg == NULL) {
+				pkg = alpm_find_satisfier(alpm_db_get_pkgcache(db_local), strname);
+			}
+
+			if(pkg == NULL) {
+				pm_printf(ALPM_LOG_ERROR,
+						_("package '%s' was not found\n"), strname);
+				if(!config->op_q_isfile && access(strname, R_OK) == 0) {
+					pm_printf(ALPM_LOG_WARNING,
+							_("'%s' is a file, you might want to use %s.\n"),
+							strname, "-p/--file");
+				}
+			}
 		}
 
 		if(pkg == NULL) {
-			switch(alpm_errno(config->handle)) {
-				case ALPM_ERR_PKG_NOT_FOUND:
-					pm_printf(ALPM_LOG_ERROR,
-							_("package '%s' was not found\n"), strname);
-					if(!config->op_q_isfile && access(strname, R_OK) == 0) {
-						pm_printf(ALPM_LOG_WARNING,
-								_("'%s' is a file, you might want to use %s.\n"),
-								strname, "-p/--file");
-					}
-					break;
-				default:
-					pm_printf(ALPM_LOG_ERROR,
-							_("could not load package '%s': %s\n"), strname,
-							alpm_strerror(alpm_errno(config->handle)));
-					break;
-			}
 			ret = 1;
 			continue;
 		}
