@@ -788,4 +788,20 @@ int SYMEXPORT alpm_pkg_should_ignore(alpm_handle_t *handle, alpm_pkg_t *pkg)
 	return 0;
 }
 
+#ifdef __MSYS__
+int SYMEXPORT alpm_pkg_is_core_package(const alpm_pkg_t *pkg)
+{
+	if (pkg == NULL)
+		return 0;
+	return
+		strcmp(pkg->name, "bash")                == 0 ||
+		strcmp(pkg->name, "filesystem")          == 0 ||
+		strcmp(pkg->name, "mintty")              == 0 ||
+		strcmp(pkg->name, "msys2-runtime")       == 0 ||
+		strcmp(pkg->name, "msys2-runtime-devel") == 0 ||
+		strcmp(pkg->name, "pacman")              == 0 ||
+		strcmp(pkg->name, "pacman-mirrors")      == 0;
+}
+#endif
+
 /* vim: set noet: */

@@ -30,6 +30,8 @@
 
 #ifdef __MSYS__
 #include <termios.h>
+#include <handle.h>
+#include <trans.h>
 #endif
 
 #include <alpm.h>
@@ -694,6 +696,8 @@ static int wait_indefinitely(void)
 static int core_update(int *needed)
 {
 	int retval;
+	alpm_list_t *i;
+	alpm_list_t *core = NULL;
 
 	colon_printf(_("Starting core system upgrade...\n"));
 	alpm_logaction(config->handle, PACMAN_CALLER_PREFIX,
@@ -705,13 +709,23 @@ static int core_update(int *needed)
 		return 1;
 	}
 
-	if(!(*needed = alpm_trans_get_add(config->handle) != NULL)) {
+	*needed = 0;
+	for(i = alpm_trans_get_add(config->handle); i; i = i->next) {
+		alpm_pkg_t *pkg = i->data;
+		if (alpm_pkg_is_core_package(pkg)) {
+			core = alpm_list_add(core, pkg);
+			*needed = 1;
+		}
+	}
+
+	if(!(*needed)) {
 		if (!config->print) {
 			printf(_(" there is nothing to do\n"));
 		}
 		return 0;
 	}
 
+	config->handle->trans->add = core;
 	pm_printf(ALPM_LOG_WARNING, _("terminate other MSYS2 programs before proceeding\n"));
 	if((retval = sync_prepare_execute()) == 0) {
 		pm_printf(ALPM_LOG_WARNING, _("terminate MSYS2 without returning to shell and check for updates again\n"));
