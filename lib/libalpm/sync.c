@@ -220,7 +220,8 @@ int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
 		alpm_pkg_t *lpkg = i->data;
 
 #ifdef __MSYS__
-		if(core_update && !alpm_pkg_is_core_package(lpkg)) {
+		/* Skip regular packages in core update, and core packages in regular update */
+		if(core_update != alpm_pkg_is_core_package(lpkg)) {
 			continue;
 		}
 #endif
