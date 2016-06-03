@@ -220,14 +220,8 @@ int SYMEXPORT alpm_sync_sysupgrade(alpm_handle_t *handle, int enable_downgrade)
 		alpm_pkg_t *lpkg = i->data;
 
 #ifdef __MSYS__
-		if(core_update
-			&& strcmp(lpkg->name, "bash")                != 0
-			&& strcmp(lpkg->name, "filesystem")          != 0
-			&& strcmp(lpkg->name, "mintty")              != 0
-			&& strcmp(lpkg->name, "msys2-runtime")       != 0
-			&& strcmp(lpkg->name, "msys2-runtime-devel") != 0
-			&& strcmp(lpkg->name, "pacman")              != 0
-			&& strcmp(lpkg->name, "pacman-mirrors")      != 0) {
+		/* Skip regular packages in core update, and core packages in regular update */
+		if(core_update != alpm_pkg_is_core_package(lpkg)) {
 			continue;
 		}
 #endif
