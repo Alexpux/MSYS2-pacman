@@ -1,1 +1,1 @@
-../common/ini.c
+#include "../common/ini.c"
