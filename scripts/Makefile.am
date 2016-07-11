@@ -42,6 +42,7 @@ LIBRARY = \
 libmakepkgdir = $(datarootdir)/makepkg
 
 LIBMAKEPKGDIRS = \
+	integrity \
 	lint_package \
 	lint_pkgbuild \
 	source \
@@ -54,6 +55,11 @@ LIBMAKEPKG = \
 	libmakepkg/util/util.sh
 
 LIBMAKEPKG_IN = \
+	libmakepkg/integrity.sh \
+	libmakepkg/integrity/generate_checksum.sh \
+	libmakepkg/integrity/generate_signature.sh \
+	libmakepkg/integrity/verify_checksum.sh \
+	libmakepkg/integrity/verify_signature.sh \
 	libmakepkg/lint_package.sh \
 	libmakepkg/lint_package/build_references.sh \
 	libmakepkg/lint_package/missing_backup.sh \
