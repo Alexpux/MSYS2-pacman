@@ -146,7 +146,7 @@ msgstr "Получение пакетов...\n"
 #: src/pacman/callback.c:295
 #, c-format
 msgid "checking available disk space...\n"
-msgstr "проверяется доступное место...\n"
+msgstr "проверяется доступное дисковое пространство...\n"
 
 #: src/pacman/callback.c:302
 #, c-format
