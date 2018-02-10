@@ -194,7 +194,7 @@ static int sync_cleancache(int level)
 			}
 			printf(_("removing old packages from cache...\n"));
 		} else {
-			if(!noyes(_("Do you want to remove ALL files from cache?"))) {
+			if(!yesno(_("Do you want to remove ALL files from cache?"))) {
 				printf("\n");
 				continue;
 			}

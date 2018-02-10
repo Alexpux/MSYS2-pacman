@@ -146,7 +146,7 @@ int pacman_remove(alpm_list_t *targets)
 			holdpkg = 1;
 		}
 	}
-	if(holdpkg && (noyes(_("HoldPkg was found in target list. Do you want to continue?")) == 0)) {
+	if(holdpkg && (yesno(_("HoldPkg was found in target list. Do you want to continue?")) == 0)) {
 		retval = 1;
 		goto cleanup;
 	}
