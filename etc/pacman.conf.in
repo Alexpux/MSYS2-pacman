@@ -33,7 +33,7 @@ Architecture = auto
 #UseSyslog
 #Color
 #TotalDownload
-CheckSpace
+#CheckSpace
 #VerbosePkgLists
 
 # PGP signature checking
